@@ -146,6 +146,8 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5434/vet_calorie?schema=p
 | `make db-setup` | Запуск PostgreSQL, применение миграций и выполнение seed |
 | `docker compose -f backend/docker-compose.yml up -d --wait` | Запуск PostgreSQL и ожидание healthcheck |
 | `docker compose -f backend/docker-compose.yml ps` | Состояние PostgreSQL |
+| `make prod-migrate` | Применение миграций внутри production-контейнера |
+| `make prod-seed` | Заполнение production-базы демонстрационными данными внутри контейнера |
 
 `make seed` создаёт три демонстрационных клиента с 1, 2 и 3 питомцами, последние энергетические расчёты для них, 10 продуктов WHISKAS/PEDIGREE, 22 нутриента и три примера рационов. Записи имеют стабильные идентификаторы и обновляются через `upsert`, поэтому повторный запуск не создаёт дублей.
 

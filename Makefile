@@ -1,6 +1,6 @@
 COMPOSE := docker compose -f backend/docker-compose.yml
 
-.PHONY: seed db-up db-stop db-deploy db-setup prod-build prod-up prod-down prod-logs prod-migrate
+.PHONY: seed db-up db-stop db-deploy db-setup prod-build prod-up prod-down prod-logs prod-migrate prod-seed
 
 seed:
 	npm run db:seed
@@ -30,3 +30,6 @@ prod-logs:
 
 prod-migrate:
 	docker compose -f compose.prod.yml run --rm migrate
+
+prod-seed:
+	docker compose -f compose.prod.yml run --rm migrate npm run db:seed
