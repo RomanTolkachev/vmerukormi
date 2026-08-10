@@ -31,7 +31,7 @@ function safeEqual(left: string, right: string) {
 function cookieOptions(httpOnly: boolean, expires: Date) {
   return {
     httpOnly,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.AUTH_COOKIE_SECURE === "true",
     sameSite: "lax" as const,
     path: "/",
     expires,
