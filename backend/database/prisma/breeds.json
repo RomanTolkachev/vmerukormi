@@ -1,0 +1,1946 @@
+[
+  {
+    "id": "b69b06d8-7a12-4e77-bd4d-b52ded618776",
+    "species": "CAT",
+    "nameRu": "Абиссинская",
+    "nameEn": "Abyssinian Cat",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 2.5
+  },
+  {
+    "id": "9ab42e9f-b136-4ed9-8a3e-bbe40239f2ae",
+    "species": "DOG",
+    "nameRu": "Австралийская овчарка (аусси)",
+    "nameEn": "Australian Shepherd",
+    "maleIdealWeight": 26,
+    "femaleIdealWeight": 21
+  },
+  {
+    "id": "10fc94e9-1aa1-43d0-a75a-afdcc3d317c6",
+    "species": "DOG",
+    "nameRu": "Австралийская пастушья собака",
+    "nameEn": "Australian Cattle Dog",
+    "maleIdealWeight": 26,
+    "femaleIdealWeight": 18
+  },
+  {
+    "id": "064c4b93-066c-438e-bf9a-4e198171bd6c",
+    "species": "DOG",
+    "nameRu": "Австралийский келпи",
+    "nameEn": "Australian Kelpie",
+    "maleIdealWeight": 18,
+    "femaleIdealWeight": 16
+  },
+  {
+    "id": "288ac951-076b-4435-9cec-56c005967225",
+    "species": "DOG",
+    "nameRu": "Австралийский терьер",
+    "nameEn": "Australian Terrier",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "ab1cac94-bda5-4a07-8cbc-eb3d2169e393",
+    "species": "DOG",
+    "nameRu": "Австралийский шелковистый терьер",
+    "nameEn": "Australian Silky Terrier",
+    "maleIdealWeight": 4.5,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "60722573-d3f5-4b35-95f9-df96342bad1c",
+    "species": "DOG",
+    "nameRu": "Азавак",
+    "nameEn": "Azawakh",
+    "maleIdealWeight": 23,
+    "femaleIdealWeight": 17
+  },
+  {
+    "id": "a913ae2c-e292-41b5-b8fa-8a4468715bc3",
+    "species": "DOG",
+    "nameRu": "Акита ину",
+    "nameEn": "Akita Inu",
+    "maleIdealWeight": 35,
+    "femaleIdealWeight": 25
+  },
+  {
+    "id": "93076211-effd-4d53-9e29-9882ffb2ab51",
+    "species": "DOG",
+    "nameRu": "Аляскинский маламут",
+    "nameEn": "Alaskan Malamute",
+    "maleIdealWeight": 38,
+    "femaleIdealWeight": 36
+  },
+  {
+    "id": "d3a51da4-f84b-4288-abf6-19574e709902",
+    "species": "DOG",
+    "nameRu": "Американская акита",
+    "nameEn": "American Akita",
+    "maleIdealWeight": 60,
+    "femaleIdealWeight": 50
+  },
+  {
+    "id": "2e475510-c8e2-4b8b-9753-b52f725ed026",
+    "species": "DOG",
+    "nameRu": "Американская эскимосская собака",
+    "nameEn": "American Eskimo Dog",
+    "maleIdealWeight": 14,
+    "femaleIdealWeight": 12
+  },
+  {
+    "id": "5b5f21b1-041c-11ed-8e8e-872d2dcbf4eb",
+    "species": "DOG",
+    "nameRu": "Американский булли",
+    "nameEn": "American bully",
+    "maleIdealWeight": 50,
+    "femaleIdealWeight": 40
+  },
+  {
+    "id": "ba7315a8-d9ed-4006-be07-645d2e501290",
+    "species": "DOG",
+    "nameRu": "Американский бульдог",
+    "nameEn": "American bulldog",
+    "maleIdealWeight": 45,
+    "femaleIdealWeight": 35
+  },
+  {
+    "id": "200f4fbe-c66b-432a-be6e-8576889b3788",
+    "species": "DOG",
+    "nameRu": "Американский водный спаниель",
+    "nameEn": "American Water Spaniel",
+    "maleIdealWeight": 16,
+    "femaleIdealWeight": 14
+  },
+  {
+    "id": "6af3b909-2677-4e9e-8c42-1600e2650d8e",
+    "species": "DOG",
+    "nameRu": "Американский кокер спаниель",
+    "nameEn": "American Cocker Spaniel",
+    "maleIdealWeight": 12.5,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "48407242-6270-4b35-afcf-52ad8003b5d1",
+    "species": "DOG",
+    "nameRu": "Американский питбультерьер",
+    "nameEn": "American pit bull terrier",
+    "maleIdealWeight": 20,
+    "femaleIdealWeight": 17
+  },
+  {
+    "id": "5bfad9d7-6f7c-458f-bc91-9d6530de9660",
+    "species": "DOG",
+    "nameRu": "Американский стаффордширский терьер",
+    "nameEn": "American staffordshire terrier",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "c9d29746-ca46-4e77-826a-e0dc3d39f2e6",
+    "species": "DOG",
+    "nameRu": "Анатолийская овчарка",
+    "nameEn": "Anatolian Shepherd",
+    "maleIdealWeight": 58,
+    "femaleIdealWeight": 50
+  },
+  {
+    "id": "72ba75f3-2bb5-46a7-9355-f3e240c3e98c",
+    "species": "DOG",
+    "nameRu": "Английский бульдог",
+    "nameEn": "Bulldog",
+    "maleIdealWeight": 25,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "e56ddf40-7d31-47e0-a6c5-24ddbcf89574",
+    "species": "DOG",
+    "nameRu": "Английский кокер спаниель",
+    "nameEn": "English Cocker Spaniel",
+    "maleIdealWeight": 13,
+    "femaleIdealWeight": 11
+  },
+  {
+    "id": "9e0543ae-c2b5-4587-985e-235b84d14ee0",
+    "species": "DOG",
+    "nameRu": "Английский мастиф",
+    "nameEn": "English Mastiff",
+    "maleIdealWeight": 80,
+    "femaleIdealWeight": 75
+  },
+  {
+    "id": "1713eeae-c94d-4c4e-a514-859e74ece73b",
+    "species": "DOG",
+    "nameRu": "Английский сеттер",
+    "nameEn": "English Setter",
+    "maleIdealWeight": 30,
+    "femaleIdealWeight": 26
+  },
+  {
+    "id": "2d291f04-0584-40e8-a369-dbb3ef96219a",
+    "species": "DOG",
+    "nameRu": "Английский спрингер спаниель",
+    "nameEn": "English Springer Spaniel",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "d359f674-083f-4a52-b36c-b0e5eb214f00",
+    "species": "DOG",
+    "nameRu": "Английский той-терьер",
+    "nameEn": "English Toy Terrier",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 2
+  },
+  {
+    "id": "8bd847b3-5e3e-4ddf-b406-265a469b6332",
+    "species": "DOG",
+    "nameRu": "Английский фоксхаунд",
+    "nameEn": "English Foxhound",
+    "maleIdealWeight": 32,
+    "femaleIdealWeight": 27
+  },
+  {
+    "id": "898bea43-d4a4-489b-9c8a-b0af0a9d9fd3",
+    "species": "DOG",
+    "nameRu": "Аппенцеллер зенненхунд",
+    "nameEn": "Appenzeller Sennenhund",
+    "maleIdealWeight": 29,
+    "femaleIdealWeight": 24
+  },
+  {
+    "id": "4532926b-e946-4c95-aa35-98c9de90d0ab",
+    "species": "DOG",
+    "nameRu": "Аргентинский дог",
+    "nameEn": "Dogo Argentino",
+    "maleIdealWeight": 43,
+    "femaleIdealWeight": 42
+  },
+  {
+    "id": "e6c90e75-268c-4873-a472-d0adc48c1506",
+    "species": "DOG",
+    "nameRu": "Арьежская гончая",
+    "nameEn": "Ariegeois",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 25
+  },
+  {
+    "id": "b7575952-de28-4003-ba56-75906224375d",
+    "species": "DOG",
+    "nameRu": "Арьежский бракк",
+    "nameEn": "Bracco d'Ariège",
+    "maleIdealWeight": 29,
+    "femaleIdealWeight": 26
+  },
+  {
+    "id": "c57baba8-88cd-4df3-b265-955e8c5e838e",
+    "species": "DOG",
+    "nameRu": "Афганская борзая",
+    "nameEn": "Afghan Hound",
+    "maleIdealWeight": 27,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "a3864e84-eb90-47cb-9346-4765693e7bdb",
+    "species": "DOG",
+    "nameRu": "Аффенпинчер",
+    "nameEn": "Affenpinscher",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "e199fb21-b124-4fd0-9da1-1cfafa144a25",
+    "species": "DOG",
+    "nameRu": "Баварская горная гончая",
+    "nameEn": "Bavarian Mountain Hound",
+    "maleIdealWeight": 24,
+    "femaleIdealWeight": 21
+  },
+  {
+    "id": "cfab2c85-e3fb-458b-ab85-9f7ceb8df8ab",
+    "species": "DOG",
+    "nameRu": "Басенджи",
+    "nameEn": "Basenji",
+    "maleIdealWeight": 11,
+    "femaleIdealWeight": 9
+  },
+  {
+    "id": "d3fa02b6-b991-4782-9b56-fbd17c5ff28a",
+    "species": "DOG",
+    "nameRu": "Бассет хаунд",
+    "nameEn": "Basset Hound",
+    "maleIdealWeight": 25,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "9bbbb646-85bd-4e93-bc1e-e3ef506618fb",
+    "species": "DOG",
+    "nameRu": "Бедлингтон терьер",
+    "nameEn": "Bedlington Terrier",
+    "maleIdealWeight": 9,
+    "femaleIdealWeight": 8
+  },
+  {
+    "id": "ac6dd881-94d1-4432-b83f-97c6f55b066a",
+    "species": "DOG",
+    "nameRu": "Белая швейцарская овчарка",
+    "nameEn": "White Shepherd",
+    "maleIdealWeight": 35,
+    "femaleIdealWeight": 30
+  },
+  {
+    "id": "71f5a258-0390-4bde-8cb6-33a9bc42934a",
+    "species": "DOG",
+    "nameRu": "Бельгийский гриффон",
+    "nameEn": "Belgian Griffon",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "86f54fa2-e4fc-4619-bb7a-60a6c34a66c2",
+    "species": "CAT",
+    "nameRu": "Бенгальская",
+    "nameEn": "Bengal Cat",
+    "maleIdealWeight": 5.5,
+    "femaleIdealWeight": 4.5
+  },
+  {
+    "id": "674f50bc-5175-4d3c-a098-d3b332583e7d",
+    "species": "DOG",
+    "nameRu": "Бергамская овчарка",
+    "nameEn": "Bergamasco Shepherd",
+    "maleIdealWeight": 35,
+    "femaleIdealWeight": 29
+  },
+  {
+    "id": "e14416df-e49e-4cb6-a925-54f1d9fbd4aa",
+    "species": "DOG",
+    "nameRu": "Бернский зенненхунд",
+    "nameEn": "Berner Sennenhund",
+    "maleIdealWeight": 44,
+    "femaleIdealWeight": 42
+  },
+  {
+    "id": "d4f948d0-9fdd-4057-a5c7-2f37ff095d33",
+    "species": "CAT",
+    "nameRu": "Беспородная кошка",
+    "nameEn": "Mixed breed cat",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "28d235f6-ed59-4935-945d-86ec3b04d9a1",
+    "species": "DOG",
+    "nameRu": "Бигль",
+    "nameEn": "Beagle",
+    "maleIdealWeight": 12,
+    "femaleIdealWeight": 11
+  },
+  {
+    "id": "9d8dfe05-afdb-45e2-b23c-63ef9d9ab449",
+    "species": "DOG",
+    "nameRu": "Бишон фризе",
+    "nameEn": "Bichon Frise",
+    "maleIdealWeight": 8,
+    "femaleIdealWeight": 6
+  },
+  {
+    "id": "1a0821fa-036c-4ae4-855b-553e47ef7a74",
+    "species": "DOG",
+    "nameRu": "Бобтейл",
+    "nameEn": "Old English Sheepdog",
+    "maleIdealWeight": 38,
+    "femaleIdealWeight": 31
+  },
+  {
+    "id": "59fca2b6-ab1b-449e-ad36-08fa737ba93c",
+    "species": "DOG",
+    "nameRu": "Боксер",
+    "nameEn": "Boxer",
+    "maleIdealWeight": 31,
+    "femaleIdealWeight": 26
+  },
+  {
+    "id": "0b88b444-7098-4921-bff9-c7078e2c1987",
+    "species": "DOG",
+    "nameRu": "Большой Швейцарский Зенненхунд",
+    "nameEn": "Swiss mountain dog",
+    "maleIdealWeight": 52,
+    "femaleIdealWeight": 51
+  },
+  {
+    "id": "b4a834b1-8697-4b28-842a-09336649dae2",
+    "species": "DOG",
+    "nameRu": "Бордер колли",
+    "nameEn": "Border Collie",
+    "maleIdealWeight": 17,
+    "femaleIdealWeight": 15
+  },
+  {
+    "id": "73450a30-dfa8-4f6d-a520-ac20574cf210",
+    "species": "DOG",
+    "nameRu": "Бордер терьер",
+    "nameEn": "Border Terrier",
+    "maleIdealWeight": 6.5,
+    "femaleIdealWeight": 5.8
+  },
+  {
+    "id": "b90c07d2-2073-48ec-bbde-5ea56a7c1b9c",
+    "species": "DOG",
+    "nameRu": "Бордосский дог",
+    "nameEn": "Dogue de Bordeaux",
+    "maleIdealWeight": 60,
+    "femaleIdealWeight": 53
+  },
+  {
+    "id": "064284b3-43ca-47e4-a876-cb2235635098",
+    "species": "DOG",
+    "nameRu": "Бородатый колли",
+    "nameEn": "Bearded Collie",
+    "maleIdealWeight": 25,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "92ad470a-ffb9-4c4b-b479-f57684d5fdee",
+    "species": "DOG",
+    "nameRu": "Босерон",
+    "nameEn": "Beauceron",
+    "maleIdealWeight": 38,
+    "femaleIdealWeight": 37
+  },
+  {
+    "id": "dadcba12-edf9-4dd1-b308-ec8ff3a06548",
+    "species": "DOG",
+    "nameRu": "Бостон терьер",
+    "nameEn": "Boston Terrier",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 7
+  },
+  {
+    "id": "99d19b90-a86d-4579-bf04-7d93737dfed1",
+    "species": "DOG",
+    "nameRu": "Бретонский спаниель",
+    "nameEn": "Brittany Spaniel",
+    "maleIdealWeight": 16,
+    "femaleIdealWeight": 15
+  },
+  {
+    "id": "e5b5fd72-aaf7-42d0-b32d-d2cd8fb044f4",
+    "species": "DOG",
+    "nameRu": "Бриар",
+    "nameEn": "Briard",
+    "maleIdealWeight": 34,
+    "femaleIdealWeight": 29
+  },
+  {
+    "id": "3de51955-b976-4433-bc38-758a27c6a6cf",
+    "species": "CAT",
+    "nameRu": "Британская короткошерстная",
+    "nameEn": "British Shorthair",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "538df553-3e92-44b2-9596-cb83341cab6c",
+    "species": "DOG",
+    "nameRu": "Брюссельский гриффон",
+    "nameEn": "Griffon Bruxellois",
+    "maleIdealWeight": 5.5,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "3b036c47-1b8d-4568-a4e1-fc3a96a13ff6",
+    "species": "DOG",
+    "nameRu": "Бульмастиф",
+    "nameEn": "Bullmastiff",
+    "maleIdealWeight": 55,
+    "femaleIdealWeight": 45
+  },
+  {
+    "id": "ea704759-f4b9-4abc-8d10-1a682c8e5f33",
+    "species": "DOG",
+    "nameRu": "Бультерьер",
+    "nameEn": "Bullterrier",
+    "maleIdealWeight": 34,
+    "femaleIdealWeight": 26
+  },
+  {
+    "id": "d2abbba3-98c5-48a2-93bf-f24b3cdc7412",
+    "species": "CAT",
+    "nameRu": "Бурманская",
+    "nameEn": "Burmese",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 3.5
+  },
+  {
+    "id": "00361daf-6de0-4f4c-91fa-d51c7bde60e5",
+    "species": "DOG",
+    "nameRu": "Бурят-монгольский волкодав",
+    "nameEn": "Buryat - Mongolian Dog",
+    "maleIdealWeight": 57,
+    "femaleIdealWeight": 49
+  },
+  {
+    "id": "533fbdeb-4feb-413d-adc7-4860f486e344",
+    "species": "DOG",
+    "nameRu": "Вахтельхунд",
+    "nameEn": "German Spaniel",
+    "maleIdealWeight": 27,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "ec69d549-ca87-41a7-9a9c-987f1ef46c93",
+    "species": "DOG",
+    "nameRu": "Веймаранер",
+    "nameEn": "Weimaraner",
+    "maleIdealWeight": 35,
+    "femaleIdealWeight": 30
+  },
+  {
+    "id": "15b76ff0-d18e-43d1-a8c8-886906952bdd",
+    "species": "DOG",
+    "nameRu": "Вельш корги кардиган",
+    "nameEn": "Welsh Corgi Cardigan",
+    "maleIdealWeight": 15,
+    "femaleIdealWeight": 13
+  },
+  {
+    "id": "e75f09ef-45ca-43d2-98b5-84e9ec753aec",
+    "species": "DOG",
+    "nameRu": "Вельш корги пемброк",
+    "nameEn": "Welsh Corgi Pembroke",
+    "maleIdealWeight": 12,
+    "femaleIdealWeight": 11
+  },
+  {
+    "id": "a873fb63-9f6c-4e27-9766-4e70be8ecdbe",
+    "species": "DOG",
+    "nameRu": "Вельш спрингер спаниель",
+    "nameEn": "Welsh Springer Spaniel",
+    "maleIdealWeight": 19,
+    "femaleIdealWeight": 18
+  },
+  {
+    "id": "7def5e29-b643-46a6-a85f-309b6344b434",
+    "species": "DOG",
+    "nameRu": "Вельш терьер",
+    "nameEn": "Welsh Terrier",
+    "maleIdealWeight": 9.5,
+    "femaleIdealWeight": 9
+  },
+  {
+    "id": "774e50ad-0078-4d03-877c-4293f5d34672",
+    "species": "DOG",
+    "nameRu": "Вест хайленд уайт терьер",
+    "nameEn": "West Highland White Terrier",
+    "maleIdealWeight": 9,
+    "femaleIdealWeight": 7
+  },
+  {
+    "id": "ee7b2b1d-a4ac-461d-be3f-71fdcec33dfe",
+    "species": "DOG",
+    "nameRu": "Вольфшпиц",
+    "nameEn": "Wolfspitz",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 18
+  },
+  {
+    "id": "729591ea-0531-4e9c-a32d-0235ff9f3168",
+    "species": "DOG",
+    "nameRu": "Восточно-сибирская лайка",
+    "nameEn": "East Siberian Laika",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 19
+  },
+  {
+    "id": "c42d1848-2c5e-42c2-9a68-d86dcf7720c5",
+    "species": "DOG",
+    "nameRu": "Восточноевропейская овчарка",
+    "nameEn": "East-European Shepherd",
+    "maleIdealWeight": 45,
+    "femaleIdealWeight": 40
+  },
+  {
+    "id": "c2a0b186-7b99-4dc7-be8b-c5f43e4a6dd7",
+    "species": "DOG",
+    "nameRu": "Выжла",
+    "nameEn": "Vizsla",
+    "maleIdealWeight": 25,
+    "femaleIdealWeight": 22
+  },
+  {
+    "id": "34f52653-96f2-4a7c-b269-af097bf3cf57",
+    "species": "DOG",
+    "nameRu": "Голден ретривер",
+    "nameEn": "Golden Retriever",
+    "maleIdealWeight": 34,
+    "femaleIdealWeight": 31
+  },
+  {
+    "id": "7f14676c-5628-44a0-a540-682df8b57bc9",
+    "species": "DOG",
+    "nameRu": "Голландский спаниель",
+    "nameEn": "Wetterhoun",
+    "maleIdealWeight": 32,
+    "femaleIdealWeight": 27
+  },
+  {
+    "id": "e968386d-40f1-4228-9fb4-936d1151621e",
+    "species": "DOG",
+    "nameRu": "Гончая Артуа",
+    "nameEn": "Artois Hound",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "9e4d5b9d-cf02-4ad7-bb55-2993dfcc3f6b",
+    "species": "DOG",
+    "nameRu": "Грейхаунд",
+    "nameEn": "Greyhound",
+    "maleIdealWeight": 33,
+    "femaleIdealWeight": 30
+  },
+  {
+    "id": "c04a1bb3-2cfd-4518-9265-30c772fbd7ad",
+    "species": "DOG",
+    "nameRu": "Грюнендаль",
+    "nameEn": "Groenendael",
+    "maleIdealWeight": 29,
+    "femaleIdealWeight": 26
+  },
+  {
+    "id": "ad46e726-502d-4855-aa50-ea8438cce1d9",
+    "species": "DOG",
+    "nameRu": "Далматин",
+    "nameEn": "Dalmatian",
+    "maleIdealWeight": 30,
+    "femaleIdealWeight": 27
+  },
+  {
+    "id": "19710189-70b0-479b-a938-f42efe48210a",
+    "species": "CAT",
+    "nameRu": "Девон рекс",
+    "nameEn": "Devon Rex",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 2.5
+  },
+  {
+    "id": "ec0ca777-83c9-40ce-9248-834441a43972",
+    "species": "DOG",
+    "nameRu": "Денди динмонт терьер",
+    "nameEn": "Dandy Dinmont Terrier",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 9
+  },
+  {
+    "id": "91113094-3b3f-49fb-a9c1-b0d0266c604a",
+    "species": "DOG",
+    "nameRu": "Джек рассел терьер",
+    "nameEn": "Jack Russell Terrier",
+    "maleIdealWeight": 7,
+    "femaleIdealWeight": 6
+  },
+  {
+    "id": "6e01d5a6-57b6-4807-b651-4d1bd948889e",
+    "species": "DOG",
+    "nameRu": "Доберман",
+    "nameEn": "Doberman Pinscher",
+    "maleIdealWeight": 43,
+    "femaleIdealWeight": 33
+  },
+  {
+    "id": "d294dcaf-4a72-481b-a9d4-62eaf66c4536",
+    "species": "CAT",
+    "nameRu": "Домашняя короткошерстная",
+    "nameEn": "Domestic shorthair",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "5ba2aca3-e0f1-443f-b97a-e40b7adab809",
+    "species": "CAT",
+    "nameRu": "Донской сфинкс",
+    "nameEn": "Donskoy Cat",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "271e6943-d821-4083-98f8-8b21ad533326",
+    "species": "DOG",
+    "nameRu": "Дратхаар",
+    "nameEn": "German Wirehaired Pointer",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 26
+  },
+  {
+    "id": "8080fd61-dda6-4cbb-9594-38eb9ab68e5c",
+    "species": "DOG",
+    "nameRu": "Евразиер",
+    "nameEn": "Eurasier",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 22
+  },
+  {
+    "id": "3cd06210-7176-478f-a88a-0b8d61110f17",
+    "species": "CAT",
+    "nameRu": "Европейская короткошерстная",
+    "nameEn": "European Shorthair",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "d8ff89a8-8d0d-43c8-a63e-7439504b5034",
+    "species": "DOG",
+    "nameRu": "Западно-сибирская лайка",
+    "nameEn": "West Siberian Laika",
+    "maleIdealWeight": 21,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "6ea6764c-fb94-4100-922a-8fce2df2a8b0",
+    "species": "DOG",
+    "nameRu": "Ирландский водный спаниель",
+    "nameEn": "Irish Water Spaniel",
+    "maleIdealWeight": 24,
+    "femaleIdealWeight": 22
+  },
+  {
+    "id": "824d5600-7726-491b-9133-f1e819353554",
+    "species": "DOG",
+    "nameRu": "Ирландский волкодав",
+    "nameEn": "Irish Wolfhound",
+    "maleIdealWeight": 70,
+    "femaleIdealWeight": 55
+  },
+  {
+    "id": "76bedf90-befb-4d5d-a31b-7db849daf896",
+    "species": "DOG",
+    "nameRu": "Ирландский мягкошерстный пшеничный терьер",
+    "nameEn": "Soft Coated Wheaten Terrier",
+    "maleIdealWeight": 17,
+    "femaleIdealWeight": 14
+  },
+  {
+    "id": "a171ed5a-a9b5-4629-8499-34defc2e2d3c",
+    "species": "DOG",
+    "nameRu": "Ирландский сеттер",
+    "nameEn": "Irish Setter",
+    "maleIdealWeight": 30,
+    "femaleIdealWeight": 27
+  },
+  {
+    "id": "b391ea00-de55-48d2-aef6-4d8490c5c30a",
+    "species": "DOG",
+    "nameRu": "Ирландский терьер",
+    "nameEn": "Irish Terrier",
+    "maleIdealWeight": 12,
+    "femaleIdealWeight": 11
+  },
+  {
+    "id": "87bcb030-b0d7-11ec-882b-29c07ccbeb6b",
+    "species": "DOG",
+    "nameRu": "Исландская овчарка",
+    "nameEn": "Icelandic Sheepdog",
+    "maleIdealWeight": 14,
+    "femaleIdealWeight": 11
+  },
+  {
+    "id": "0e6f6ee0-d5ba-11ec-8ce1-0192480339ee",
+    "species": "DOG",
+    "nameRu": "Испанская водяная собака",
+    "nameEn": "Perro de agua español",
+    "maleIdealWeight": 20,
+    "femaleIdealWeight": 16
+  },
+  {
+    "id": "43252642-e81b-4883-9e2e-5d096de2ab34",
+    "species": "DOG",
+    "nameRu": "Итальянская гончая",
+    "nameEn": "Italian Hound",
+    "maleIdealWeight": 24,
+    "femaleIdealWeight": 22
+  },
+  {
+    "id": "48fb726d-a0e8-4ad2-9273-3da2ff726fe8",
+    "species": "DOG",
+    "nameRu": "Итальянский спиноне",
+    "nameEn": "Italian Spinone",
+    "maleIdealWeight": 34,
+    "femaleIdealWeight": 30
+  },
+  {
+    "id": "2e1a2a9d-3696-4f18-91b4-62651dfb4e07",
+    "species": "DOG",
+    "nameRu": "Йоркширский терьер",
+    "nameEn": "Yorkshire Terrier",
+    "maleIdealWeight": 2,
+    "femaleIdealWeight": 2.5
+  },
+  {
+    "id": "2288bf00-2e86-4e37-8c50-1cfef07f2d42",
+    "species": "DOG",
+    "nameRu": "Ка де бо",
+    "nameEn": "Ca de Bou",
+    "maleIdealWeight": 36,
+    "femaleIdealWeight": 32
+  },
+  {
+    "id": "de8ea2f0-204d-493b-b6f2-e705e6e7eaad",
+    "species": "DOG",
+    "nameRu": "Кавалер кинг чарльз спаниель",
+    "nameEn": "Cavalier King Charles Spaniel",
+    "maleIdealWeight": 7,
+    "femaleIdealWeight": 6
+  },
+  {
+    "id": "9e6eb9a0-d93d-4080-bc15-c094c44213f7",
+    "species": "DOG",
+    "nameRu": "Кавказская овчарка",
+    "nameEn": "Caucasian Shepherd",
+    "maleIdealWeight": 70,
+    "femaleIdealWeight": 60
+  },
+  {
+    "id": "b56da04d-dad0-4b7c-96f5-236d19b79b49",
+    "species": "DOG",
+    "nameRu": "Кан ди кастру лаборейру",
+    "nameEn": "Portuguese Cattle Dog",
+    "maleIdealWeight": 35,
+    "femaleIdealWeight": 25
+  },
+  {
+    "id": "0590cf5c-0746-49eb-9d77-b1a2dbcc4314",
+    "species": "CAT",
+    "nameRu": "Канадский сфинкс",
+    "nameEn": "Sphynx Cat",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "e3495606-5b71-45c5-b4ee-ec8070b96f3e",
+    "species": "DOG",
+    "nameRu": "Канарский дог",
+    "nameEn": "Dogo Canario",
+    "maleIdealWeight": 60,
+    "femaleIdealWeight": 50
+  },
+  {
+    "id": "cd26425f-659c-47f6-b976-224977300858",
+    "species": "DOG",
+    "nameRu": "Кане корсо",
+    "nameEn": "Cane Corso",
+    "maleIdealWeight": 50,
+    "femaleIdealWeight": 43
+  },
+  {
+    "id": "fea76051-220c-11f1-bd3b-93fb18d43f45",
+    "species": "DOG",
+    "nameRu": "Карело-финская лайка",
+    "nameEn": "Finnish Spitz",
+    "maleIdealWeight": 13.5,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "b8f16c9c-933e-4fdc-bba0-05290d18d560",
+    "species": "DOG",
+    "nameRu": "Каталонская овчарка",
+    "nameEn": "Catalan Sheepdog",
+    "maleIdealWeight": 18,
+    "femaleIdealWeight": 16
+  },
+  {
+    "id": "6f59db0f-a037-4a4b-836a-d9e47cad5631",
+    "species": "DOG",
+    "nameRu": "Керн терьер",
+    "nameEn": "Cairn Terrier",
+    "maleIdealWeight": 7,
+    "femaleIdealWeight": 6
+  },
+  {
+    "id": "5d3e7c97-1963-4cac-ac9b-68b20f8a4d50",
+    "species": "DOG",
+    "nameRu": "Керри блю терьер",
+    "nameEn": "Kerry Blue Terrier",
+    "maleIdealWeight": 17,
+    "femaleIdealWeight": 15
+  },
+  {
+    "id": "ac615ac2-4db5-4c56-898f-7453ad7b4a15",
+    "species": "DOG",
+    "nameRu": "Китайская хохлатая собака",
+    "nameEn": "Chinese Crested Dog",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "aac166e9-a21a-4cfa-90ff-bb8f36c38f1e",
+    "species": "DOG",
+    "nameRu": "Кламбер спаниель",
+    "nameEn": "Clumber Spaniel",
+    "maleIdealWeight": 36,
+    "femaleIdealWeight": 28
+  },
+  {
+    "id": "8a4b4300-b016-11ec-b05a-7b11bf174093",
+    "species": "DOG",
+    "nameRu": "Коикерхондье",
+    "nameEn": "Kooikerhondje",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 9
+  },
+  {
+    "id": "6f60f2fc-54cd-44d9-9c95-f274e3479eb0",
+    "species": "DOG",
+    "nameRu": "Колли",
+    "nameEn": "Collie",
+    "maleIdealWeight": 25,
+    "femaleIdealWeight": 22
+  },
+  {
+    "id": "d8468327-0a13-4eba-997b-40a2b4962a76",
+    "species": "DOG",
+    "nameRu": "Комондор",
+    "nameEn": "Komondor",
+    "maleIdealWeight": 55,
+    "femaleIdealWeight": 45
+  },
+  {
+    "id": "a29e9d2a-4b87-4daa-8455-04748ee7d158",
+    "species": "CAT",
+    "nameRu": "Корниш-рекс",
+    "nameEn": "Cornish Rex",
+    "maleIdealWeight": 3.5,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "4560cb99-0986-4803-a7e1-f7b64e58ac1e",
+    "species": "DOG",
+    "nameRu": "Кроличья такса",
+    "nameEn": "Rabbit dachshund",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "baf855b7-ca4c-42ca-8f84-83934149771b",
+    "species": "DOG",
+    "nameRu": "Кувас",
+    "nameEn": "Kuvasz",
+    "maleIdealWeight": 55,
+    "femaleIdealWeight": 43
+  },
+  {
+    "id": "a8c8360e-8d9a-41b1-8c97-6642075d445e",
+    "species": "CAT",
+    "nameRu": "Курильский бобтейл",
+    "nameEn": "Kurilian Bobtail",
+    "maleIdealWeight": 5.5,
+    "femaleIdealWeight": 4.5
+  },
+  {
+    "id": "11d50a90-c309-4d3d-b95e-ea9f090426de",
+    "species": "DOG",
+    "nameRu": "Курцхаар",
+    "nameEn": "German Shorthaired Pointer",
+    "maleIdealWeight": 29,
+    "femaleIdealWeight": 24
+  },
+  {
+    "id": "722f3533-0fbf-49d3-b215-e5693a960916",
+    "species": "DOG",
+    "nameRu": "Курчавошерстный ретривер",
+    "nameEn": "Curly-Coated Retriever",
+    "maleIdealWeight": 37,
+    "femaleIdealWeight": 28
+  },
+  {
+    "id": "66498f6e-6347-4fd6-ba05-ab8bd9b44d3a",
+    "species": "DOG",
+    "nameRu": "Лабрадор ретривер",
+    "nameEn": "Labrador Retriever",
+    "maleIdealWeight": 35,
+    "femaleIdealWeight": 30
+  },
+  {
+    "id": "004f2544-735b-4259-bc3b-014b059a7575",
+    "species": "DOG",
+    "nameRu": "Лакенуа",
+    "nameEn": "Laekenois",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "5bf7017d-c81a-41ce-8cdf-399b63b22b0a",
+    "species": "DOG",
+    "nameRu": "Ланкаширский хилер",
+    "nameEn": "Lancashire Heeler",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "a62d4f48-3ff3-4d3f-9d62-34d19b1dfd89",
+    "species": "DOG",
+    "nameRu": "Левретка",
+    "nameEn": "Italian Greyhound",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "98e5451b-71e8-4c5f-a9e7-f0d5969a83ee",
+    "species": "DOG",
+    "nameRu": "Лейкленд терьер",
+    "nameEn": "Lakeland Terrier",
+    "maleIdealWeight": 7,
+    "femaleIdealWeight": 6
+  },
+  {
+    "id": "77db2483-5e47-4cd6-94d5-c01c2daa96f3",
+    "species": "DOG",
+    "nameRu": "Леонбергер",
+    "nameEn": "Leonberger",
+    "maleIdealWeight": 63,
+    "femaleIdealWeight": 50
+  },
+  {
+    "id": "db14fb80-4e60-4b48-b4b9-6870bcb84fae",
+    "species": "DOG",
+    "nameRu": "Малинуа",
+    "nameEn": "Malinois",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 24
+  },
+  {
+    "id": "b363a027-8580-45f6-b98f-a38254fac91e",
+    "species": "DOG",
+    "nameRu": "Малый пудель",
+    "nameEn": "Medium poodle",
+    "maleIdealWeight": 11,
+    "femaleIdealWeight": 9
+  },
+  {
+    "id": "323fafd2-21fe-41c4-9a95-9c0c1d6e1572",
+    "species": "DOG",
+    "nameRu": "Мальтезе",
+    "nameEn": "Maltese",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "305e4219-4012-4391-8160-7d2c929a5b33",
+    "species": "DOG",
+    "nameRu": "Маремма",
+    "nameEn": "Maremma Sheepdog",
+    "maleIdealWeight": 40,
+    "femaleIdealWeight": 35
+  },
+  {
+    "id": "9587c636-fbd2-4041-8a69-8186010f4a83",
+    "species": "DOG",
+    "nameRu": "Мастино наполетано",
+    "nameEn": "Mastino Napoletano",
+    "maleIdealWeight": 65,
+    "femaleIdealWeight": 55
+  },
+  {
+    "id": "960256b6-75ff-48c0-b1cc-7eeb332f8fec",
+    "species": "CAT",
+    "nameRu": "Мейн кун",
+    "nameEn": "Maine Coon",
+    "maleIdealWeight": 12,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "9b501088-82f4-4cbd-b4c4-bccef679f930",
+    "species": "DOG",
+    "nameRu": "Мексиканская голая собака",
+    "nameEn": "Mexican Hairless Dog",
+    "maleIdealWeight": 16,
+    "femaleIdealWeight": 13
+  },
+  {
+    "id": "e6782184-1a8c-4220-854f-8fba0c6f2408",
+    "species": "DOG",
+    "nameRu": "Метис (собака)",
+    "nameEn": "Mixed-breed dog",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "d4a0c87d-b229-4784-b45b-e544b05a3495",
+    "species": "DOG",
+    "nameRu": "Миниатюрная такса",
+    "nameEn": "Miniature Dachshund",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "43705362-bb21-443d-8816-63de1c31c799",
+    "species": "DOG",
+    "nameRu": "Миниатюрный бультерьер",
+    "nameEn": "Miniature Bull Terrier",
+    "maleIdealWeight": 15,
+    "femaleIdealWeight": 12
+  },
+  {
+    "id": "63108153-5f9f-4dda-954d-61cc6cb017d7",
+    "species": "DOG",
+    "nameRu": "Миниатюрный пудель",
+    "nameEn": "Mini poodle",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "e7080248-16aa-4920-901c-1af9d619dc72",
+    "species": "DOG",
+    "nameRu": "Миттельшнауцер",
+    "nameEn": "Mittelschnauzer",
+    "maleIdealWeight": 20,
+    "femaleIdealWeight": 16
+  },
+  {
+    "id": "86037a40-7a76-453e-90da-6a2e26ee265b",
+    "species": "DOG",
+    "nameRu": "Монгольская овчарка (банхар)",
+    "nameEn": "Mongolian Banhar",
+    "maleIdealWeight": 70,
+    "femaleIdealWeight": 60
+  },
+  {
+    "id": "453ad6ec-af72-4597-9b97-f45778dec847",
+    "species": "DOG",
+    "nameRu": "Мопс",
+    "nameEn": "Mops",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 8
+  },
+  {
+    "id": "710eff1e-ae15-426e-a4aa-3291b4257284",
+    "species": "DOG",
+    "nameRu": "Московская сторожевая",
+    "nameEn": "Moscow Watchdog",
+    "maleIdealWeight": 65,
+    "femaleIdealWeight": 50
+  },
+  {
+    "id": "05e34136-f7ae-48f8-8559-1feacec2271c",
+    "species": "DOG",
+    "nameRu": "Муди",
+    "nameEn": "Mudi",
+    "maleIdealWeight": 13,
+    "femaleIdealWeight": 9
+  },
+  {
+    "id": "ccf35b80-23bc-4523-bf8c-23d66a0231c5",
+    "species": "CAT",
+    "nameRu": "Невская маскарадная",
+    "nameEn": "Neva Masquerade",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "3a13f2d5-c242-4d81-9655-d66f23385395",
+    "species": "DOG",
+    "nameRu": "Немецкая овчарка",
+    "nameEn": "German Shepherd",
+    "maleIdealWeight": 37,
+    "femaleIdealWeight": 27
+  },
+  {
+    "id": "b5213781-91b2-46a1-833f-771d6490af88",
+    "species": "DOG",
+    "nameRu": "Немецкий дог",
+    "nameEn": "Great Dane",
+    "maleIdealWeight": 72,
+    "femaleIdealWeight": 55
+  },
+  {
+    "id": "48e6b2fc-2506-4061-99fd-185fbbf77343",
+    "species": "DOG",
+    "nameRu": "Немецкий пинчер",
+    "nameEn": "German Pinscher",
+    "maleIdealWeight": 16,
+    "femaleIdealWeight": 13
+  },
+  {
+    "id": "34c330dd-8e80-40db-af9a-cf9d8f9faf33",
+    "species": "DOG",
+    "nameRu": "Новошотландский ретривер (толлер)",
+    "nameEn": "Nova Scotia Duck Tolling Retriever (toller)",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 19
+  },
+  {
+    "id": "c7dd358c-3c7c-4612-aa8a-903e4ec9bd1d",
+    "species": "CAT",
+    "nameRu": "Норвежская лесная",
+    "nameEn": "Norwegian Forest Cat",
+    "maleIdealWeight": 6.5,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "d202f1b6-051c-44da-be1d-34ae8d78c4ad",
+    "species": "DOG",
+    "nameRu": "Норвежский бухунд",
+    "nameEn": "Norwegian Buhund",
+    "maleIdealWeight": 16,
+    "femaleIdealWeight": 14
+  },
+  {
+    "id": "a53e21b7-8b3f-41e0-8419-6bda5a909e19",
+    "species": "DOG",
+    "nameRu": "Норвич терьер",
+    "nameEn": "Norwich Terrier",
+    "maleIdealWeight": 5.5,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "f4786cba-3516-452a-bd72-5800fa8320aa",
+    "species": "DOG",
+    "nameRu": "Норфолк терьер",
+    "nameEn": "Norfolk Terrier",
+    "maleIdealWeight": 5.5,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "5731aa26-dba0-48d0-aeb3-16ebfb6bba41",
+    "species": "DOG",
+    "nameRu": "Ньюфаундленд",
+    "nameEn": "Newfoundland",
+    "maleIdealWeight": 66,
+    "femaleIdealWeight": 53
+  },
+  {
+    "id": "6914992f-c24a-41fa-b44f-f5c36243e96f",
+    "species": "CAT",
+    "nameRu": "Ориентальная",
+    "nameEn": "Oriental shorthair",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "6c7c1a6b-5f1c-4939-a411-a34417dae702",
+    "species": "DOG",
+    "nameRu": "Папильон",
+    "nameEn": "Papillon",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "6180a423-003b-4aed-a1d9-8428186f777e",
+    "species": "DOG",
+    "nameRu": "Пекинес",
+    "nameEn": "Pekinese",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "691af22b-89fe-4676-9fa4-3349ecad34f5",
+    "species": "CAT",
+    "nameRu": "Персидская",
+    "nameEn": "Persian",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "9d16791f-f016-431f-8837-a6f5340a0846",
+    "species": "DOG",
+    "nameRu": "Петербургская орхидея",
+    "nameEn": "Petersburg orchid",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "dfd5dbba-72e6-44b0-af5a-6c3c31f1e30e",
+    "species": "DOG",
+    "nameRu": "Пикардийская овчарка",
+    "nameEn": "Berger Picard",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "34650256-5cbc-42f7-ac64-c88223d39e58",
+    "species": "DOG",
+    "nameRu": "Пиренейская горная собака",
+    "nameEn": "Great Pyrenees",
+    "maleIdealWeight": 52,
+    "femaleIdealWeight": 42
+  },
+  {
+    "id": "53cc4aac-9ba8-4047-abb0-3446b9e46a81",
+    "species": "DOG",
+    "nameRu": "Пиренейская овчарка",
+    "nameEn": "Pyrenean Shepherd",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 15
+  },
+  {
+    "id": "d3049750-9579-4d9c-af3d-af08a977daf8",
+    "species": "DOG",
+    "nameRu": "Пиренейский мастиф",
+    "nameEn": "Pyrenean Mastiff",
+    "maleIdealWeight": 75,
+    "femaleIdealWeight": 60
+  },
+  {
+    "id": "390a2f94-6e99-4231-8738-7cbec94e5b3c",
+    "species": "DOG",
+    "nameRu": "Поденко ибиценко",
+    "nameEn": "Podenco Ibicenco",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 24
+  },
+  {
+    "id": "544a545b-4aba-4f37-8995-6f260c07f24e",
+    "species": "DOG",
+    "nameRu": "Пойнтер",
+    "nameEn": "Pointer",
+    "maleIdealWeight": 30,
+    "femaleIdealWeight": 25
+  },
+  {
+    "id": "df743121-f135-11f0-bbdf-13b648df4de1",
+    "species": "DOG",
+    "nameRu": "Пражский крысарик",
+    "nameEn": "Prague Ratter",
+    "maleIdealWeight": 2.6,
+    "femaleIdealWeight": 2.6
+  },
+  {
+    "id": "5046f8c1-dbb9-440c-ba84-8805f429dbce",
+    "species": "DOG",
+    "nameRu": "Прямошерстный ретривер",
+    "nameEn": "Flat-Coated Retriever",
+    "maleIdealWeight": 30,
+    "femaleIdealWeight": 29
+  },
+  {
+    "id": "bd43f76b-0314-4186-99b3-f62558ef79e9",
+    "species": "DOG",
+    "nameRu": "Пти-брабансон",
+    "nameEn": "Petit Brabancon",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "4138a2ab-146e-4656-bac6-3c02fa756a8d",
+    "species": "DOG",
+    "nameRu": "Пули",
+    "nameEn": "Puli",
+    "maleIdealWeight": 14,
+    "femaleIdealWeight": 12
+  },
+  {
+    "id": "de634fcb-ce20-4601-91f6-2015087d9577",
+    "species": "DOG",
+    "nameRu": "Пуми",
+    "nameEn": "Pumi",
+    "maleIdealWeight": 13,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "96765de4-ad11-4fa9-95a3-b6060a933ce5",
+    "species": "CAT",
+    "nameRu": "Регдолл",
+    "nameEn": "Ragdoll",
+    "maleIdealWeight": 7.5,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "44cb2336-0a5f-44c0-8655-e82fce0ad8c7",
+    "species": "DOG",
+    "nameRu": "Ризеншнауцер",
+    "nameEn": "Riesenschnauzer",
+    "maleIdealWeight": 40,
+    "femaleIdealWeight": 40
+  },
+  {
+    "id": "094b6fa9-ddc4-45c0-bb04-34fc5104f4f4",
+    "species": "DOG",
+    "nameRu": "Родезийский риджбек",
+    "nameEn": "Rhodesian Ridgeback",
+    "maleIdealWeight": 38.5,
+    "femaleIdealWeight": 34
+  },
+  {
+    "id": "afc9cd83-b3a2-4b00-9e4e-0caf119bae70",
+    "species": "DOG",
+    "nameRu": "Ротвейлер",
+    "nameEn": "Rottweiler",
+    "maleIdealWeight": 51,
+    "femaleIdealWeight": 45
+  },
+  {
+    "id": "9accfc7b-0c25-45e5-b97e-84fd7b904943",
+    "species": "CAT",
+    "nameRu": "Русская голубая",
+    "nameEn": "Russian Blue Cat",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 3.5
+  },
+  {
+    "id": "55e61c3d-3eee-484a-bfb2-54ecb08d973d",
+    "species": "DOG",
+    "nameRu": "Русская псовая борзая",
+    "nameEn": "Borzoi",
+    "maleIdealWeight": 40,
+    "femaleIdealWeight": 32
+  },
+  {
+    "id": "652ff546-507a-4056-a667-314184cca72f",
+    "species": "DOG",
+    "nameRu": "Русская цветная болонка",
+    "nameEn": "Russian Tsvetnaya Bolonka",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "1582774f-bb1e-42b3-b46a-eff271fb919a",
+    "species": "DOG",
+    "nameRu": "Русский спаниель",
+    "nameEn": "Russian spaniel",
+    "maleIdealWeight": 18,
+    "femaleIdealWeight": 15
+  },
+  {
+    "id": "d6da89c3-583d-4aea-a0cd-7d3e031064ad",
+    "species": "DOG",
+    "nameRu": "Русский той",
+    "nameEn": "Russian toy",
+    "maleIdealWeight": 2,
+    "femaleIdealWeight": 2
+  },
+  {
+    "id": "e6735c6f-6122-48e4-895c-73beb610b1bb",
+    "species": "DOG",
+    "nameRu": "Русский черный терьер",
+    "nameEn": "Black Russian Terrier",
+    "maleIdealWeight": 55,
+    "femaleIdealWeight": 47
+  },
+  {
+    "id": "509b6ebe-eefd-4d99-9167-e42366e9ead5",
+    "species": "DOG",
+    "nameRu": "Русско-европейская лайка",
+    "nameEn": "Russo-European Laika",
+    "maleIdealWeight": 22,
+    "femaleIdealWeight": 19
+  },
+  {
+    "id": "e1fda961-076a-467c-80ed-ad8bb79c18a9",
+    "species": "CAT",
+    "nameRu": "Саванна",
+    "nameEn": "Savanna",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 7
+  },
+  {
+    "id": "e424e0a0-2c09-404b-abf5-f67b887ef0af",
+    "species": "DOG",
+    "nameRu": "Салюки",
+    "nameEn": "Saluki",
+    "maleIdealWeight": 25,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "be0f2282-8de8-45b3-9c6f-d62ff59da4b0",
+    "species": "DOG",
+    "nameRu": "Самоед",
+    "nameEn": "Samoyed",
+    "maleIdealWeight": 27,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "3bf68f10-e8f1-11ed-8677-bf19e320638e",
+    "species": "CAT",
+    "nameRu": "Священная бирма",
+    "nameEn": "Sacred сat of Burma",
+    "maleIdealWeight": 4.25,
+    "femaleIdealWeight": 3.25
+  },
+  {
+    "id": "99f5ad4d-6a5a-4d5f-8b92-21f176e26b9c",
+    "species": "DOG",
+    "nameRu": "Сенбернар",
+    "nameEn": "St. Bernard",
+    "maleIdealWeight": 90,
+    "femaleIdealWeight": 70
+  },
+  {
+    "id": "8ffafef4-01e1-4518-ba1d-cfbc86bf0cc3",
+    "species": "DOG",
+    "nameRu": "Сеттер гордон",
+    "nameEn": "Gordon Setter",
+    "maleIdealWeight": 30,
+    "femaleIdealWeight": 25
+  },
+  {
+    "id": "c2955bac-89c5-44e7-a453-661e16ba41d7",
+    "species": "CAT",
+    "nameRu": "Сиамская",
+    "nameEn": "Siamese",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 2.5
+  },
+  {
+    "id": "29ff162c-48fa-4596-8985-43fa9b534eb8",
+    "species": "DOG",
+    "nameRu": "Сиба-ину",
+    "nameEn": "Shiba-Inu",
+    "maleIdealWeight": 12,
+    "femaleIdealWeight": 11
+  },
+  {
+    "id": "15bca68b-5ce9-4f10-9312-dc6609f2d0e0",
+    "species": "CAT",
+    "nameRu": "Сибирская кошка",
+    "nameEn": "Siberian Cat",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "8d74c729-a034-4356-851f-ba898dc41d18",
+    "species": "DOG",
+    "nameRu": "Сибирский хаски",
+    "nameEn": "Siberian Husky",
+    "maleIdealWeight": 24,
+    "femaleIdealWeight": 18
+  },
+  {
+    "id": "9f0d8737-6894-4f8e-a665-c15ec0ff8865",
+    "species": "DOG",
+    "nameRu": "Скай терьер",
+    "nameEn": "Skye Terrier",
+    "maleIdealWeight": 17,
+    "femaleIdealWeight": 12
+  },
+  {
+    "id": "1e1af49a-699e-4192-a44f-c2f9faca406a",
+    "species": "DOG",
+    "nameRu": "Скотч терьер",
+    "nameEn": "Scottish Terrier",
+    "maleIdealWeight": 12,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "6dee24da-79a6-4b0b-8ecf-b66e8a4574cc",
+    "species": "DOG",
+    "nameRu": "Слюги",
+    "nameEn": "Sloughi",
+    "maleIdealWeight": 27,
+    "femaleIdealWeight": 24
+  },
+  {
+    "id": "a5492f4a-363f-41f9-a49c-7e4f9aaf8524",
+    "species": "CAT",
+    "nameRu": "Сноу-шу",
+    "nameEn": "Snow shoe",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "e0bd1928-6875-4422-a215-620a7af625c6",
+    "species": "CAT",
+    "nameRu": "Сомали",
+    "nameEn": "Somali",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 2.5
+  },
+  {
+    "id": "08ddd5bc-e0c3-4a32-aa2f-de84b72a19a4",
+    "species": "DOG",
+    "nameRu": "Среднеазиатская овчарка",
+    "nameEn": "Central Asian Shepherd Dog",
+    "maleIdealWeight": 67,
+    "femaleIdealWeight": 53
+  },
+  {
+    "id": "3fff6e7d-b4cc-48f2-bf22-9ac5a4c06879",
+    "species": "DOG",
+    "nameRu": "Стандартный пудель",
+    "nameEn": "Standard poodle",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "775e58fd-3e1c-4159-8faa-a3797440bbab",
+    "species": "DOG",
+    "nameRu": "Стаффордширский бультерьер",
+    "nameEn": "Staffordshire Bullterier",
+    "maleIdealWeight": 14,
+    "femaleIdealWeight": 13
+  },
+  {
+    "id": "aa2de6c1-37fc-4ba0-bf4a-b2b34ca9af23",
+    "species": "CAT",
+    "nameRu": "Тайская кошка",
+    "nameEn": "Thai cat",
+    "maleIdealWeight": 3.5,
+    "femaleIdealWeight": 3
+  },
+  {
+    "id": "63408066-7f18-477b-8584-9add12467f4e",
+    "species": "DOG",
+    "nameRu": "Тайский риджбек",
+    "nameEn": "Thai ridgeback",
+    "maleIdealWeight": 25,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "45e37870-7899-4454-9d56-2a89c895c130",
+    "species": "DOG",
+    "nameRu": "Такса стандартная",
+    "nameEn": "Dachshund",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 8
+  },
+  {
+    "id": "0e80915e-11df-4695-8528-133dbdb5542a",
+    "species": "DOG",
+    "nameRu": "Тервюрен",
+    "nameEn": "Tervueren",
+    "maleIdealWeight": 27,
+    "femaleIdealWeight": 22
+  },
+  {
+    "id": "887c231e-1d2f-4d38-97b6-8f44aaf29f25",
+    "species": "DOG",
+    "nameRu": "Тибетский мастиф",
+    "nameEn": "Tibetan Mastiff",
+    "maleIdealWeight": 75,
+    "femaleIdealWeight": 70
+  },
+  {
+    "id": "cab21b4e-412e-4c05-ad52-414b9ad1b55a",
+    "species": "DOG",
+    "nameRu": "Тибетский спаниель",
+    "nameEn": "Tibetan Spaniel",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "dcc74c59-92fe-48ca-b8b8-a7e6afc0bee6",
+    "species": "DOG",
+    "nameRu": "Тибетский терьер",
+    "nameEn": "Tibetan Terrier",
+    "maleIdealWeight": 12,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "c7cbdeb6-31e2-4fde-86ea-4941c9478598",
+    "species": "DOG",
+    "nameRu": "Той-пудель",
+    "nameEn": "Toy pudel",
+    "maleIdealWeight": 2,
+    "femaleIdealWeight": 2
+  },
+  {
+    "id": "183828a9-eb81-4a6a-8c51-43a711c7ad6c",
+    "species": "DOG",
+    "nameRu": "Той-фокстерьер",
+    "nameEn": "Toy Fox Terrier",
+    "maleIdealWeight": 2,
+    "femaleIdealWeight": 2
+  },
+  {
+    "id": "75c0a052-2722-4c24-a737-703976340104",
+    "species": "DOG",
+    "nameRu": "Уиппет",
+    "nameEn": "Whippet",
+    "maleIdealWeight": 11,
+    "femaleIdealWeight": 11
+  },
+  {
+    "id": "e8e6aec4-9114-44f1-a217-475bc50cbd88",
+    "species": "DOG",
+    "nameRu": "Фараонова собака",
+    "nameEn": "Pharaoh Hound",
+    "maleIdealWeight": 28,
+    "femaleIdealWeight": 18
+  },
+  {
+    "id": "0e869743-f49f-4f60-a9e4-0818d4cc5d59",
+    "species": "DOG",
+    "nameRu": "Фила бразилейро",
+    "nameEn": "Fila Brasileiro",
+    "maleIdealWeight": 55,
+    "femaleIdealWeight": 45
+  },
+  {
+    "id": "b06f12b3-3d91-4c96-9dc5-9c2bdd5edcdc",
+    "species": "DOG",
+    "nameRu": "Фландрский бувье",
+    "nameEn": "Bouvier des Flandres",
+    "maleIdealWeight": 38,
+    "femaleIdealWeight": 31
+  },
+  {
+    "id": "b22a6a8a-ed1c-4ab5-8318-19b6eccdd1b4",
+    "species": "DOG",
+    "nameRu": "Фокстерьер",
+    "nameEn": "Fox Terrier",
+    "maleIdealWeight": 7.8,
+    "femaleIdealWeight": 7
+  },
+  {
+    "id": "8288b87b-e77d-4ef0-a4dd-d8b3013c013f",
+    "species": "DOG",
+    "nameRu": "Французский бракк",
+    "nameEn": "French Pointing Dog",
+    "maleIdealWeight": 29,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "6af61d67-b2a1-429b-933f-a83923277824",
+    "species": "DOG",
+    "nameRu": "Французский бульдог",
+    "nameEn": "French Bulldog",
+    "maleIdealWeight": 13,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "94dabc1f-2d21-45e7-9546-4f75460b6564",
+    "species": "DOG",
+    "nameRu": "Французский спаниель",
+    "nameEn": "French Spaniel",
+    "maleIdealWeight": 23,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "e1fa934c-bcb4-48b1-8c8f-a397ddb0ab12",
+    "species": "DOG",
+    "nameRu": "Хаванез",
+    "nameEn": "Havanese",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "f98acf75-ca78-4d8c-b495-66449ae27d6e",
+    "species": "DOG",
+    "nameRu": "Ханаанская собака",
+    "nameEn": "Canaan Dog",
+    "maleIdealWeight": 23,
+    "femaleIdealWeight": 20
+  },
+  {
+    "id": "96a15935-57d8-45c2-88a8-94e59cd527e6",
+    "species": "DOG",
+    "nameRu": "Ховаварт",
+    "nameEn": "Hovawart",
+    "maleIdealWeight": 35,
+    "femaleIdealWeight": 30
+  },
+  {
+    "id": "33d3f44c-ca4f-4f38-a919-ed5e6caa031a",
+    "species": "DOG",
+    "nameRu": "Хортая борзая",
+    "nameEn": "Hortaya borzaya",
+    "maleIdealWeight": 20,
+    "femaleIdealWeight": 18
+  },
+  {
+    "id": "6711be96-0e42-4d51-a50e-a2ec85f0ff37",
+    "species": "DOG",
+    "nameRu": "Цвергпинчер",
+    "nameEn": "Miniature Pinscher",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "8d2bc1d4-e1f8-44f1-aab6-e4c7107a0d36",
+    "species": "DOG",
+    "nameRu": "Цвергшнауцер",
+    "nameEn": "Zwergschnauzer",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "33d0845e-c3fe-418f-b467-45f85ce885e9",
+    "species": "DOG",
+    "nameRu": "Чау чау",
+    "nameEn": "Chow Chow",
+    "maleIdealWeight": 29,
+    "femaleIdealWeight": 24
+  },
+  {
+    "id": "fb087cb6-65b1-41bd-9a88-3c93eced77f2",
+    "species": "CAT",
+    "nameRu": "Чаузи",
+    "nameEn": "Chausie",
+    "maleIdealWeight": 15,
+    "femaleIdealWeight": 10
+  },
+  {
+    "id": "d02e0c2e-87b2-4732-a916-ffdd42adb6eb",
+    "species": "DOG",
+    "nameRu": "Чесапик бэй ретривер",
+    "nameEn": "Chesapeake Bay Retriever",
+    "maleIdealWeight": 32,
+    "femaleIdealWeight": 28
+  },
+  {
+    "id": "b25e1039-2956-41cf-8993-5f59c17ba75c",
+    "species": "DOG",
+    "nameRu": "Чешский терьер",
+    "nameEn": "Cesky Terrier",
+    "maleIdealWeight": 9,
+    "femaleIdealWeight": 7
+  },
+  {
+    "id": "2494a5af-e661-49f7-8b81-ccfd8e7e844e",
+    "species": "DOG",
+    "nameRu": "Чирнеко дель этна",
+    "nameEn": "Сirneco dell Etna",
+    "maleIdealWeight": 11,
+    "femaleIdealWeight": 9
+  },
+  {
+    "id": "afbd7057-3324-49e1-8d24-50fb6c121474",
+    "species": "DOG",
+    "nameRu": "Чихуахуа",
+    "nameEn": "Chihuahua",
+    "maleIdealWeight": 2.3,
+    "femaleIdealWeight": 2
+  },
+  {
+    "id": "06fd7511-d0a1-11ee-9ad6-bba859372f18",
+    "species": "DOG",
+    "nameRu": "Чунцин",
+    "nameEn": "Chinese Chongqing Dog",
+    "maleIdealWeight": 20,
+    "femaleIdealWeight": 15
+  },
+  {
+    "id": "5c0b360b-0d61-4ac0-b6d5-2bae9e3f7db8",
+    "species": "DOG",
+    "nameRu": "Шарпей",
+    "nameEn": "Shar-Pei",
+    "maleIdealWeight": 27,
+    "femaleIdealWeight": 22
+  },
+  {
+    "id": "838cd6b8-61a0-46e8-9c27-b423eeeb9b44",
+    "species": "DOG",
+    "nameRu": "Шелти",
+    "nameEn": "Sheltie",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 8
+  },
+  {
+    "id": "9700c6a2-03ba-46a7-97f7-217eed3e86ce",
+    "species": "DOG",
+    "nameRu": "Ши-тцу",
+    "nameEn": "Shih-Tzu",
+    "maleIdealWeight": 6,
+    "femaleIdealWeight": 5
+  },
+  {
+    "id": "537cd108-587c-4a91-8058-78cf64d739ef",
+    "species": "DOG",
+    "nameRu": "Шипперке",
+    "nameEn": "Schipperke",
+    "maleIdealWeight": 7,
+    "femaleIdealWeight": 4
+  },
+  {
+    "id": "9c13e89c-20a9-4fc3-bc15-ee85521dc86c",
+    "species": "CAT",
+    "nameRu": "Шотландская вислоухая",
+    "nameEn": "Scottish Fold",
+    "maleIdealWeight": 5,
+    "femaleIdealWeight": 3.5
+  },
+  {
+    "id": "c44ef64b-5aaf-48a1-984d-9aead3aee6fc",
+    "species": "DOG",
+    "nameRu": "Шотландский сеттер",
+    "nameEn": "Scottish setter",
+    "maleIdealWeight": 29,
+    "femaleIdealWeight": 25
+  },
+  {
+    "id": "4a95d215-bf56-4db5-9c80-2d17b2d2310e",
+    "species": "DOG",
+    "nameRu": "Шпиц немецкий",
+    "nameEn": "German Medium Spitz",
+    "maleIdealWeight": 10,
+    "femaleIdealWeight": 8
+  },
+  {
+    "id": "8393e60c-8cdd-47c9-abd1-25c3d2b625cf",
+    "species": "DOG",
+    "nameRu": "Шпиц померанский",
+    "nameEn": "Pomeranian",
+    "maleIdealWeight": 2,
+    "femaleIdealWeight": 2
+  },
+  {
+    "id": "8a7f310b-295d-407e-8587-f2c3f0d95c25",
+    "species": "CAT",
+    "nameRu": "Экзот",
+    "nameEn": "Exotic Shorthair",
+    "maleIdealWeight": 4,
+    "femaleIdealWeight": 3.5
+  },
+  {
+    "id": "360bfdd9-cdd0-43b6-ba78-a9dcd0d83115",
+    "species": "DOG",
+    "nameRu": "Энтлебухер зенненхунд",
+    "nameEn": "Entlebucher Sennenhund",
+    "maleIdealWeight": 27,
+    "femaleIdealWeight": 23
+  },
+  {
+    "id": "914e7b5e-6b92-4bd0-9bd1-c704c61ec42d",
+    "species": "DOG",
+    "nameRu": "Эрдельтерьер",
+    "nameEn": "Airedale Terrier",
+    "maleIdealWeight": 26,
+    "femaleIdealWeight": 21
+  },
+  {
+    "id": "d52c16af-502a-4c46-b440-75830615e567",
+    "species": "DOG",
+    "nameRu": "Эстонская гончая",
+    "nameEn": "Estonian Hound",
+    "maleIdealWeight": 20,
+    "femaleIdealWeight": 15
+  },
+  {
+    "id": "701c8060-32bb-41b0-99fe-fb22f03751e3",
+    "species": "DOG",
+    "nameRu": "Эштрельская овчарка",
+    "nameEn": "Estrela Mountain Dog",
+    "maleIdealWeight": 45,
+    "femaleIdealWeight": 35
+  },
+  {
+    "id": "75df0b9c-49f4-4445-8f11-773b63dd37d3",
+    "species": "DOG",
+    "nameRu": "Южноафриканский бурбуль",
+    "nameEn": "Boerboel Dog",
+    "maleIdealWeight": 85,
+    "femaleIdealWeight": 65
+  },
+  {
+    "id": "a29dbc46-4403-4785-9082-75f73c9bfb45",
+    "species": "DOG",
+    "nameRu": "Ягдтерьер",
+    "nameEn": "Jagdterrier",
+    "maleIdealWeight": 9.5,
+    "femaleIdealWeight": 8
+  },
+  {
+    "id": "41eaa571-8385-4436-91b9-880d51b026d8",
+    "species": "DOG",
+    "nameRu": "Японский хин",
+    "nameEn": "Japanese Chin",
+    "maleIdealWeight": 3,
+    "femaleIdealWeight": 2
+  },
+  {
+    "id": "114e6db7-0206-49ea-9838-75bf3e53eb1c",
+    "species": "DOG",
+    "nameRu": "Японский шпиц",
+    "nameEn": "Japanese Spitz",
+    "maleIdealWeight": 8,
+    "femaleIdealWeight": 6
+  }
+]

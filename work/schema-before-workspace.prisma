@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Species {
+  CAT
+  DOG
+}
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+model Module {
+  id           String        @id
+  name         String        @unique
+  species      Species
+  formula      String
+  description  String?
+  calculations Calculation[]
+}
+
+model Pet {
+  id           String        @id @default(cuid())
+  name         String
+  species      Species
+  sex          Sex?
+  breedId      String?
+  actualWeight Float
+  idealWeight  Float
+  bcs          Int           @default(5)
+  birthdate    DateTime?
+  note         String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  breed        Breed?        @relation(fields: [breedId], references: [id], onDelete: SetNull)
+  calculations Calculation[]
+
+  @@index([breedId])
+}
+
+model Breed {
+  id                String  @id
+  species           Species
+  nameRu            String
+  nameEn            String
+  maleIdealWeight   Float
+  femaleIdealWeight Float
+  pets              Pet[]
+
+  @@index([species, nameRu])
+}
+
+model Calculation {
+  id             String   @id @default(cuid())
+  petId          String?
+  moduleId       String
+  actualWeight   Float
+  idealWeight    Float
+  bcs            Int
+  energyFactor   Float    @default(1)
+  lactationWeek  Int      @default(1)
+  childrenCount  Int      @default(0)
+  baseEnergy     Int
+  adjustedEnergy Int
+  createdAt      DateTime @default(now())
+  pet            Pet?     @relation(fields: [petId], references: [id], onDelete: SetNull)
+  module         Module   @relation(fields: [moduleId], references: [id])
+
+  @@index([createdAt])
+  @@index([petId])
+}

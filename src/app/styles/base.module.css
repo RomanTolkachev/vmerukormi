@@ -1,0 +1,29 @@
+.root,
+.body {
+  height: 100%;
+}
+
+.body {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  background: var(--surface);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.body *,
+.body *::before,
+.body *::after {
+  box-sizing: border-box;
+}
+
+.body button,
+.body input,
+.body select,
+.body textarea {
+  font: inherit;
+}
+
+.body button {
+  cursor: pointer;
+}

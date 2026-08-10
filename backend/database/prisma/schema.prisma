@@ -1,0 +1,315 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Species {
+  CAT
+  DOG
+}
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+enum ProductKind {
+  PRODUCT
+  SUPPLEMENT
+  RECIPE
+}
+
+enum RationMode {
+  DAILY
+  WEEKLY
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model User {
+  id               String            @id @default(cuid())
+  username         String            @unique
+  passwordHash     String
+  role             UserRole          @default(USER)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  sessions         Session[]
+  pets             Pet[]
+  calculations     Calculation[]
+  customers        Customer[]
+  productGroups    ProductGroup[]
+  nutrients        Nutrient[]
+  products         Product[]
+  rations          Ration[]
+  notifications    Notification[]
+  invoices         Invoice[]
+  tablePreferences TablePreference[]
+}
+
+model Session {
+  id            String   @id @default(cuid())
+  tokenHash     String   @unique
+  csrfTokenHash String
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Module {
+  id           String        @id
+  name         String        @unique
+  species      Species
+  formula      String
+  description  String?
+  calculations Calculation[]
+}
+
+model Pet {
+  id           String           @id @default(cuid())
+  name         String
+  species      Species
+  sex          Sex?
+  breedId      String?
+  actualWeight Float
+  idealWeight  Float
+  bcs          Int              @default(5)
+  birthdate    DateTime?
+  note         String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  breed        Breed?           @relation(fields: [breedId], references: [id], onDelete: SetNull)
+  calculations Calculation[]
+  customerId   String?
+  customer     Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  measurements PetMeasurement[]
+  rations      Ration[]
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([breedId])
+  @@index([customerId])
+  @@index([userId])
+}
+
+model Breed {
+  id                String  @id
+  species           Species
+  nameRu            String
+  nameEn            String
+  maleIdealWeight   Float
+  femaleIdealWeight Float
+  pets              Pet[]
+
+  @@index([species, nameRu])
+}
+
+model Calculation {
+  id             String   @id @default(cuid())
+  petId          String?
+  moduleId       String
+  actualWeight   Float
+  idealWeight    Float
+  bcs            Int
+  energyFactor   Float    @default(1)
+  lactationWeek  Int      @default(1)
+  childrenCount  Int      @default(0)
+  baseEnergy     Int
+  adjustedEnergy Int
+  createdAt      DateTime @default(now())
+  pet            Pet?     @relation(fields: [petId], references: [id], onDelete: SetNull)
+  module         Module   @relation(fields: [moduleId], references: [id])
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([petId])
+  @@index([userId, createdAt])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pets      Pet[]
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, name])
+}
+
+model PetMeasurement {
+  id         String   @id @default(cuid())
+  petId      String
+  measuredAt DateTime @default(now())
+  weight     Float
+  bcs        Int?
+  note       String?
+  pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId, measuredAt])
+}
+
+model ProductGroup {
+  id       String         @id @default(cuid())
+  name     String
+  parentId String?
+  parent   ProductGroup?  @relation("ProductGroupTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children ProductGroup[] @relation("ProductGroupTree")
+  products Product[]
+  userId   String
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Nutrient {
+  id       String            @id @default(cuid())
+  code     String
+  name     String
+  category String
+  unit     String
+  values   ProductNutrient[]
+  userId   String
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, code])
+  @@index([userId, category, name])
+}
+
+model Product {
+  id           String            @id @default(cuid())
+  name         String
+  kind         ProductKind       @default(PRODUCT)
+  groupId      String?
+  baseQuantity Float             @default(100)
+  unit         String            @default("г")
+  calories     Float             @default(0)
+  protein      Float             @default(0)
+  fat          Float             @default(0)
+  carbs        Float             @default(0)
+  archived     Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  group        ProductGroup?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  nutrients    ProductNutrient[]
+  measures     ProductMeasure[]
+  rationItems  RationItem[]
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, groupId, name])
+}
+
+model ProductNutrient {
+  productId  String
+  nutrientId String
+  amount     Float?
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  nutrient   Nutrient @relation(fields: [nutrientId], references: [id], onDelete: Cascade)
+
+  @@id([productId, nutrientId])
+}
+
+model ProductMeasure {
+  id          String       @id @default(cuid())
+  productId   String
+  name        String
+  grams       Float
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rationItems RationItem[]
+
+  @@index([productId])
+}
+
+model Ration {
+  id           String       @id @default(cuid())
+  name         String
+  petId        String?
+  mode         RationMode   @default(DAILY)
+  targetEnergy Float        @default(0)
+  note         String?
+  sharedToken  String?      @unique
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  pet          Pet?         @relation(fields: [petId], references: [id], onDelete: SetNull)
+  items        RationItem[]
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, petId, updatedAt])
+}
+
+model RationItem {
+  id        String          @id @default(cuid())
+  rationId  String
+  productId String
+  measureId String?
+  quantity  Float           @default(1)
+  grams     Float
+  day       Int             @default(1)
+  enabled   Boolean         @default(true)
+  ration    Ration          @relation(fields: [rationId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  measure   ProductMeasure? @relation(fields: [measureId], references: [id], onDelete: SetNull)
+
+  @@index([rationId, day])
+  @@index([productId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  number      String
+  description String
+  amount      Float
+  status      InvoiceStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, number])
+  @@index([userId, createdAt])
+}
+
+model TablePreference {
+  userId    String
+  tableName String
+  config    Json
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, tableName])
+}

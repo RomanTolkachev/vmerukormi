@@ -1,0 +1,13 @@
+import { GLOSSARY, REFERENCES } from "@/entities/reference/model/references";
+import { ScrollablePanel } from "@/shared/ui/scrollable-panel/scrollable-panel";
+import { ui } from "@/shared/ui/styles/ui";
+
+export function InfoPage() {
+  return <ScrollablePanel>
+    <div className={ui("infoStack")}>
+      <section className={ui("card")}><div className={ui("cardHead")}><div><h2>Источники и стандарты</h2><div className={ui("meta")}>Прямые ссылки на документы, с которыми сверена модель</div></div><span className={ui("species")}>4 источника</span></div><div className={ui("cardBody")}><div className={ui("referenceGrid")}>{REFERENCES.map((source)=><a className={ui("referenceCard")} href={source.url} target="_blank" rel="noreferrer" key={source.url}><div className={ui("referenceTop")}><span className={ui("sourceKind")}>{source.kind}</span><span className={ui("externalIcon")} aria-hidden="true">↗</span></div><h3>{source.title}</h3><div className={ui("referenceOrg")}>{source.organization}</div><p>{source.relevance}</p><div className={ui("referenceDetails")}>{source.details}</div></a>)}</div><div className={ui("notice")}><b>Как использованы источники.</b> Структура уравнений совпадает с опубликованными NRC/FEDIAF подходами, а конкретные результаты текущих модулей дополнительно сверены с исходным API на синтетических данных. Расчёт — стартовая оценка, а не ветеринарное назначение.</div></div></section>
+      <section className={ui("card")}><div className={ui("cardHead")}><div><h2>Словарь обозначений</h2><div className={ui("meta")}>Все сокращения и символы из калькулятора и формул</div></div></div><div className={ui("cardBody")}><div className={ui("glossaryGrid")}>{GLOSSARY.map(([term, expansion, meaning])=><article className={ui("glossaryItem")} key={term}><div className={ui("glossaryTerm")}>{term}</div><div><div className={ui("glossaryExpansion")}>{expansion}</div><p>{meaning}</p></div></article>)}</div></div></section>
+      <section className={ui("card")}><div className={ui("cardHead")}><h2>Как читать формулы</h2></div><div className={ui("cardBody")}><div className={ui("readingGrid")}><div><span className={ui("stepNumber")}>1</span><b>Выберите физиологический модуль</b><p>Взрослое животное, рост, беременность, лактация или специальный режим.</p></div><div><span className={ui("stepNumber")}>2</span><b>Проверьте используемую массу</b><p>Для большинства взрослых модулей применяется IW; для роста формула использует и AW, и IW.</p></div><div><span className={ui("stepNumber")}>3</span><b>Скорректируйте по наблюдениям</b><p>Следите за динамикой массы и BCS. Поле «Поправка ОЭ» позволяет менять стартовую оценку без изменения формулы.</p></div></div></div></section>
+    </div>
+  </ScrollablePanel>;
+}
