@@ -300,7 +300,7 @@ export function RationEditor({
           <span>Энергия в сутки</span>
           <strong>{formatNumber(totals.calories, 0)} <small>ккал</small></strong>
           <div className={ui("energyProgress")}><i style={{ width: `${Math.min(energyPercent, 100)}%` }} /></div>
-          <small>{formatNumber(energyPercent, 0)}% от цели · {targetStatusLabel(energyComparison, ration.tolerancePercent)}</small>
+          <small>{ration.targetEnergy ? `цель ${formatNumber(ration.targetEnergy, 0)} ккал · ${formatNumber(energyPercent, 0)}% от цели` : "Целевая норма не задана"} · {targetStatusLabel(energyComparison, ration.tolerancePercent)}</small>
         </div>
         <div className={ui("rationMetric")}><span>Вес</span><strong>{formatNumber(totals.grams)} г</strong><small>{ration.mode === "WEEKLY" ? `${formatNumber(totals.totalGrams)} г за неделю` : "в сутки"}</small></div>
         <button type="button" className={ui("rationMetric", proteinComparison === "low" && "rationMetricAction", targetStatusClass(proteinComparison))} onClick={() => proteinComparison === "low" && focusProductPicker({ kind: "macro", code: "protein", name: "Белок", unit: "г" })}><span>Белок</span><strong>{formatNumber(totals.protein)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.protein)} г · ${targetStatusLabel(proteinComparison, ration.tolerancePercent)}` : "в сутки"}</small></button>
