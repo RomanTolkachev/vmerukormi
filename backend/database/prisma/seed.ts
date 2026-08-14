@@ -219,6 +219,7 @@ const productTagDefinitions = [
   { slug: "fiber", name: "Клетчатка" },
   { slug: "calcium", name: "Кальций" },
   { slug: "omega-3", name: "Омега-3" },
+  { slug: "vitamins", name: "Витамины" },
 ] as const;
 
 const customers = [

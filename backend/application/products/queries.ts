@@ -16,6 +16,7 @@ export async function getProductEditorData(id: string) {
           include: { nutrient: true },
           orderBy: { nutrient: { name: "asc" } },
         },
+        measures: { orderBy: { name: "asc" } },
         tags: { include: { tag: true } },
       },
     }),
@@ -50,6 +51,7 @@ export async function getProductEditorData(id: string) {
       carbs: product.carbs,
       archived: product.archived,
       tagIds: product.tags.map((value) => value.tagId),
+      measures: product.measures,
       nutrients: product.nutrients.map((value) => ({
         nutrientId: value.nutrientId,
         amount: value.amount,

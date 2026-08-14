@@ -37,8 +37,10 @@ function scoreProduct(product: RationProduct, focus: ProductFocus | null) {
   return amount / product.calories * 100;
 }
 
-function formatNumber(value: number, digits = 1) {
-  return value.toLocaleString("ru-RU", { maximumFractionDigits: digits });
+function formatNumber(value: number, digits?: number) {
+  const absolute = Math.abs(value);
+  const maximumFractionDigits = digits ?? (absolute === 0 || absolute >= 10 ? 1 : absolute >= 1 ? 2 : absolute >= 0.01 ? 4 : 6);
+  return value.toLocaleString("ru-RU", { maximumFractionDigits });
 }
 
 function itemValues(item: RationItem) {
@@ -92,6 +94,7 @@ export function RationEditor({
   }, [productFocus, productSearch, products, selectedTagIds]);
   const effectiveProductId = availableProducts.some((product) => product.id === productId) ? productId : availableProducts[0]?.id ?? "";
   const selectedProduct = products.find((product) => product.id === effectiveProductId);
+  const selectedMeasure = selectedProduct?.measures.find((measure) => measure.id === measureId);
   const availablePets = useMemo(
     () => pets.filter((pet) => customerId ? pet.customerId === customerId : pet.customerId === null),
     [customerId, pets],
@@ -331,7 +334,7 @@ export function RationEditor({
                             </td>
                             {ration.mode === "WEEKLY" && <td><select className={ui("input", "compactInput")} aria-label={`День для ${item.product.name}`} value={item.day} onChange={(event) => void patchItem(item.id, { day: Number(event.target.value) })}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</select></td>}
                             <td><select className={ui("input", "compactInput")} aria-label={`Мера для ${item.product.name}`} value={item.measureId ?? ""} onChange={(event) => void patchItem(item.id, { measureId: event.target.value || null })}><option value="">Граммы</option>{item.product.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name}</option>)}</select></td>
-                            <td><input className={ui("input", "compactInput", "quantityInput")} aria-label={`Количество ${item.product.name}`} type="number" min="0.01" step="0.01" defaultValue={item.quantity} onBlur={(event) => void patchItem(item.id, { quantity: Number(event.target.value) })} /></td>
+                            <td><input className={ui("input", "compactInput", "quantityInput")} aria-label={`Количество ${item.product.name}`} type="number" min="0.000001" step="any" defaultValue={item.quantity} onBlur={(event) => void patchItem(item.id, { quantity: Number(event.target.value) })} /></td>
                             <td>{formatNumber(item.grams)} г</td>
                             <td><b>{formatNumber(value.calories, 0)}</b> ккал</td>
                             <td><button className={ui("danger")} type="button" onClick={() => void removeItem(item.id)}>Удалить</button></td>
@@ -348,11 +351,11 @@ export function RationEditor({
           <section className={ui("card")}>
             <div className={ui("cardHead")}><div><h2>Нутриенты</h2><div className={ui("meta")}>Среднее значение в сутки по включённым продуктам</div></div></div>
             <div className={ui("cardBody")}>
-              {ration.calculation ? (
+                  {ration.calculation ? (
                 <div className={ui("nutrientSummaryGrid")}>
-                  {nutrientComparisons.map((nutrient) => { const status = targetStatus(nutrient.actualAmount, nutrient.targetAmount, ration.tolerancePercent); return <button type="button" className={ui("nutrientSummaryCard", status === "low" && "nutrientSummaryAction", targetStatusClass(status))} key={nutrient.nutrientId} onClick={() => status === "low" && focusProductPicker({ kind: "nutrient", nutrientId: nutrient.nutrientId, name: nutrient.nutrient.name, unit: nutrient.nutrient.unit })}><span>{nutrient.nutrient.code}</span><b>{formatNumber(nutrient.actualAmount, 2)} / {formatNumber(nutrient.targetAmount, 2)} {nutrient.nutrient.unit}</b><small>{nutrient.nutrient.name} · {targetStatusLabel(status, ration.tolerancePercent)}{status === "low" ? " · подобрать" : ""}</small></button>; })}
+                  {nutrientComparisons.map((nutrient) => { const status = targetStatus(nutrient.actualAmount, nutrient.targetAmount, ration.tolerancePercent); return <button type="button" className={ui("nutrientSummaryCard", status === "low" && "nutrientSummaryAction", targetStatusClass(status))} key={nutrient.nutrientId} onClick={() => status === "low" && focusProductPicker({ kind: "nutrient", nutrientId: nutrient.nutrientId, name: nutrient.nutrient.name, unit: nutrient.nutrient.unit })}><span>{nutrient.nutrient.code}</span><b>{formatNumber(nutrient.actualAmount)} / {formatNumber(nutrient.targetAmount)} {nutrient.nutrient.unit}</b><small>{nutrient.nutrient.name} · {targetStatusLabel(status, ration.tolerancePercent)}{status === "low" ? " · подобрать" : ""}</small></button>; })}
                 </div>
-              ) : nutrientTotals.length ? <div className={ui("nutrientSummaryGrid")}>{nutrientTotals.map((nutrient) => <div key={`${nutrient.category}-${nutrient.code}`}><span>{nutrient.code}</span><b>{formatNumber(nutrient.amount, 2)} {nutrient.unit}</b><small>{nutrient.name}</small></div>)}</div> : <div className={ui("empty")}>Выберите расчёт нормы и добавьте продукты</div>}
+              ) : nutrientTotals.length ? <div className={ui("nutrientSummaryGrid")}>{nutrientTotals.map((nutrient) => <div key={`${nutrient.category}-${nutrient.code}`}><span>{nutrient.code}</span><b>{formatNumber(nutrient.amount)} {nutrient.unit}</b><small>{nutrient.name}</small></div>)}</div> : <div className={ui("empty")}>Выберите расчёт нормы и добавьте продукты</div>}
             </div>
           </section>
         </div>
@@ -368,7 +371,7 @@ export function RationEditor({
                   {!!productTags.length && <div className={ui("field")}><span>Теги</span><div className={ui("productTagList")}>{productTags.map((tag) => <button type="button" className={ui("tagChip", selectedTagIds.includes(tag.id) && "tagChipActive")} aria-pressed={selectedTagIds.includes(tag.id)} key={tag.id} onClick={() => setSelectedTagIds((current) => current.includes(tag.id) ? current.filter((id) => id !== tag.id) : [...current, tag.id])}>{tag.name}</button>)}</div>{!!selectedTagIds.length && <button className={ui("tagReset")} type="button" onClick={() => setSelectedTagIds([])}>Сбросить теги</button>}</div>}
                   <label className={ui("field")}><span>Продукт ({availableProducts.length})</span><select className={ui("input")} value={effectiveProductId} onChange={(event) => { setProductId(event.target.value); setMeasureId(""); }} required disabled={!availableProducts.length}>{availableProducts.length ? availableProducts.map((product) => <option value={product.id} key={product.id}>{product.name}{productFocus ? ` · ${formatNumber(scoreProduct(product, productFocus), 2)} ${productFocus.unit}/100 ккал` : ""}</option>) : <option value="">Ничего не найдено</option>}</select></label>
                   <label className={ui("field")}><span>Мера</span><select className={ui("input")} value={measureId} onChange={(event) => setMeasureId(event.target.value)}><option value="">Граммы</option>{selectedProduct?.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name} ({measure.grams} г)</option>)}</select></label>
-                  <label className={ui("field")}><span>Количество</span><input className={ui("input")} type="number" min="0.01" step="0.01" value={quantity} onChange={(event) => setQuantity(event.target.value)} required /></label>
+                  <label className={ui("field")}><span>Количество{selectedMeasure ? `, ${selectedMeasure.name}` : ", г"}</span><input className={ui("input")} type="number" min="0.000001" step="any" value={quantity} onChange={(event) => setQuantity(event.target.value)} required />{selectedMeasure && <div className={ui("fieldHint")}>{formatNumber(Number(quantity) * selectedMeasure.grams)} г продукта</div>}</label>
                   {ration.mode === "WEEKLY" && <label className={ui("field")}><span>День</span><select className={ui("input")} value={day} onChange={(event) => setDay(event.target.value)}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</select></label>}
                   <button className={ui("primary")} disabled={pending}>Добавить в рацион</button>
                 </div> : <div className={ui("empty")}>Сначала создайте продукт в разделе «Продукты»<div className={ui("actions", "centeredActions")}><Link className={ui("secondary", "linkButton")} href="/products">Перейти к продуктам</Link></div></div>}

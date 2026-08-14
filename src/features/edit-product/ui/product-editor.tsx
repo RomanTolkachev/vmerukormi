@@ -3,10 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import {
+  addProductMeasure,
   addProductNutrient,
   createProductTag,
+  deleteProductMeasure,
   deleteProductNutrient,
   updateProduct,
+  updateProductMeasure,
   updateProductNutrient,
 } from "../api/product-editor-api";
 import type {
@@ -14,9 +17,24 @@ import type {
   NutrientOption,
   ProductGroupOption,
   ProductKind,
+  ProductMeasureValue,
   ProductTagOption,
 } from "../model/types";
 import { ui } from "@/shared/ui/styles/ui";
+
+const measurePresets = [
+  { name: "мг", grams: 0.001 },
+  { name: "таблетка", grams: null },
+  { name: "капсула", grams: null },
+  { name: "капля", grams: null },
+  { name: "мл", grams: null },
+  { name: "мерная ложка", grams: null },
+  { name: "саше", grams: null },
+] as const;
+
+function formatGrams(value: number) {
+  return value.toLocaleString("ru-RU", { maximumFractionDigits: 6 });
+}
 
 export function ProductEditor({
   initialProduct,
@@ -31,6 +49,7 @@ export function ProductEditor({
 }) {
   const [product, setProduct] = useState(initialProduct);
   const [values, setValues] = useState(initialProduct.nutrients);
+  const [measures, setMeasures] = useState(initialProduct.measures);
   const [tags, setTags] = useState(initialTags);
   const [newTag, setNewTag] = useState("");
   const available = useMemo(
@@ -39,6 +58,8 @@ export function ProductEditor({
   );
   const [nutrientId, setNutrientId] = useState("");
   const [amount, setAmount] = useState("0");
+  const [measureName, setMeasureName] = useState("мг");
+  const [measureGrams, setMeasureGrams] = useState("0.001");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -127,6 +148,53 @@ export function ProductEditor({
     }
   }
 
+  function selectMeasurePreset(name: string, grams: number | null) {
+    setMeasureName(name);
+    setMeasureGrams(grams === null ? "" : String(grams));
+  }
+
+  async function addMeasure(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const grams = Number(measureGrams);
+    if (!measureName.trim() || !Number.isFinite(grams) || grams <= 0) return;
+    setPending(true);
+    setError("");
+    try {
+      const measure = await addProductMeasure(product.id, measureName, grams);
+      setMeasures((current) => [...current, measure].sort((a, b) => a.name.localeCompare(b.name, "ru")));
+      setMeasureName("");
+      setMeasureGrams("");
+      setMessage("Мера добавлена");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось добавить меру");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function saveMeasure(measure: ProductMeasureValue) {
+    if (!measure.name.trim() || !Number.isFinite(measure.grams) || measure.grams <= 0) return;
+    setError("");
+    try {
+      const updated = await updateProductMeasure(product.id, measure.id, measure.name, measure.grams);
+      setMeasures((current) => current.map((value) => value.id === measure.id ? updated : value));
+      setMessage("Мера обновлена");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось обновить меру");
+    }
+  }
+
+  async function removeMeasure(measureId: string) {
+    setError("");
+    try {
+      await deleteProductMeasure(product.id, measureId);
+      setMeasures((current) => current.filter((value) => value.id !== measureId));
+      setMessage("Мера удалена");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось удалить меру");
+    }
+  }
+
   return <div className={ui("pageLayout", "productEditorPage")}>
     <header className={ui("productEditorHeader")}>
       <div>
@@ -171,6 +239,27 @@ export function ProductEditor({
       </section>
 
       <div className={ui("productNutrientColumn")}>
+        <section className={ui("card")}>
+          <form onSubmit={addMeasure}>
+            <div className={ui("cardHead")}><div><h2>Меры и дозирование</h2><div className={ui("meta")}>Для таблеток, капель и малых доз</div></div></div>
+            <div className={ui("cardBody", "productMeasureBody")}>
+              <div className={ui("productTagList")}>{measurePresets.map((preset) => <button className={ui("tagChip", measureName === preset.name && "tagChipActive")} type="button" key={preset.name} onClick={() => selectMeasurePreset(preset.name, preset.grams)}>{preset.name}</button>)}</div>
+              <div className={ui("measureCreateGrid")}>
+                <label className={ui("field")}><span>Название меры</span><input className={ui("input")} value={measureName} onChange={(event) => setMeasureName(event.target.value)} placeholder="Например, таблетка" required /></label>
+                <label className={ui("field")}><span>Вес одной меры, г</span><input className={ui("input")} type="number" min="0.000001" step="any" value={measureGrams} onChange={(event) => setMeasureGrams(event.target.value)} placeholder="Например, 0.5" required /></label>
+                <button className={ui("secondary")} disabled={pending}>Добавить меру</button>
+              </div>
+              <div className={ui("fieldHint")}>Для миллиграмма уже подставлено 0,001 г. Вес таблетки, капли, капсулы или ложки зависит от конкретного препарата — возьмите его с упаковки или измерьте.</div>
+              {measures.length ? <div className={ui("measureValueList")}>{measures.map((measure) => <div className={ui("measureValueRow")} key={measure.id}>
+                <input className={ui("input")} value={measure.name} aria-label="Название меры" onChange={(event) => setMeasures((current) => current.map((value) => value.id === measure.id ? { ...value, name: event.target.value } : value))} onBlur={() => void saveMeasure(measure)} />
+                <label><span>1 мера =</span><input className={ui("input")} type="number" min="0.000001" step="any" value={measure.grams} aria-label={`Вес меры ${measure.name} в граммах`} onChange={(event) => setMeasures((current) => current.map((value) => value.id === measure.id ? { ...value, grams: Number(event.target.value) } : value))} onBlur={() => void saveMeasure(measure)} /><span>г</span></label>
+                <small>{formatGrams(measure.grams)} г</small>
+                <button className={ui("danger")} type="button" onClick={() => void removeMeasure(measure.id)}>Удалить</button>
+              </div>)}</div> : <div className={ui("empty")}>Дополнительных мер пока нет</div>}
+            </div>
+          </form>
+        </section>
+
         <section className={ui("card")}>
           <form onSubmit={addNutrient}>
             <div className={ui("cardHead")}><h2>Добавить нутриент</h2></div>

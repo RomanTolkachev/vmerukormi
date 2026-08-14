@@ -21,8 +21,14 @@ const nutrientSchema = z.object({
   amount: z.coerce.number().min(0).max(1_000_000_000),
 });
 
+const measureSchema = z.object({
+  name: z.string().trim().min(1).max(40),
+  grams: z.coerce.number().positive().max(100000),
+});
+
 type ProductContext = { params: Promise<{ id: string }> };
 type NutrientContext = { params: Promise<{ id: string; nutrientId: string }> };
+type MeasureContext = { params: Promise<{ id: string; measureId: string }> };
 
 async function ownedProduct(id: string, userId: string) {
   return prisma.product.findFirst({ where: { id, userId }, select: { id: true } });
@@ -116,6 +122,70 @@ export async function DELETE_NUTRIENT(request: Request, { params }: NutrientCont
       where: { productId: id, nutrientId, nutrient: { userId: user.id } },
     });
     if (!deleted.count) return Response.json({ error: "Нутриент не найден в продукте" }, { status: 404 });
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    return authErrorResponse(error);
+  }
+}
+
+export async function POST_MEASURE(request: Request, { params }: ProductContext) {
+  try {
+    const user = await requireUser(request, { csrf: true });
+    const { id } = await params;
+    const parsed = measureSchema.safeParse(await request.json());
+    if (!parsed.success) return Response.json({ error: "Проверьте название и вес меры" }, { status: 400 });
+    if (!(await ownedProduct(id, user.id))) return Response.json({ error: "Продукт не найден" }, { status: 404 });
+    const duplicate = await prisma.productMeasure.findFirst({
+      where: { productId: id, name: { equals: parsed.data.name, mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (duplicate) return Response.json({ error: "Такая мера уже добавлена" }, { status: 409 });
+    const measure = await prisma.productMeasure.create({ data: { productId: id, ...parsed.data } });
+    return Response.json(measure, { status: 201 });
+  } catch (error) {
+    return authErrorResponse(error);
+  }
+}
+
+export async function PATCH_MEASURE(request: Request, { params }: MeasureContext) {
+  try {
+    const user = await requireUser(request, { csrf: true });
+    const { id, measureId } = await params;
+    const parsed = measureSchema.safeParse(await request.json());
+    if (!parsed.success) return Response.json({ error: "Проверьте название и вес меры" }, { status: 400 });
+    const existing = await prisma.productMeasure.findFirst({
+      where: { id: measureId, productId: id, product: { userId: user.id } },
+      select: { id: true },
+    });
+    if (!existing) return Response.json({ error: "Мера не найдена" }, { status: 404 });
+    const duplicate = await prisma.productMeasure.findFirst({
+      where: { productId: id, id: { not: measureId }, name: { equals: parsed.data.name, mode: "insensitive" } },
+      select: { id: true },
+    });
+    if (duplicate) return Response.json({ error: "Такая мера уже добавлена" }, { status: 409 });
+    const measure = await prisma.$transaction(async (tx) => {
+      const updated = await tx.productMeasure.update({ where: { id: measureId }, data: parsed.data });
+      const rationItems = await tx.rationItem.findMany({ where: { measureId }, select: { id: true, quantity: true } });
+      await Promise.all(rationItems.map((item) => tx.rationItem.update({
+        where: { id: item.id },
+        data: { grams: item.quantity * updated.grams },
+      })));
+      return updated;
+    });
+    return Response.json(measure);
+  } catch (error) {
+    return authErrorResponse(error);
+  }
+}
+
+export async function DELETE_MEASURE(request: Request, { params }: MeasureContext) {
+  try {
+    const user = await requireUser(request, { csrf: true });
+    const { id, measureId } = await params;
+    const deleted = await prisma.productMeasure.deleteMany({
+      where: { id: measureId, productId: id, product: { userId: user.id } },
+    });
+    if (!deleted.count) return Response.json({ error: "Мера не найдена" }, { status: 404 });
     return new Response(null, { status: 204 });
   } catch (error) {
     return authErrorResponse(error);

@@ -6,6 +6,12 @@ export type ProductNutrientValue = {
   nutrient: { id: string; code: string; name: string; category: string; unit: string };
 };
 
+export type ProductMeasureValue = {
+  id: string;
+  name: string;
+  grams: number;
+};
+
 export type EditableProduct = {
   id: string;
   name: string;
@@ -19,6 +25,7 @@ export type EditableProduct = {
   carbs: number;
   archived: boolean;
   tagIds: string[];
+  measures: ProductMeasureValue[];
   nutrients: ProductNutrientValue[];
 };
 
