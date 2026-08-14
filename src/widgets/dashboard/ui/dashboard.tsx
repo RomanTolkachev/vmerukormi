@@ -9,6 +9,7 @@ import { getBreeds } from "@/entities/breed/api/get-breeds";
 import type { Breed } from "@/entities/breed/model/types";
 import { getCalculations } from "@/entities/calculation/api/get-calculations";
 import type { CalculationHistoryItem, EnergyResult } from "@/entities/calculation/model/types";
+import { macroEnergy } from "@/entities/calculation/lib/macro-energy";
 import type { CalculationModule } from "@/entities/module/model/types";
 import { getCustomers } from "@/entities/customer/api/get-customers";
 import type { CustomerOption } from "@/entities/customer/model/types";
@@ -23,10 +24,17 @@ import { NumberField } from "@/shared/ui/number-field";
 import { InfoPage } from "@/widgets/info/ui/info-page";
 
 type Form = { petId: string; moduleId: string; breedId: string; sex: Sex | ""; actualWeight: number; idealWeight: number; bcs: number; energyFactor: number; lactationWeek: number; childrenCount: number };
-export type DashboardTab = "calc" | "pets" | "history" | "modules" | "info";
+export type DashboardTab = "calc" | "pets" | "history" | "info";
 
 const calculationDefaults: Form = { petId: "", moduleId: "cat-adult", breedId: "", sex: "", actualWeight: 5, idealWeight: 5, bcs: 5, energyFactor: 1, lactationWeek: 1, childrenCount: 0 };
 const petDefaults: PetDraft = { name: "", species: "CAT", breedId: "", customerId: "", sex: "", actualWeight: 5, idealWeight: 5, bcs: 5 };
+
+function defaultModuleForSpecies(modules: CalculationModule[], species: Pet["species"]) {
+  const adultId = species === "CAT" ? "cat-adult" : "dog-adult";
+  return modules.find((item) => item.id === adultId)
+    ?? modules.find((item) => item.species === species && item.name.toLocaleLowerCase("ru").includes("взросл"))
+    ?? modules.find((item) => item.species === species);
+}
 
 export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, selectedCustomerId }: { initialModules: CalculationModule[]; initialTab?: DashboardTab; selectedPetId?: string; selectedCustomerId?: string }) {
   const router = useRouter();
@@ -35,6 +43,7 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
   const [breeds, setBreeds] = useState<Breed[]>([]);
   const [history, setHistory] = useState<CalculationHistoryItem[]>([]);
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
+  const [moduleRows] = useState(initialModules);
   const [result, setResult] = useState<EnergyResult | null>(null);
   const [error, setError] = useState("");
   const calculationForm = useForm<Form>({ defaultValues: calculationDefaults });
@@ -49,7 +58,7 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
   const petSex = useWatch({ control: petForm.control, name: "sex" });
   const petActual = useWatch({ control: petForm.control, name: "actualWeight" });
   const petIdeal = useWatch({ control: petForm.control, name: "idealWeight" });
-  const selectedModule = useMemo(() => initialModules.find((m) => m.id === moduleId)!, [moduleId, initialModules]);
+  const selectedModule = useMemo(() => moduleRows.find((m) => m.id === moduleId)!, [moduleId, moduleRows]);
   const isLactation = moduleId.includes("lactation");
   const calcBreeds = useMemo(() => breeds.filter((breed) => breed.species === selectedModule.species), [breeds, selectedModule.species]);
   const petBreeds = useMemo(() => breeds.filter((breed) => breed.species === petSpecies), [breeds, petSpecies]);
@@ -104,9 +113,9 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
     if (tab !== "calc" || !selectedPetId || calculationForm.getValues("petId") === selectedPetId) return;
     const pet = pets.find((item) => item.id === selectedPetId);
     if (!pet) return;
-    const compatible = initialModules.find((module) => module.species === pet.species);
+    const compatible = defaultModuleForSpecies(moduleRows, pet.species);
     calculationForm.reset({ ...calculationDefaults, petId: pet.id, breedId: pet.breedId ?? "", sex: pet.sex ?? "", actualWeight: pet.actualWeight, idealWeight: pet.idealWeight, bcs: pet.bcs, moduleId: compatible?.id ?? calculationDefaults.moduleId });
-  }, [calculationForm, initialModules, pets, selectedPetId, tab]);
+  }, [calculationForm, moduleRows, pets, selectedPetId, tab]);
 
   useEffect(() => {
     if (tab !== "pets" || !selectedCustomerId || petForm.getValues("customerId") === selectedCustomerId) return;
@@ -118,20 +127,52 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
       router.push(`/?petId=${encodeURIComponent(pet.id)}`);
       return;
     }
-    const compatible = initialModules.find((m) => m.species === pet.species);
+    const compatible = defaultModuleForSpecies(moduleRows, pet.species);
     calculationForm.reset({ ...calculationDefaults, petId: pet.id, breedId: pet.breedId ?? "", sex: pet.sex ?? "", actualWeight: pet.actualWeight, idealWeight: pet.idealWeight, bcs: pet.bcs, moduleId: compatible?.id ?? moduleId });
     setResult(null);
+  }
+
+  function calculationInput(form: Form) {
+    return { moduleId: form.moduleId, actualWeight: form.actualWeight, idealWeight: form.idealWeight, bcs: form.bcs, energyFactor: form.energyFactor, lactationWeek: form.lactationWeek, childrenCount: form.childrenCount, petId: form.petId || null, breedId: form.breedId || null, sex: form.sex || null };
   }
 
   const calculate = calculationForm.handleSubmit(async (form) => {
     setError("");
     try {
-      setResult(await calculateEnergy({ moduleId: form.moduleId, actualWeight: form.actualWeight, idealWeight: form.idealWeight, bcs: form.bcs, energyFactor: form.energyFactor, lactationWeek: form.lactationWeek, childrenCount: form.childrenCount, petId: form.petId || null }));
-      await loadData();
+      setResult(await calculateEnergy(calculationInput(form), false));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Не удалось выполнить расчёт");
     }
   });
+
+  async function saveCalculation() {
+    if (!result) return;
+    setError("");
+    try {
+      const form = calculationForm.getValues();
+      await calculateEnergy({
+        ...calculationInput(form),
+        adjustedEnergy: result.adjustedEnergy,
+        protein: result.protein,
+        fat: result.fat,
+        carbs: result.carbs,
+        nutrients: result.standardNutrients
+          .filter((item) => item.targetAmount !== null)
+          .map((item) => ({ nutrientId: item.nutrientId, targetAmount: item.targetAmount as number })),
+      }, true);
+      await loadData();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Не удалось сохранить расчёт");
+    }
+  }
+
+  function updateMacro(field: "protein" | "fat" | "carbs", value: number) {
+    setResult((current) => {
+      if (!current) return current;
+      const macros = { protein: current.protein, fat: current.fat, carbs: current.carbs, [field]: value };
+      return { ...current, ...macros, adjustedEnergy: macroEnergy(macros.protein, macros.fat, macros.carbs) };
+    });
+  }
 
   const createPet = petForm.handleSubmit(async (draft) => {
     setError("");
@@ -158,31 +199,29 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
   return <div className={ui("pageLayout", "dashboardPage")}>
       <section className={ui("hero")}><div><h1>Питание без чёрного ящика</h1><p>Рассчитывайте суточную обменную энергию кошек и собак по восстановленным формулам. Все коэффициенты доступны в справочнике.</p></div><span className={ui("badge")}>Защищённая сессия</span></section>
 
-      {tab === "calc" && <div className={ui("grid")}>
+      {tab === "calc" && <div className={ui("grid", "calculationGrid")}>
         <section className={ui("card")}><form onSubmit={calculate}><div className={ui("cardHead")}><h2>Параметры расчёта</h2><span className={ui("meta")}>ОЭ, ккал/сут</span></div><div className={ui("cardBody")}>
           <div className={ui("formGrid")}>
             <div className={ui("field", "full")}><label>Питомец</label><select className={ui("input")} {...calculationForm.register("petId")} onChange={(e) => { const pet = pets.find(p=>p.id===e.target.value); if (pet) choosePet(pet); else calculationForm.setValue("petId", ""); }}><option value="">Без сохранённой карточки</option>{pets.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
-            <div className={ui("field", "full")}><label>Модуль</label><select className={ui("input", "highlight")} {...calculationForm.register("moduleId")}>{initialModules.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></div>
+            <div className={ui("field", "full")}><label>Модуль</label><select className={ui("input", "highlight")} {...calculationForm.register("moduleId")}>{moduleRows.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></div>
             <div className={ui("field")}><label>Порода</label><select className={ui("input")} {...calculationForm.register("breedId")}><option value="">Не выбрана</option>{calcBreeds.map(breed=><option key={breed.id} value={breed.id}>{breed.nameRu}</option>)}</select></div>
             <div className={ui("field")}><label>Пол</label><select className={ui("input")} {...calculationForm.register("sex")}><option value="">Не выбран</option><option value="MALE">Самец</option><option value="FEMALE">Самка</option></select></div>
             <NumberField label="Фактическая масса, кг" registration={calculationForm.register("actualWeight", { valueAsNumber: true, min: 0.1, max: 150 })}/>
             <NumberField label="Идеальная / взрослая масса, кг" registration={calculationForm.register("idealWeight", { valueAsNumber: true, min: 0.1, max: 150 })} hint={calcBreedId && calcSex ? "Предзаполнено по породе и полу; значение можно изменить" : undefined}/>
             <NumberField label="BCS, 1–9" registration={calculationForm.register("bcs", { valueAsNumber: true })} min={1} max={9} step={1} readOnly hint="Автоматически рассчитан из фактической и идеальной массы"/>
-            <NumberField label="Поправка ОЭ" registration={calculationForm.register("energyFactor", { valueAsNumber: true, min: 0.1, max: 5 })} min={0.1} max={5} step={0.05}/>
+            <NumberField label="Индивидуальная потребность, доля ОЭ" registration={calculationForm.register("energyFactor", { valueAsNumber: true, min: 0.1, max: 5 })} min={0.1} max={5} step={0.05} hint="1,2 = 120% нормы, то есть на 20% больше; 0,8 = на 20% меньше"/>
             {isLactation && <><NumberField label="Неделя лактации" registration={calculationForm.register("lactationWeek", { valueAsNumber: true })} min={1} max={12} step={1}/><NumberField label="Количество детёнышей" registration={calculationForm.register("childrenCount", { valueAsNumber: true })} min={0} max={20} step={1}/></>}
           </div>
           <div className={ui("formulaBox")}><strong>Формула модуля</strong><code>{selectedModule.formula}</code></div>
-          <div className={ui("actions")}><button className={ui("primary")} type="submit">Рассчитать и сохранить</button><button className={ui("secondary")} type="button" onClick={()=>setResult(null)}>Сбросить результат</button></div>
+          <div className={ui("actions")}><button className={ui("primary")} type="submit">Рассчитать стандартные нормы</button><button className={ui("secondary")} type="button" onClick={()=>setResult(null)}>Сбросить результат</button></div>
           {error && <div className={ui("error")}>{error}</div>}
         </div></form></section>
-        <aside><div className={ui("card")}>{result ? <div className={ui("result")}><div className={ui("resultLabel")}>Суточная обменная энергия</div><div className={ui("resultValue")}>{result.adjustedEnergy}</div><div className={ui("resultUnit")}>ккал в сутки</div><div className={ui("resultSub")}><span>Базовый расчёт</span><b>{result.baseEnergy} ккал</b></div></div> : <div className={ui("result")}><div className={ui("resultLabel")}>Результат</div><div className={ui("resultValue")}>—</div><div className={ui("resultUnit")}>заполните параметры и выполните расчёт</div></div>}</div><div className={ui("tip")}><b>Как читать результат:</b> это стартовая оценка. Контролируйте динамику массы и BCS и корректируйте поле «Поправка ОЭ».</div></aside>
+        <aside className={ui("calculationTargetEditor")}>{result ? <><div className={ui("card")}><div className={ui("cardBody")}><div className={ui("resultLabel")}>Суточная норма</div><label className={ui("field")}><span>Калорийность, ккал/сут</span><input className={ui("input", "highlight")} type="number" min="1" value={result.adjustedEnergy} onChange={(event)=>setResult({ ...result, adjustedEnergy: Number(event.target.value) })}/></label><div className={ui("formGrid")}><label className={ui("field")}><span>Белок, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={result.protein} onChange={(event)=>updateMacro("protein", Number(event.target.value))}/></label><label className={ui("field")}><span>Жир, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={result.fat} onChange={(event)=>updateMacro("fat", Number(event.target.value))}/></label><label className={ui("field", "full")}><span>Углеводы, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={result.carbs} onChange={(event)=>updateMacro("carbs", Number(event.target.value))}/></label></div><div className={ui("fieldHint")}>Изменение БЖУ пересчитывает калорийность по модифицированным коэффициентам Atwater. Ручное изменение калорийности не меняет БЖУ.</div><div className={ui("resultSub")}><span>Норма калорий</span><b>{result.baseEnergy} ккал</b></div></div></div><div className={ui("card", "calculationNutrientsCard")}><div className={ui("cardHead")}><div><h2>Нутриенты</h2><div className={ui("meta")}>{result.standardSource}</div></div></div><div className={ui("cardBody", "calculationNutrientsBody")}><div className={ui("nutrientTargetList")}>{result.standardNutrients.map((nutrient)=><label className={ui("nutrientTargetRow")} key={nutrient.nutrientId}><span><b>{nutrient.code}</b>{nutrient.name}</span><input className={ui("input")} type="number" min="0" step="any" placeholder="Не задано" value={nutrient.targetAmount ?? ""} onChange={(event)=>setResult({ ...result, standardNutrients: result.standardNutrients.map((item)=>item.nutrientId===nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) })}/><small>{nutrient.unit}/сут</small></label>)}</div><div className={ui("actions")}><button className={ui("primary")} type="button" onClick={()=>void saveCalculation()}>Сохранить расчёт</button></div></div></div></> : <><div className={ui("card")}><div className={ui("result")}><div className={ui("resultLabel")}>Результат</div><div className={ui("resultValue")}>—</div><div className={ui("resultUnit")}>заполните параметры и выполните расчёт</div></div></div><div className={ui("tip")}><b>Как читать результат:</b> это стартовая оценка. После расчёта врач сможет изменить калорийность, БЖУ и каждый нутриент перед сохранением.</div></>}</aside>
       </div>}
 
       {tab === "pets" && <div className={ui("grid")}><section className={ui("card")}><div className={ui("cardHead")}><h2>Карточки питомцев</h2><span className={ui("meta")}>{pets.length} всего</span></div><div className={ui("cardBody")}><div className={ui("list")}>{pets.length ? pets.map(p=><div className={ui("pet")} key={p.id}><div><div className={ui("petName")}>{p.species==='CAT'?'🐈':'🐕'} {p.name}</div><div className={ui("meta")}>{p.customer ? `Клиент: ${p.customer.name} · ` : "Без клиента · "}{p.breed?.nameRu ? `${p.breed.nameRu} · ` : ""}{p.sex === "MALE" ? "самец · " : p.sex === "FEMALE" ? "самка · " : ""}факт. {p.actualWeight} кг · идеал {p.idealWeight} кг · BCS {p.bcs}/9</div></div><div className={ui("actions", "petActions")}><select className={ui("input", "petCustomerSelect")} aria-label={`Клиент для ${p.name}`} value={p.customerId ?? ""} onChange={(event)=>void assignCustomer(p.id, event.target.value)}><option value="">Без клиента</option>{customers.map(customer=><option key={customer.id} value={customer.id}>{customer.name}</option>)}</select><button className={ui("secondary")} onClick={()=>choosePet(p)}>Рассчитать</button><button className={ui("danger")} onClick={()=>removePet(p.id)}>Удалить</button></div></div>) : <div className={ui("empty")}>Пока нет сохранённых питомцев</div>}</div></div></section><section className={ui("card")}><form onSubmit={createPet}><div className={ui("cardHead")}><h2>Новый питомец</h2></div><div className={ui("cardBody")}><div className={ui("formGrid")}><div className={ui("field", "full")}><label>Имя</label><input className={ui("input")} {...petForm.register("name", { required: true })}/></div><div className={ui("field", "full")}><label>Клиент</label><select className={ui("input")} {...petForm.register("customerId")}><option value="">Без клиента</option>{customers.map(customer=><option key={customer.id} value={customer.id}>{customer.name}</option>)}</select>{!customers.length && <div className={ui("fieldHint")}>Сначала добавьте клиента во вкладке «Клиенты» или сохраните питомца без привязки.</div>}</div><div className={ui("field", "full")}><label>Вид</label><select className={ui("input")} {...petForm.register("species")}><option value="CAT">Кошка</option><option value="DOG">Собака</option></select></div><div className={ui("field")}><label>Порода</label><select className={ui("input")} {...petForm.register("breedId")}><option value="">Не выбрана</option>{petBreeds.map(breed=><option key={breed.id} value={breed.id}>{breed.nameRu}</option>)}</select></div><div className={ui("field")}><label>Пол</label><select className={ui("input")} {...petForm.register("sex")}><option value="">Не выбран</option><option value="MALE">Самец</option><option value="FEMALE">Самка</option></select></div><NumberField label="Фактическая масса" registration={petForm.register("actualWeight", { valueAsNumber: true, min: 0.1, max: 150 })}/><NumberField label="Идеальная масса" registration={petForm.register("idealWeight", { valueAsNumber: true, min: 0.1, max: 150 })} hint={petBreedId && petSex ? "Предзаполнено по породе и полу" : undefined}/><NumberField label="BCS" registration={petForm.register("bcs", { valueAsNumber: true })} min={1} max={9} step={1} readOnly hint="Рассчитан автоматически"/></div><div className={ui("actions")}><button className={ui("primary")} type="submit">Сохранить карточку</button></div>{error&&<div className={ui("error")}>{error}</div>}</div></form></section></div>}
 
       {tab === "history" && <section className={ui("card")}><div className={ui("cardHead")}><h2>Последние расчёты</h2><span className={ui("meta")}>до 50 записей</span></div><div className={ui("cardBody")}><div className={ui("list")}>{history.length ? history.map(item=><div className={ui("historyItem")} key={item.id}><div><div className={ui("petName")}>{item.pet?.name ?? "Без карточки"}</div><div className={ui("meta")}>{item.module.name} · {new Date(item.createdAt).toLocaleString('ru-RU')}</div></div><div className={ui("historyEnergy")}>{item.adjustedEnergy}<div className={ui("meta")}>ккал/сут</div></div></div>) : <div className={ui("empty")}>История появится после первого расчёта</div>}</div></div></section>}
-
-      {tab === "modules" && <section className={ui("card")}><div className={ui("cardHead")}><h2>Справочник формул</h2><span className={ui("meta")}>{initialModules.length} модулей</span></div><div className={ui("cardBody")}><div className={ui("list")}>{initialModules.map(m=><div className={ui("moduleItem")} key={m.id}><div className={ui("moduleTop")}><b>{m.name}</b><span className={ui("species")}>{m.species==='CAT'?'Кошка':'Собака'}</span></div><div className={ui("moduleFormula")}>{m.formula}</div><div className={ui("meta")}>{m.description}</div></div>)}</div><div className={ui("notice")}>AW — фактическая масса, IW — идеальная или ожидаемая взрослая масса. Формулы воспроизведены по ответам исходного API на синтетических данных.</div></div></section>}
 
       {tab === "info" && <InfoPage />}
   </div>;

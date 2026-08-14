@@ -10,4 +10,16 @@ export type CalculationHistoryItem = {
 export type EnergyResult = {
   baseEnergy: number;
   adjustedEnergy: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+  standardSource: string;
+  standardNutrients: {
+    nutrientId: string;
+    code: string;
+    name: string;
+    category: string;
+    unit: string;
+    targetAmount: number | null;
+  }[];
 };

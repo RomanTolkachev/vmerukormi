@@ -4,8 +4,10 @@ import type { RationItem, RationMode } from "@/entities/ration/model/types";
 export type RationInput = {
   name: string;
   petId: string | null;
+  calculationId: string | null;
   mode: RationMode;
   targetEnergy?: number;
+  tolerancePercent: number;
   note: string | null;
 };
 

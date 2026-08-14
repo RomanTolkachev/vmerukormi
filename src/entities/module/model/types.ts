@@ -5,5 +5,27 @@ export type CalculationModule = {
   name: string;
   species: Species;
   formula: string;
-  description: string;
+  description: string | null;
+  techBegin: string;
+  techEnd: string;
+};
+
+export type FormulaVersion = {
+  id: string;
+  moduleId: string;
+  moduleName: string;
+  species: Species;
+  formula: string;
+  description: string | null;
+  techBegin: string;
+  techEnd: string;
+  current: boolean;
+};
+
+export type FormulaModuleDetails = {
+  id: string;
+  name: string;
+  species: Species;
+  archived: boolean;
+  versions: FormulaVersion[];
 };

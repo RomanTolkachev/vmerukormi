@@ -18,8 +18,10 @@ export type EditableProduct = {
   fat: number;
   carbs: number;
   archived: boolean;
+  tagIds: string[];
   nutrients: ProductNutrientValue[];
 };
 
 export type NutrientOption = ProductNutrientValue["nutrient"];
 export type ProductGroupOption = { id: string; name: string };
+export type ProductTagOption = { id: string; name: string; slug: string };

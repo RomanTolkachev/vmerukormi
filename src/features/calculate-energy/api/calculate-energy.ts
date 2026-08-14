@@ -10,12 +10,19 @@ export type EnergyCalculationInput = {
   energyFactor: number;
   lactationWeek: number;
   childrenCount: number;
+  breedId?: string | null;
+  sex?: "MALE" | "FEMALE" | null;
+  adjustedEnergy?: number;
+  protein?: number;
+  fat?: number;
+  carbs?: number;
+  nutrients?: { nutrientId: string; targetAmount: number }[];
 };
 
-export function calculateEnergy(input: EnergyCalculationInput) {
+export function calculateEnergy(input: EnergyCalculationInput, save = true) {
   return requestJson<EnergyResult>("/api/calculations", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...input, save: true }),
+    body: JSON.stringify({ ...input, save }),
   });
 }

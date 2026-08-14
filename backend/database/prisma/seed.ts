@@ -8,6 +8,8 @@ import {
 } from "@prisma/client";
 import { calculateEnergy } from "../../domain/nutrition/calculator";
 import { MODULES, type ModuleId } from "../../domain/nutrition/modules";
+import { formulaOpenEnd } from "../../domain/nutrition/formula-versions";
+import { DEFAULT_MACROS_PER_1000_KCAL, DEFAULT_NUTRIENTS_PER_1000_KCAL, scalePer1000 } from "../../domain/nutrition/standards";
 import breeds from "./breeds.json";
 
 const prisma = new PrismaClient();
@@ -210,6 +212,15 @@ const products: SeedProduct[] = [
   },
 ];
 
+const productTagDefinitions = [
+  { slug: "source-protein", name: "Источник белка" },
+  { slug: "source-fat", name: "Источник жира" },
+  { slug: "source-carbs", name: "Источник углеводов" },
+  { slug: "fiber", name: "Клетчатка" },
+  { slug: "calcium", name: "Кальций" },
+  { slug: "omega-3", name: "Омега-3" },
+] as const;
+
 const customers = [
   { id: "seed-customer-anna", name: "Анна Крылова", email: "anna@example.test", phone: "+7 900 111-22-33", note: "Предпочитает влажные рационы для кошек." },
   { id: "seed-customer-ilya", name: "Илья Морозов", email: "ilya@example.test", phone: "+7 900 222-33-44", note: "Два питомца, контроль веса раз в месяц." },
@@ -255,6 +266,16 @@ async function seedCatalog(userId: string) {
     nutrientIds.set(definition.code, nutrient.id);
   }
 
+  const tagIds = new Map<string, string>();
+  for (const definition of productTagDefinitions) {
+    const tag = await prisma.productTag.upsert({
+      where: { userId_slug: { userId, slug: definition.slug } },
+      update: { name: definition.name },
+      create: { ...definition, userId },
+    });
+    tagIds.set(definition.slug, tag.id);
+  }
+
   const desiredMeasureIds = products.flatMap((product) =>
     product.measures.map((measure) => measure.id),
   );
@@ -293,6 +314,22 @@ async function seedCatalog(userId: string) {
         carbs: product.carbs,
         userId,
       },
+    });
+
+    const tagSlugs = [
+      ...(product.calories > 0 && product.protein / product.calories * 100 >= 7 ? ["source-protein"] : []),
+      ...(product.calories > 0 && product.fat / product.calories * 100 >= 4 ? ["source-fat"] : []),
+      ...(product.calories > 0 && product.carbs / product.calories * 100 >= 10 ? ["source-carbs"] : []),
+      ...(product.fibre >= 2 ? ["fiber"] : []),
+      ...((product.nutrients?.Ca ?? 0) > 0 ? ["calcium"] : []),
+      ...((product.nutrients?.O3 ?? 0) > 0 ? ["omega-3"] : []),
+    ];
+    await prisma.productTagLink.deleteMany({ where: { productId: product.id } });
+    await prisma.productTagLink.createMany({
+      data: tagSlugs.flatMap((slug) => {
+        const tagId = tagIds.get(slug);
+        return tagId ? [{ productId: product.id, tagId }] : [];
+      }),
     });
 
     for (const measure of product.measures) {
@@ -340,6 +377,7 @@ async function seedClientsAndPets(userId: string) {
   }
 
   const energyByPet = new Map<string, number>();
+  const userNutrients = await prisma.nutrient.findMany({ where: { userId }, select: { id: true, code: true } });
   for (const pet of pets) {
     await prisma.pet.upsert({
       where: { id: pet.id },
@@ -378,29 +416,47 @@ async function seedClientsAndPets(userId: string) {
       bcs: pet.bcs,
     });
     energyByPet.set(pet.id, energy.adjustedEnergy);
+    const macros = DEFAULT_MACROS_PER_1000_KCAL[pet.species];
+    const nutrientStandards = DEFAULT_NUTRIENTS_PER_1000_KCAL[pet.species];
+    const calculationId = `seed-calculation-${pet.id}`;
     await prisma.calculation.upsert({
-      where: { id: `seed-calculation-${pet.id}` },
+      where: { id: calculationId },
       update: {
         petId: pet.id,
         moduleId: pet.moduleId,
+        formulaVersionId: `${pet.moduleId}-initial`,
         actualWeight: pet.actualWeight,
         idealWeight: pet.idealWeight,
         bcs: pet.bcs,
         baseEnergy: energy.baseEnergy,
         adjustedEnergy: energy.adjustedEnergy,
+        protein: scalePer1000(macros.protein, energy.adjustedEnergy),
+        fat: scalePer1000(macros.fat, energy.adjustedEnergy),
+        carbs: scalePer1000(macros.carbs, energy.adjustedEnergy),
         userId,
       },
       create: {
-        id: `seed-calculation-${pet.id}`,
+        id: calculationId,
         petId: pet.id,
         moduleId: pet.moduleId,
+        formulaVersionId: `${pet.moduleId}-initial`,
         actualWeight: pet.actualWeight,
         idealWeight: pet.idealWeight,
         bcs: pet.bcs,
         baseEnergy: energy.baseEnergy,
         adjustedEnergy: energy.adjustedEnergy,
+        protein: scalePer1000(macros.protein, energy.adjustedEnergy),
+        fat: scalePer1000(macros.fat, energy.adjustedEnergy),
+        carbs: scalePer1000(macros.carbs, energy.adjustedEnergy),
         userId,
       },
+    });
+    await prisma.calculationNutrient.deleteMany({ where: { calculationId } });
+    await prisma.calculationNutrient.createMany({
+      data: userNutrients.flatMap((nutrient) => {
+        const per1000 = nutrientStandards[nutrient.code];
+        return per1000 === undefined ? [] : [{ calculationId, nutrientId: nutrient.id, targetAmount: scalePer1000(per1000, energy.adjustedEnergy) }];
+      }),
     });
   }
   return energyByPet;
@@ -446,6 +502,7 @@ async function seedRations(userId: string, energyByPet: Map<string, number>) {
       update: {
         name: ration.name,
         petId: ration.petId,
+        calculationId: `seed-calculation-${ration.petId}`,
         mode,
         targetEnergy: energyByPet.get(ration.petId) ?? 0,
         note: "Демонстрационный рацион из seed.",
@@ -455,6 +512,7 @@ async function seedRations(userId: string, energyByPet: Map<string, number>) {
         id: ration.id,
         name: ration.name,
         petId: ration.petId,
+        calculationId: `seed-calculation-${ration.petId}`,
         mode,
         targetEnergy: energyByPet.get(ration.petId) ?? 0,
         note: "Демонстрационный рацион из seed.",
@@ -489,8 +547,24 @@ async function main() {
     MODULES.map((module) =>
       prisma.module.upsert({
         where: { id: module.id },
-        update: { name: module.name, species: module.species as Species, formula: module.formula, description: module.description },
-        create: { id: module.id, name: module.name, species: module.species as Species, formula: module.formula, description: module.description },
+        update: { name: module.name, species: module.species as Species, archived: false },
+        create: { id: module.id, name: module.name, species: module.species as Species },
+      }),
+    ),
+  );
+  await Promise.all(
+    MODULES.map((module) =>
+      prisma.moduleFormulaVersion.upsert({
+        where: { id: `${module.id}-initial` },
+        update: {},
+        create: {
+          id: `${module.id}-initial`,
+          moduleId: module.id,
+          formula: module.formula,
+          description: module.description,
+          techBegin: new Date("2000-01-01T00:00:00.000Z"),
+          techEnd: formulaOpenEnd(),
+        },
       }),
     ),
   );

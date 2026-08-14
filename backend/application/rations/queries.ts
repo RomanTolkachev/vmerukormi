@@ -8,6 +8,8 @@ import type {
   RationPetOption,
   RationProduct,
   RationItem,
+  RationCalculationOption,
+  RationCustomerOption,
 } from "@/entities/ration/model/types";
 
 const productInclude = {
@@ -16,6 +18,7 @@ const productInclude = {
     include: { nutrient: true },
     orderBy: { nutrient: { category: "asc" as const } },
   },
+  tags: { include: { tag: true } },
 };
 
 function serializeProduct(product: {
@@ -33,29 +36,52 @@ function serializeProduct(product: {
     amount: number | null;
     nutrient: { code: string; name: string; unit: string; category: string };
   }[];
+  tags: { tag: { id: string; name: string; slug: string } }[];
 }): RationProduct {
-  return product;
+  return { ...product, tags: product.tags.map((value) => value.tag).sort((a, b) => a.name.localeCompare(b.name, "ru")) };
 }
 
 function petOption(pet: {
   id: string;
   name: string;
   customer: { name: string } | null;
+  customerId: string | null;
   calculations: { adjustedEnergy: number }[];
 }): RationPetOption {
   return {
     id: pet.id,
     name: pet.name,
+    customerId: pet.customerId,
     customerName: pet.customer?.name ?? null,
     latestEnergy: pet.calculations[0]?.adjustedEnergy ?? null,
   };
 }
 
+function calculationOption(calculation: {
+  id: string;
+  petId: string | null;
+  adjustedEnergy: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+  createdAt: Date;
+  pet: { name: string } | null;
+  module: { name: string };
+  nutrients: { nutrientId: string; targetAmount: number; nutrient: { code: string; name: string; unit: string; category: string } }[];
+}): RationCalculationOption {
+  return {
+    ...calculation,
+    petName: calculation.pet?.name ?? null,
+    moduleName: calculation.module.name,
+    createdAt: calculation.createdAt.toISOString(),
+  };
+}
+
 export async function getRationsPageData() {
   const userId = (await getCurrentUser())?.id;
-  if (!userId) return { rations: [] as RationListEntry[], pets: [] as RationPetOption[] };
+  if (!userId) return { rations: [] as RationListEntry[], customers: [] as RationCustomerOption[], pets: [] as RationPetOption[], calculations: [] as RationCalculationOption[] };
 
-  const [rations, pets] = await Promise.all([
+  const [rations, customers, pets, calculations] = await Promise.all([
     prisma.ration.findMany({
       where: { userId },
       include: {
@@ -64,6 +90,7 @@ export async function getRationsPageData() {
       },
       orderBy: { updatedAt: "desc" },
     }),
+    prisma.customer.findMany({ where: { userId }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     prisma.pet.findMany({
       where: { userId },
       include: {
@@ -76,10 +103,18 @@ export async function getRationsPageData() {
       },
       orderBy: { name: "asc" },
     }),
+    prisma.calculation.findMany({
+      where: { userId },
+      include: { pet: { select: { name: true } }, module: { select: { name: true } }, nutrients: { include: { nutrient: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
   ]);
 
   return {
+    customers,
     pets: pets.map(petOption),
+    calculations: calculations.map(calculationOption),
     rations: rations.map((ration): RationListEntry => {
       const enabledItems = ration.items.filter((item) => item.enabled);
       const totalGrams = enabledItems.reduce((sum, item) => sum + item.grams, 0);
@@ -93,6 +128,7 @@ export async function getRationsPageData() {
         name: ration.name,
         mode: ration.mode,
         targetEnergy: ration.targetEnergy,
+        tolerancePercent: ration.tolerancePercent,
         note: ration.note,
         createdAt: ration.createdAt.toISOString(),
         updatedAt: ration.updatedAt.toISOString(),
@@ -120,6 +156,7 @@ export async function getRationEditorData(id: string) {
     where: { id, userId },
     include: {
       pet: { include: { customer: { select: { name: true } } } },
+      calculation: { include: { pet: { select: { name: true } }, module: { select: { name: true } }, nutrients: { include: { nutrient: true } } } },
       items: {
         include: {
           measure: true,
@@ -131,12 +168,13 @@ export async function getRationEditorData(id: string) {
   });
   if (!ration) return null;
 
-  const [products, pets] = await Promise.all([
+  const [products, customers, pets, calculations] = await Promise.all([
     prisma.product.findMany({
       where: { userId, archived: false },
       include: productInclude,
       orderBy: { name: "asc" },
     }),
+    prisma.customer.findMany({ where: { userId }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     prisma.pet.findMany({
       where: { userId },
       include: {
@@ -149,14 +187,22 @@ export async function getRationEditorData(id: string) {
       },
       orderBy: { name: "asc" },
     }),
+    prisma.calculation.findMany({
+      where: { userId },
+      include: { pet: { select: { name: true } }, module: { select: { name: true } }, nutrients: { include: { nutrient: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
   ]);
 
   const value: RationEditorValue = {
     id: ration.id,
     name: ration.name,
     petId: ration.petId,
+    calculationId: ration.calculationId,
     mode: ration.mode,
     targetEnergy: ration.targetEnergy,
+    tolerancePercent: ration.tolerancePercent,
     note: ration.note,
     createdAt: ration.createdAt.toISOString(),
     updatedAt: ration.updatedAt.toISOString(),
@@ -167,6 +213,7 @@ export async function getRationEditorData(id: string) {
           customerName: ration.pet.customer?.name ?? null,
         }
       : null,
+    calculation: ration.calculation ? calculationOption(ration.calculation) : null,
     items: ration.items.map(
       (item): RationItem => ({
         id: item.id,
@@ -185,6 +232,8 @@ export async function getRationEditorData(id: string) {
   return {
     ration: value,
     products: products.map(serializeProduct),
+    customers,
     pets: pets.map(petOption),
+    calculations: calculations.map(calculationOption),
   };
 }

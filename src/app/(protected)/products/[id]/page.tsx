@@ -6,5 +6,5 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const data = await getProductEditorData(id);
   if (!data) notFound();
-  return <ProductEditor initialProduct={data.product} nutrients={data.nutrients} groups={data.groups} />;
+  return <ProductEditor initialProduct={data.product} nutrients={data.nutrients} groups={data.groups} tags={data.tags} />;
 }

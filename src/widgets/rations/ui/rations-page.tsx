@@ -10,6 +10,8 @@ import type {
   RationListEntry,
   RationMode,
   RationPetOption,
+  RationCalculationOption,
+  RationCustomerOption,
 } from "@/entities/ration/model/types";
 
 function formatNumber(value: number, digits = 0) {
@@ -18,22 +20,30 @@ function formatNumber(value: number, digits = 0) {
 
 export function RationsPage({
   rations,
+  customers,
   pets,
+  calculations,
   selectedPetId,
 }: {
   rations: RationListEntry[];
+  customers: RationCustomerOption[];
   pets: RationPetOption[];
+  calculations: RationCalculationOption[];
   selectedPetId?: string;
 }) {
   const router = useRouter();
   const initialPet = pets.find((pet) => pet.id === selectedPetId) ?? null;
+  const initialCalculation = calculations.find((calculation) => calculation.petId === initialPet?.id) ?? null;
   const [search, setSearch] = useState("");
   const [name, setName] = useState("");
+  const [customerId, setCustomerId] = useState(initialPet?.customerId ?? "");
   const [petId, setPetId] = useState(initialPet?.id ?? "");
+  const [calculationId, setCalculationId] = useState(initialCalculation?.id ?? "");
   const [mode, setMode] = useState<RationMode>("DAILY");
   const [targetEnergy, setTargetEnergy] = useState(
-    initialPet?.latestEnergy ? String(initialPet.latestEnergy) : "",
+    initialCalculation?.adjustedEnergy ? String(initialCalculation.adjustedEnergy) : "",
   );
+  const [tolerancePercent, setTolerancePercent] = useState("10");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
@@ -48,10 +58,33 @@ export function RationsPage({
     );
   }, [rations, search]);
 
+  const availablePets = useMemo(
+    () => pets.filter((pet) => customerId ? pet.customerId === customerId : pet.customerId === null),
+    [customerId, pets],
+  );
+  const availableCalculations = useMemo(
+    () => calculations.filter((calculation) => calculation.petId === petId),
+    [calculations, petId],
+  );
+
+  function chooseCustomer(value: string) {
+    setCustomerId(value);
+    setPetId("");
+    setCalculationId("");
+    setTargetEnergy("");
+  }
+
   function choosePet(value: string) {
     setPetId(value);
-    const pet = pets.find((item) => item.id === value);
-    setTargetEnergy(pet?.latestEnergy ? String(pet.latestEnergy) : "");
+    setCalculationId("");
+    setTargetEnergy("");
+  }
+
+  function chooseCalculation(value: string) {
+    setCalculationId(value);
+    const calculation = calculations.find((item) => item.id === value);
+    setPetId(calculation?.petId ?? "");
+    setTargetEnergy(calculation ? String(calculation.adjustedEnergy) : "");
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -62,8 +95,10 @@ export function RationsPage({
       const ration = await createRation({
         name,
         petId: petId || null,
+        calculationId: calculationId || null,
         mode,
         targetEnergy: targetEnergy ? Number(targetEnergy) : undefined,
+        tolerancePercent: Number(tolerancePercent),
         note: note || null,
       });
       router.push(`/rations/${ration.id}`);
@@ -140,12 +175,27 @@ export function RationsPage({
                   <input className={ui("input")} value={name} onChange={(event) => setName(event.target.value)} required />
                 </label>
                 <label className={ui("field")}>
+                  <span>Хозяин</span>
+                  <select className={ui("input")} value={customerId} onChange={(event) => chooseCustomer(event.target.value)}>
+                    <option value="">Без хозяина</option>
+                    {customers.map((customer) => <option value={customer.id} key={customer.id}>{customer.name}</option>)}
+                  </select>
+                </label>
+                <label className={ui("field")}>
                   <span>Питомец</span>
                   <select className={ui("input")} value={petId} onChange={(event) => choosePet(event.target.value)}>
-                    <option value="">Без питомца</option>
-                    {pets.map((pet) => (
-                      <option value={pet.id} key={pet.id}>
-                        {pet.name}{pet.customerName ? ` — ${pet.customerName}` : ""}
+                    <option value="">Не выбран</option>
+                    {availablePets.map((pet) => <option value={pet.id} key={pet.id}>{pet.name}</option>)}
+                  </select>
+                  {!availablePets.length && <div className={ui("fieldHint")}>{customerId ? "У хозяина нет питомцев" : "Нет питомцев без хозяина"}</div>}
+                </label>
+                <label className={ui("field")}>
+                  <span>Расчёт нормы</span>
+                  <select className={ui("input", "highlight")} value={calculationId} onChange={(event) => chooseCalculation(event.target.value)} disabled={!petId}>
+                    <option value="">{petId ? "Выберите расчёт" : "Сначала выберите питомца"}</option>
+                    {availableCalculations.map((calculation) => (
+                      <option value={calculation.id} key={calculation.id}>
+                        {calculation.petName ?? "Без питомца"} · {calculation.moduleName} · {new Date(calculation.createdAt).toLocaleDateString("ru-RU")}
                       </option>
                     ))}
                   </select>
@@ -161,8 +211,13 @@ export function RationsPage({
                   <span>Целевая энергия, ккал/сут</span>
                   <input className={ui("input", "highlight")} type="number" min="0" step="1" value={targetEnergy} onChange={(event) => setTargetEnergy(event.target.value)} />
                   <div className={ui("fieldHint")}>
-                    {petId ? "Предложена из последнего расчёта питомца" : "Можно указать вручную"}
+                    {calculationId ? "Зафиксирована выбранным расчётом" : "Можно указать вручную"}
                   </div>
+                </label>
+                <label className={ui("field")}>
+                  <span>Допустимое превышение, %</span>
+                  <input className={ui("input")} type="number" min="0" max="100" step="1" value={tolerancePercent} onChange={(event) => setTolerancePercent(event.target.value)} required />
+                  <div className={ui("fieldHint")}>Значения выше этого диапазона подсвечиваются красным</div>
                 </label>
                 <label className={ui("field")}>
                   <span>Заметка</span>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import {
   addProductNutrient,
+  createProductTag,
   deleteProductNutrient,
   updateProduct,
   updateProductNutrient,
@@ -13,6 +14,7 @@ import type {
   NutrientOption,
   ProductGroupOption,
   ProductKind,
+  ProductTagOption,
 } from "../model/types";
 import { ui } from "@/shared/ui/styles/ui";
 
@@ -20,13 +22,17 @@ export function ProductEditor({
   initialProduct,
   nutrients,
   groups,
+  tags: initialTags,
 }: {
   initialProduct: EditableProduct;
   nutrients: NutrientOption[];
   groups: ProductGroupOption[];
+  tags: ProductTagOption[];
 }) {
   const [product, setProduct] = useState(initialProduct);
   const [values, setValues] = useState(initialProduct.nutrients);
+  const [tags, setTags] = useState(initialTags);
+  const [newTag, setNewTag] = useState("");
   const available = useMemo(
     () => nutrients.filter((nutrient) => !values.some((value) => value.nutrientId === nutrient.id)),
     [nutrients, values],
@@ -53,10 +59,28 @@ export function ProductEditor({
         fat: product.fat,
         carbs: product.carbs,
         archived: product.archived,
+        tagIds: product.tagIds,
       });
       setMessage("Параметры продукта сохранены");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Не удалось сохранить продукт");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function addTag() {
+    if (!newTag.trim()) return;
+    setPending(true);
+    setError("");
+    try {
+      const tag = await createProductTag(newTag);
+      setTags((current) => current.some((item) => item.id === tag.id) ? current : [...current, tag].sort((a, b) => a.name.localeCompare(b.name, "ru")));
+      setProduct((current) => ({ ...current, tagIds: current.tagIds.includes(tag.id) ? current.tagIds : [...current.tagIds, tag.id] }));
+      setNewTag("");
+      setMessage("Тег добавлен. Сохраните продукт");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Не удалось создать тег");
     } finally {
       setPending(false);
     }
@@ -129,6 +153,17 @@ export function ProductEditor({
               <label className={ui("field")}><span>Жиры, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={product.fat} onChange={(event) => setProduct({ ...product, fat: Number(event.target.value) })} /></label>
               <label className={ui("field")}><span>Углеводы, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={product.carbs} onChange={(event) => setProduct({ ...product, carbs: Number(event.target.value) })} /></label>
               <label className={ui("productArchive")}><input type="checkbox" checked={product.archived} onChange={(event) => setProduct({ ...product, archived: event.target.checked })} /> Архивный продукт</label>
+              <div className={ui("field", "full")}>
+                <span>Теги для подбора рациона</span>
+                <div className={ui("productTagList")}>
+                  {tags.map((tag) => <button className={ui("tagChip", product.tagIds.includes(tag.id) && "tagChipActive")} type="button" aria-pressed={product.tagIds.includes(tag.id)} key={tag.id} onClick={() => setProduct((current) => ({ ...current, tagIds: current.tagIds.includes(tag.id) ? current.tagIds.filter((id) => id !== tag.id) : [...current.tagIds, tag.id] }))}>{tag.name}</button>)}
+                  {!tags.length && <small className={ui("fieldHint")}>Тегов пока нет — создайте первый.</small>}
+                </div>
+                <div className={ui("inlineTagCreate")}>
+                  <input className={ui("input")} value={newTag} onChange={(event) => setNewTag(event.target.value)} placeholder="Например, источник белка" onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void addTag(); } }} />
+                  <button className={ui("secondary")} type="button" disabled={pending || !newTag.trim()} onClick={() => void addTag()}>Создать тег</button>
+                </div>
+              </div>
             </div>
             <div className={ui("actions")}><button className={ui("primary")} disabled={pending}>Сохранить продукт</button></div>
           </div>

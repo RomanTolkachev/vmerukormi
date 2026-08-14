@@ -9,6 +9,7 @@ const pages = [
   ["/pets", "Питомцы"],
   ["/history", "История"],
   ["/modules", "Формулы"],
+  ["/standards", "Эталоны"],
   ["/info", "Справка"],
   ["/customers", "Клиенты"],
   ["/products", "Продукты"],

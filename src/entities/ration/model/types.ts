@@ -1,10 +1,35 @@
 export type RationMode = "DAILY" | "WEEKLY";
 
+export type RationCustomerOption = {
+  id: string;
+  name: string;
+};
+
 export type RationPetOption = {
   id: string;
   name: string;
+  customerId: string | null;
   customerName: string | null;
   latestEnergy: number | null;
+};
+
+export type RationCalculationNutrient = {
+  nutrientId: string;
+  targetAmount: number;
+  nutrient: { code: string; name: string; unit: string; category: string };
+};
+
+export type RationCalculationOption = {
+  id: string;
+  petId: string | null;
+  petName: string | null;
+  moduleName: string;
+  createdAt: string;
+  adjustedEnergy: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+  nutrients: RationCalculationNutrient[];
 };
 
 export type RationListEntry = {
@@ -12,6 +37,7 @@ export type RationListEntry = {
   name: string;
   mode: RationMode;
   targetEnergy: number;
+  tolerancePercent: number;
   note: string | null;
   createdAt: string;
   updatedAt: string;
@@ -49,6 +75,7 @@ export type RationProduct = {
   carbs: number;
   measures: RationProductMeasure[];
   nutrients: RationProductNutrient[];
+  tags: { id: string; name: string; slug: string }[];
 };
 
 export type RationItem = {
@@ -67,11 +94,14 @@ export type RationEditorValue = {
   id: string;
   name: string;
   petId: string | null;
+  calculationId: string | null;
   mode: RationMode;
   targetEnergy: number;
+  tolerancePercent: number;
   note: string | null;
   createdAt: string;
   updatedAt: string;
   pet: { id: string; name: string; customerName: string | null } | null;
+  calculation: RationCalculationOption | null;
   items: RationItem[];
 };

@@ -5,8 +5,10 @@ import { prisma } from "@backend/infrastructure/database/prisma";
 const rationSchema = z.object({
   name: z.string().trim().min(1).max(160),
   petId: z.string().trim().nullable().optional(),
+  calculationId: z.string().trim().nullable().optional(),
   mode: z.enum(["DAILY", "WEEKLY"]).default("DAILY"),
   targetEnergy: z.coerce.number().min(0).max(100000).optional(),
+  tolerancePercent: z.coerce.number().min(0).max(100).default(10),
   note: z.string().trim().max(4000).nullable().optional(),
 });
 
@@ -37,7 +39,13 @@ export async function POST(request: Request) {
 
     const input = parsed.data;
     let targetEnergy = input.targetEnergy ?? 0;
-    if (input.petId) {
+    let petId = input.petId || null;
+    if (input.calculationId) {
+      const calculation = await prisma.calculation.findFirst({ where: { id: input.calculationId, userId: user.id }, select: { id: true, petId: true, adjustedEnergy: true } });
+      if (!calculation) return Response.json({ error: "Расчёт не найден" }, { status: 404 });
+      petId = calculation.petId;
+      targetEnergy = calculation.adjustedEnergy;
+    } else if (input.petId) {
       const pet = await prisma.pet.findFirst({
         where: { id: input.petId, userId: user.id },
         select: {
@@ -58,9 +66,11 @@ export async function POST(request: Request) {
     const ration = await prisma.ration.create({
       data: {
         name: input.name,
-        petId: input.petId || null,
+        petId,
+        calculationId: input.calculationId || null,
         mode: input.mode,
         targetEnergy,
+        tolerancePercent: input.tolerancePercent,
         note: input.note || null,
         userId: user.id,
       },

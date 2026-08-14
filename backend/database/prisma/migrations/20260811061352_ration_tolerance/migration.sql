@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Ration" ADD COLUMN     "tolerancePercent" DOUBLE PRECISION NOT NULL DEFAULT 10;

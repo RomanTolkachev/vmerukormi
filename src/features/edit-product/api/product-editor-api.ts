@@ -1,5 +1,5 @@
 import { apiFetch, requestJson } from "@/shared/api/http";
-import type { EditableProduct, ProductNutrientValue } from "../model/types";
+import type { EditableProduct, ProductNutrientValue, ProductTagOption } from "../model/types";
 
 export type ProductUpdate = Omit<EditableProduct, "id" | "nutrients">;
 
@@ -8,6 +8,14 @@ export function updateProduct(id: string, input: ProductUpdate) {
     method: "PATCH",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
+  });
+}
+
+export function createProductTag(name: string) {
+  return requestJson<ProductTagOption>("/api/product-tags", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name }),
   });
 }
 

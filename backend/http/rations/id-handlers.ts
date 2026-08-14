@@ -6,8 +6,10 @@ const updateSchema = z
   .object({
     name: z.string().trim().min(1).max(160).optional(),
     petId: z.string().trim().nullable().optional(),
+    calculationId: z.string().trim().nullable().optional(),
     mode: z.enum(["DAILY", "WEEKLY"]).optional(),
     targetEnergy: z.coerce.number().min(0).max(100000).optional(),
+    tolerancePercent: z.coerce.number().min(0).max(100).optional(),
     note: z.string().trim().max(4000).nullable().optional(),
   })
   .refine((value) => Object.keys(value).length > 0);
@@ -43,7 +45,14 @@ export async function PATCH(request: Request, { params }: Context) {
     });
     if (!existing) return Response.json({ error: "Рацион не найден" }, { status: 404 });
 
-    if (parsed.data.petId) {
+    let calculationPetId: string | null | undefined;
+    let calculationEnergy: number | undefined;
+    if (parsed.data.calculationId) {
+      const calculation = await prisma.calculation.findFirst({ where: { id: parsed.data.calculationId, userId: user.id }, select: { petId: true, adjustedEnergy: true } });
+      if (!calculation) return Response.json({ error: "Расчёт не найден" }, { status: 404 });
+      calculationPetId = calculation.petId;
+      calculationEnergy = calculation.adjustedEnergy;
+    } else if (parsed.data.petId) {
       const pet = await prisma.pet.findFirst({
         where: { id: parsed.data.petId, userId: user.id },
         select: { id: true },
@@ -56,7 +65,9 @@ export async function PATCH(request: Request, { params }: Context) {
         where: { id },
         data: {
           ...parsed.data,
-          petId: parsed.data.petId === undefined ? undefined : parsed.data.petId || null,
+          petId: calculationPetId !== undefined ? calculationPetId : parsed.data.petId === undefined ? undefined : parsed.data.petId || null,
+          calculationId: parsed.data.calculationId === undefined ? undefined : parsed.data.calculationId || null,
+          targetEnergy: calculationEnergy ?? parsed.data.targetEnergy,
           note: parsed.data.note === undefined ? undefined : parsed.data.note || null,
         },
       });

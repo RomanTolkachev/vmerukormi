@@ -22,7 +22,8 @@ export type WorkspaceTab =
   | "nutrients"
   | "rations"
   | "notifications"
-  | "invoices";
+  | "invoices"
+  | "standards";
 const labels: Record<WorkspaceTab, string> = {
   customers: "Клиенты и их питомцы",
   products: "Каталог продуктов и добавок",
@@ -30,13 +31,15 @@ const labels: Record<WorkspaceTab, string> = {
   rations: "Рационы",
   notifications: "Уведомления",
   invoices: "Счета и покупки",
+  standards: "Эталонные значения пород",
 };
 export function Workspace({ tab }: { tab: WorkspaceTab }) {
   const router = useRouter();
   const [version, setVersion] = useState(0);
   const [message, setMessage] = useState("");
-  const canCreate = tab !== "invoices";
+  const canCreate = tab !== "invoices" && tab !== "standards";
   const isCustomers = tab === "customers";
+  const isStandards = tab === "standards";
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -87,7 +90,7 @@ export function Workspace({ tab }: { tab: WorkspaceTab }) {
                 tableName={`workspace-${tab}`}
                 defaults={{ per_page: 10 } as Partial<TableBaseQuery>}
                 queryFn={(q) => getWorkspaceRows(tab, q)}
-                sortable={["name", "createdAt", "updatedAt"]}
+                sortable={["name", "nameRu", "createdAt", "updatedAt"]}
                 syncUrlQuery={{ enabled: false }}
                 toolbar={{
                   search: {
@@ -99,14 +102,18 @@ export function Workspace({ tab }: { tab: WorkspaceTab }) {
                   settingsButton: { enabled: true },
                 }}
                 onRowClick={
-                  isCustomers
+                  isStandards
+                    ? (row) => router.push(`/standards/${String(row.id)}`)
+                    : isCustomers
                     ? (row) => router.push(`/customers/${String(row.id)}`)
                     : tab === "products"
                       ? (row) => router.push(`/products/${String(row.id)}`)
                     : undefined
                 }
                 actionCell={
-                  tab !== "invoices"
+                  isStandards
+                    ? (_, row) => <Link className={ui("secondary", "linkButton")} href={`/standards/${String(row.id)}`}>Эталонные значения →</Link>
+                    : tab !== "invoices"
                     ? (_, row) => (
                       <div className={ui("tableActions")}>
                         {isCustomers && (

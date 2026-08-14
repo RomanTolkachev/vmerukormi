@@ -13,6 +13,7 @@ const productSchema = z.object({
   fat: z.coerce.number().min(0).max(100000),
   carbs: z.coerce.number().min(0).max(100000),
   archived: z.boolean(),
+  tagIds: z.array(z.string().trim().min(1)).max(30),
 });
 
 const nutrientSchema = z.object({
@@ -45,7 +46,21 @@ export async function PATCH(request: Request, { params }: ProductContext) {
       const group = await prisma.productGroup.findFirst({ where: { id: parsed.data.groupId, userId: user.id }, select: { id: true } });
       if (!group) return Response.json({ error: "Группа не найдена" }, { status: 404 });
     }
-    return Response.json(await prisma.product.update({ where: { id }, data: parsed.data }));
+    const { tagIds, ...productData } = parsed.data;
+    const uniqueTagIds = [...new Set(tagIds)];
+    if (uniqueTagIds.length) {
+      const ownedTags = await prisma.productTag.count({ where: { id: { in: uniqueTagIds }, userId: user.id } });
+      if (ownedTags !== uniqueTagIds.length) return Response.json({ error: "Один из тегов не найден" }, { status: 404 });
+    }
+    const updated = await prisma.$transaction(async (tx) => {
+      const product = await tx.product.update({ where: { id }, data: productData });
+      await tx.productTagLink.deleteMany({ where: { productId: id } });
+      if (uniqueTagIds.length) {
+        await tx.productTagLink.createMany({ data: uniqueTagIds.map((tagId) => ({ productId: id, tagId })) });
+      }
+      return product;
+    });
+    return Response.json({ ...updated, tagIds: uniqueTagIds });
   } catch (error) {
     return authErrorResponse(error);
   }

@@ -6,6 +6,7 @@ import { prisma } from "@backend/infrastructure/database/prisma";
 const BLUE = "2F75B5";
 const BLUE_LIGHT = "DCEAF5";
 const GREEN = "E1F1E5";
+const RED_LIGHT = "FBE8E6";
 const INK = "203243";
 const MUTED = "647789";
 const LINE = "D9E2EA";
@@ -39,6 +40,7 @@ function findRation(userId: string, id: string) {
         },
         orderBy: [{ day: "asc" }, { id: "asc" }],
       },
+      calculation: { include: { nutrients: { include: { nutrient: true } } } },
     },
   });
 }
@@ -79,6 +81,13 @@ function amountForItem(item: ExportRation["items"][number], value: number) {
   return (item.grams * value) / item.product.baseQuantity;
 }
 
+function comparisonStatus(actual: number, target: number, tolerancePercent: number) {
+  if (target <= 0) return "Норма не указана";
+  if (actual < target) return "Недобор";
+  if (actual > target * (1 + tolerancePercent / 100)) return "Выше допуска";
+  return "В диапазоне";
+}
+
 function safeFilePart(value: string) {
   const normalized = value
     .normalize("NFKD")
@@ -112,7 +121,7 @@ function buildWorkbook(ration: ExportRation) {
   rationSheet.views = [{ state: "frozen", ySplit: 12, showGridLines: false }];
   rationSheet.columns = [
     { width: 15 },
-    { width: 9 },
+    { width: 24 },
     { width: 34 },
     { width: 20 },
     { width: 12 },
@@ -181,12 +190,27 @@ function buildWorkbook(ration: ExportRation) {
     }),
     { grams: 0, calories: 0, protein: 0, fat: 0, carbs: 0 },
   );
+  const nutrientTotals = new Map<string, { code: string; name: string; category: string; unit: string; amount: number }>();
+  enabledItems.forEach((item) => {
+    const factor = item.grams / item.product.baseQuantity / divisor;
+    item.product.nutrients.forEach((value) => {
+      if (value.amount === null) return;
+      const current = nutrientTotals.get(value.nutrientId);
+      nutrientTotals.set(value.nutrientId, {
+        code: value.nutrient.code,
+        name: value.nutrient.name,
+        category: value.nutrient.category,
+        unit: value.nutrient.unit,
+        amount: (current?.amount ?? 0) + value.amount * factor,
+      });
+    });
+  });
   const percent = ration.targetEnergy ? daily.calories / ration.targetEnergy : 0;
   const status = !ration.targetEnergy
     ? "Цель не указана"
-    : percent < 0.9
+    : percent < 1
       ? "Недобор"
-      : percent > 1.1
+      : percent > 1 + ration.tolerancePercent / 100
         ? "Избыток"
         : "В диапазоне";
 
@@ -205,7 +229,7 @@ function buildWorkbook(ration: ExportRation) {
   summaryRow.eachCell((cell, column) => {
     cell.font = { bold: true, color: { argb: INK } };
     cell.alignment = { vertical: "middle", horizontal: column === 4 ? "left" : "right" };
-    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: column === 4 ? GREEN : "F6F9FB" } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: column === 4 ? (status === "В диапазоне" ? GREEN : RED_LIGHT) : "F6F9FB" } };
     thinBottom(cell);
   });
   rationSheet.getCell("C11").numFmt = "0%";
@@ -256,6 +280,53 @@ function buildWorkbook(ration: ExportRation) {
   }
   rationSheet.autoFilter = { from: { row: itemHeaderRowNumber, column: 1 }, to: { row: itemHeaderRowNumber, column: 10 } };
 
+  const rationNutrientTitleRow = itemEndRow + 2;
+  const rationNutrientHeaderRow = rationNutrientTitleRow + 1;
+  const rationNutrientStartRow = rationNutrientHeaderRow + 1;
+  rationSheet.mergeCells(rationNutrientTitleRow, 1, rationNutrientTitleRow, 10);
+  rationSheet.getCell(rationNutrientTitleRow, 1).value = "Нутриенты в сутки";
+  styleSectionTitle(rationSheet.getRow(rationNutrientTitleRow), 10);
+  const mainNutrientHeader = rationSheet.getRow(rationNutrientHeaderRow);
+  mainNutrientHeader.values = ["Код", "Нутриент", "Норма", "Факт", "Допуск, %", "Допустимый максимум", "Статус", "Единица"];
+  styleTableHeader(mainNutrientHeader);
+
+  const rationNutrientRows = ration.calculation?.nutrients.length
+    ? ration.calculation.nutrients.map((target) => ({
+        nutrientId: target.nutrientId,
+        code: target.nutrient.code,
+        name: target.nutrient.name,
+        category: target.nutrient.category,
+        unit: target.nutrient.unit,
+        target: target.targetAmount,
+        actual: nutrientTotals.get(target.nutrientId)?.amount ?? 0,
+      }))
+    : [...nutrientTotals.entries()].map(([nutrientId, nutrient]) => ({
+        nutrientId,
+        ...nutrient,
+        target: null,
+        actual: nutrient.amount,
+      }));
+  rationNutrientRows
+    .sort((left, right) => `${left.category}-${left.name}`.localeCompare(`${right.category}-${right.name}`, "ru"))
+    .forEach((nutrient, index) => {
+      const rowNumber = rationNutrientStartRow + index;
+      const row = rationSheet.getRow(rowNumber);
+      const maximum = nutrient.target === null ? null : nutrient.target * (1 + ration.tolerancePercent / 100);
+      const nutrientStatus = nutrient.target === null
+        ? "Норма не указана"
+        : comparisonStatus(nutrient.actual, nutrient.target, ration.tolerancePercent);
+      row.values = [nutrient.code, nutrient.name, nutrient.target, nutrient.actual, ration.tolerancePercent / 100, maximum, nutrientStatus, nutrient.unit];
+      for (const column of [3, 4, 6]) row.getCell(column).numFmt = "0.000";
+      row.getCell(5).numFmt = "0%";
+      row.getCell(7).fill = { type: "pattern", pattern: "solid", fgColor: { argb: nutrientStatus === "В диапазоне" ? GREEN : nutrient.target === null ? DISABLED : RED_LIGHT } };
+      row.eachCell((cell) => thinBottom(cell));
+    });
+  if (!rationNutrientRows.length) {
+    rationSheet.mergeCells(rationNutrientStartRow, 1, rationNutrientStartRow, 8);
+    rationSheet.getCell(rationNutrientStartRow, 1).value = "Для включённых продуктов нутриенты не заполнены";
+    rationSheet.getCell(rationNutrientStartRow, 1).font = { italic: true, color: { argb: MUTED } };
+  }
+
   const nutrientsSheet = workbook.addWorksheet("Нутриенты", {
     properties: { defaultRowHeight: 20 },
     views: [{ state: "frozen", ySplit: 3, showGridLines: false }],
@@ -270,21 +341,6 @@ function buildWorkbook(ration: ExportRation) {
   nutrientHeader.values = ["Код", "Нутриент", "Категория", "Единица", "Количество в сутки"];
   styleTableHeader(nutrientHeader);
 
-  const nutrientTotals = new Map<string, { code: string; name: string; category: string; unit: string; amount: number }>();
-  enabledItems.forEach((item) => {
-    const factor = item.grams / item.product.baseQuantity / divisor;
-    item.product.nutrients.forEach((value) => {
-      if (value.amount === null) return;
-      const current = nutrientTotals.get(value.nutrientId);
-      nutrientTotals.set(value.nutrientId, {
-        code: value.nutrient.code,
-        name: value.nutrient.name,
-        category: value.nutrient.category,
-        unit: value.nutrient.unit,
-        amount: (current?.amount ?? 0) + value.amount * factor,
-      });
-    });
-  });
   [...nutrientTotals.values()]
     .sort((left, right) => `${left.category}-${left.name}`.localeCompare(`${right.category}-${right.name}`, "ru"))
     .forEach((nutrient, index) => {

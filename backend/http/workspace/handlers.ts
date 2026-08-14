@@ -48,6 +48,13 @@ const columns: Record<string, { name: string; label: string }[]> = {
     { name: "amount", label: "Сумма" },
     { name: "status", label: "Статус" },
   ],
+  standards: [
+    { name: "nameRu", label: "Порода" },
+    { name: "speciesLabel", label: "Вид" },
+    { name: "maleWeight", label: "Самец, кг" },
+    { name: "femaleWeight", label: "Самка, кг" },
+    { name: "standardStatus", label: "Эталон" },
+  ],
 };
 
 function page<T extends Record<string, unknown>>(
@@ -170,6 +177,24 @@ export async function listWorkspace(
     return Response.json(
       await prisma.productGroup.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
     );
+  if (resource === "standards") {
+    const breeds = await prisma.breed.findMany({
+      include: { standards: { where: { userId: user.id }, select: { sex: true, idealWeight: true } } },
+      orderBy: [{ species: "asc" }, { nameRu: "asc" }],
+    });
+    return page(breeds.map((breed) => {
+      const male = breed.standards.find((item) => item.sex === "MALE");
+      const female = breed.standards.find((item) => item.sex === "FEMALE");
+      return {
+        id: breed.id,
+        nameRu: breed.nameRu,
+        speciesLabel: breed.species === "DOG" ? "Собака" : "Кошка",
+        maleWeight: male?.idealWeight ?? breed.maleIdealWeight,
+        femaleWeight: female?.idealWeight ?? breed.femaleIdealWeight,
+        standardStatus: male || female ? "Изменён врачом" : "Базовый",
+      };
+    }), request, resource);
+  }
   return Response.json({ message: "Unknown resource" }, { status: 404 });
   } catch (error) {
     return authErrorResponse(error);

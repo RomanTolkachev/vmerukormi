@@ -13,7 +13,7 @@
 .loginHeading p { margin: 0 0 24px; color: var(--muted); }
 .loginForm { display: grid; gap: 17px; }
 .loginButton { width: 100%; margin-top: 3px; padding: 12px 16px; }
-.content { width: 100%; max-width: 1180px; min-height: 0; margin: 0 auto; padding: 20px 24px 22px; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+.content { width: 100%; max-width: 1400px; min-height: 0; margin: 0 auto; padding: 20px 24px 22px; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
 .pageViewport, .pageLayout { min-width: 0; min-height: 0; }
 .pageViewport { overflow: hidden; }
 .pageLayout { height: 100%; }
@@ -38,6 +38,10 @@
 .tab { border: 0; background: transparent; color: var(--muted); padding: 9px 15px; border-radius: 10px; font-weight: 700; text-decoration: none; }
 .tab.active { background: var(--blue); color: white; }
 .grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr); gap: 18px; align-items: start; }
+.calculationGrid { min-height: 0; align-items: stretch; overflow: hidden; }
+.calculationGrid > .card { min-height: 0; display: grid; }
+.calculationGrid > .card > form { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.calculationGrid > .card > form > .cardBody { min-height: 0; overflow: auto; }
 .card { background: white; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 10px 34px #17324d0a; overflow: hidden; }
 .cardHead { padding: 17px 20px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
 .cardHead h2 { font-size: 17px; margin: 0; }
@@ -120,6 +124,9 @@
 .rationEditorActions { display: flex; align-items: center; gap: 10px; }
 .rationSummaryGrid { display: grid; grid-template-columns: minmax(230px, 1.5fr) repeat(4, minmax(115px, .7fr)); gap: 10px; margin-bottom: 18px; }
 .rationEnergyCard, .rationMetric { padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: white; }
+.rationMetric { color: inherit; font: inherit; text-align: left; }
+.rationMetricAction { cursor: pointer; transition: border-color .15s, transform .15s; }
+.rationMetricAction:hover { border-color: #cf7777 !important; transform: translateY(-1px); }
 .rationEnergyCard > span, .rationMetric > span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .rationEnergyCard strong, .rationMetric strong { display: block; margin: 7px 0 5px; font-size: 23px; }
 .rationEnergyCard strong small { font-size: 12px; }
@@ -136,14 +143,40 @@
 .rationItemsTable th { color: #52677a; background: #f6f9fb; font-size: 10px; text-transform: uppercase; }
 .rationItemsTable tbody tr:last-child td { border-bottom: 0; }
 .rationItemsTable td small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; }
+.rationProductCell { display: flex; align-items: center; gap: 9px; }
+.rationProductLink { color: var(--blue); font-size: 10px; font-weight: 800; text-decoration: none; }
+.rationProductLink:hover { text-decoration: underline; }
 .rationItemDisabled { opacity: .5; background: #f6f7f8; }
 .compactInput { min-width: 78px; padding: 7px 8px; border-radius: 8px; }
 .quantityInput { width: 92px; }
 .nutrientSummaryGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.nutrientSummaryGrid div { min-width: 0; padding: 11px; border-radius: 11px; background: #f6f9fb; }
+.nutrientSummaryGrid > div, .nutrientSummaryCard { min-width: 0; padding: 11px; border: 1px solid transparent; border-radius: 11px; color: inherit; background: #f6f9fb; font: inherit; text-align: left; }
 .nutrientSummaryGrid span { display: block; color: var(--blue); font-weight: 900; }
 .nutrientSummaryGrid b { display: block; margin: 4px 0; font-size: 13px; }
 .nutrientSummaryGrid small { display: block; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.nutrientSummaryAction { cursor: pointer; transition: border-color .15s, transform .15s; }
+.nutrientSummaryAction:hover { border-color: #cf7777 !important; transform: translateY(-1px); }
+.productFocus { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 8px; padding: 10px 11px; border: 1px solid #9dbddb; border-radius: 11px; background: var(--blue-soft); }
+.productFocus span { grid-column: 1; color: var(--muted); font-size: 10px; }
+.productFocus b { grid-column: 1; font-size: 13px; }
+.productFocus button { grid-column: 2; grid-row: 1 / span 2; align-self: center; padding: 0; border: 0; color: var(--blue); background: transparent; cursor: pointer; font-weight: 800; }
+.productTagList { display: flex; flex-wrap: wrap; gap: 7px; }
+.tagChip { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: #52677a; background: white; cursor: pointer; font-size: 11px; font-weight: 750; }
+.tagChip:hover { border-color: #8eb5d3; }
+.tagChipActive { border-color: var(--blue); color: var(--blue); background: var(--blue-soft); }
+.tagReset { justify-self: start; padding: 5px 0 0; border: 0; color: var(--blue); background: transparent; cursor: pointer; font-size: 11px; }
+.inlineTagCreate { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 9px; }
+.targetMet { border-color: #8bc79f !important; background: #edf9f1 !important; }
+.targetLow { border-color: #e9a2a2 !important; background: #fff0f0 !important; }
+.calculationTargetEditor { min-height: 0; display: grid; grid-auto-rows: max-content; align-content: start; gap: 14px; overflow: auto; padding-right: 4px; }
+.calculationTargetEditor > .card:first-child .cardBody > .field > input { display: block; margin-bottom: 12px; }
+.calculationNutrientsCard { min-height: 320px; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.calculationNutrientsBody { min-height: 0; overflow: auto; }
+.nutrientTargetList { display: grid; gap: 8px; }
+.nutrientTargetRow { display: grid; grid-template-columns: minmax(0, 1fr) 110px auto; align-items: center; gap: 8px; padding: 9px; border-radius: 10px; background: #f6f9fb; }
+.nutrientTargetRow > span { min-width: 0; color: var(--muted); font-size: 11px; }
+.nutrientTargetRow > span b { display: block; color: var(--blue); font-size: 12px; }
+.nutrientTargetRow small { color: var(--muted); font-size: 10px; }
 .rationMessage { margin-top: 12px; color: #2a6940; font-size: 12px; }
 .centeredActions { justify-content: center; }
 .detailTableWrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 13px; }
@@ -158,11 +191,40 @@
 .historyEnergy { text-align: right; font-size: 19px; font-weight: 900; white-space: nowrap; }
 .moduleItem { display: block; }
 .moduleTop { display: flex; justify-content: space-between; gap: 15px; }
+.formulaVersionsPage { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 18px; overflow: hidden; }
+.formulaVersionsGrid { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 18px; overflow: hidden; }
+.formulaTableCard, .formulaCreateCard { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+.formulaTableBody { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 10px; overflow: hidden; }
+.formulaCreateCard > .cardBody { min-height: 0; overflow: auto; }
+.formulaTableBody > .detailTableWrap { min-height: 0; overflow: auto; }
+.formulaTableTools { display: flex; align-items: center; gap: 10px; }
+.formulaTableTools span { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.formulaSearch { max-width: 340px; padding-top: 8px; padding-bottom: 8px; }
+.formulaSearchEmpty { align-self: start; }
+.formulaTable { min-width: 720px; }
+.formulaTable code { display: block; max-width: 360px; overflow: hidden; font-size: 11px; text-overflow: ellipsis; }
+.versionStatus { display: inline-flex; padding: 4px 7px; border-radius: 999px; color: #6c7883; background: #edf1f4; font-size: 10px; font-weight: 800; }
+.versionStatusCurrent { color: #25623a; background: var(--green); }
+.formulaCreateForm { min-height: 0; }
+.formulaTextarea { resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; line-height: 1.5; }
+.inputError { border-color: #d87979 !important; background: #fff8f8 !important; }
+.formulaError { display: block; color: #b83c3c; font-size: 11px; }
+.formulaValid { display: block; color: #2a6940; font-size: 11px; }
+.success { padding: 10px 12px; border-radius: 10px; color: #2a6940; background: var(--green); font-size: 12px; }
+@media (max-width: 1100px) { .formulaVersionsGrid { grid-template-columns: minmax(0, 1fr) 340px; } }
 .moduleFormula { margin: 9px 0 5px; padding: 9px 11px; background: var(--blue-soft); border-radius: 8px; font-family: monospace; }
+.moduleFormulaInput { font-family: monospace; }
+.standardEditorPage { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.standardEditorPage > .productEditorHeader { margin-bottom: 18px; }
+.standardEditorGrid { min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; overflow: hidden; }
+.standardSexCard { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.standardSexBody { min-height: 0; overflow: auto; }
+.standardSexBody h3 { margin: 22px 0 10px; }
 .species { font-size: 11px; padding: 5px 8px; border-radius: 999px; background: var(--cream); white-space: nowrap; }
 .notice { margin-top: 18px; padding: 14px 16px; border: 1px solid #ecd7a1; border-radius: 12px; background: var(--cream); color: #6e5c2d; font-size: 13px; line-height: 1.45; }
 .infoStack { display: grid; gap: 18px; }
 .dashboardPage > .grid, .dashboardPage > .infoStack { min-height: 0; overflow: auto; padding-right: 4px; }
+.dashboardPage > .calculationGrid { overflow: hidden; padding-right: 0; }
 .dashboardPage > .card { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); }
 .dashboardPage > .card > .cardBody { min-height: 0; overflow: auto; }
 .referenceGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -206,4 +268,6 @@
 .productEditorMessage { position: absolute; right: 0; bottom: 0; padding: 8px 12px; border-radius: 10px; color: #2a6940; background: var(--green); font-size: 12px; box-shadow: 0 8px 24px #17324d1f; }
 @media (max-width: 980px) { .rationListGrid { grid-template-columns: 1fr minmax(280px, .65fr); } .rationEditorGrid { grid-template-columns: 1fr; overflow: auto; } .rationEditorMain, .rationEditorSide { overflow: visible; padding-right: 0; } .rationSummaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rationEnergyCard { grid-column: 1 / -1; } }
 @media (max-width: 980px) { .productEditorGrid { grid-template-columns: 1fr; overflow: auto; } .productMainCard, .productNutrientColumn { overflow: visible; padding-right: 0; } }
+@media (max-width: 980px) { .formulaVersionsPage, .formulaVersionsGrid { overflow: auto; } .formulaVersionsGrid { grid-template-columns: 1fr; } .formulaTableCard, .formulaCreateCard { min-height: 480px; } }
 @media (max-width: 780px) { .workspaceGrid, .rationListGrid { grid-template-columns: 1fr; overflow: auto; } .workspaceGrid > .card, .rationListGrid > .card { min-height: 420px; } .workspaceGrid > .card > form, .rationListGrid > .card > form { min-height: max-content; } .grid, .referenceGrid, .glossaryGrid, .readingGrid, .customerPetGrid { grid-template-columns: 1fr; } .hero, .customerHeader, .rationEditorTop, .productEditorHeader { align-items: start; flex-direction: column; } .rationEditorActions { width: 100%; flex-wrap: wrap; } .customerPage { overflow: auto; } .customerPageContent { flex: none; } .customerPageContent > .card { height: auto; } .customerPageContent > .card > .cardBody { overflow: visible; } .customerSummary { width: 100%; } .formGrid { grid-template-columns: 1fr; } .field.full, .productArchive { grid-column: auto; } .topbar { padding: 0 18px; } .content { padding: 16px 14px 18px; } .tabs { width: 100%; overflow-x: auto; } .tab { white-space: nowrap; } .rationListItem { grid-template-columns: 1fr auto; } .rationListStats { text-align: left; } .rationOpen { grid-column: 2; grid-row: 1 / span 2; } .nutrientSummaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nutrientValueRow { grid-template-columns: 1fr; } }
+@media (max-width: 780px) { .dashboardPage > .calculationGrid { align-items: start; overflow: auto; } .calculationGrid > .card > form > .cardBody { overflow: visible; } }

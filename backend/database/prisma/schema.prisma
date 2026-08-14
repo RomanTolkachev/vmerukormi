@@ -54,10 +54,12 @@ model User {
   productGroups    ProductGroup[]
   nutrients        Nutrient[]
   products         Product[]
+  productTags      ProductTag[]
   rations          Ration[]
   notifications    Notification[]
   invoices         Invoice[]
   tablePreferences TablePreference[]
+  breedStandards   BreedStandard[]
 }
 
 model Session {
@@ -74,12 +76,27 @@ model Session {
 }
 
 model Module {
-  id           String        @id
-  name         String        @unique
+  id           String                 @id @default(cuid())
+  name         String                 @unique
   species      Species
+  archived     Boolean                @default(false)
+  versions     ModuleFormulaVersion[]
+  calculations Calculation[]
+}
+
+model ModuleFormulaVersion {
+  id           String        @id @default(cuid())
+  moduleId     String
   formula      String
   description  String?
+  techBegin    DateTime      @map("tech_begin") @db.Timestamp(3)
+  techEnd      DateTime      @map("tech_end") @db.Timestamp(3)
+  createdAt    DateTime      @default(now())
+  module       Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   calculations Calculation[]
+
+  @@unique([moduleId, techBegin])
+  @@index([moduleId, techBegin, techEnd])
 }
 
 model Pet {
@@ -110,38 +127,89 @@ model Pet {
 }
 
 model Breed {
-  id                String  @id
+  id                String          @id
   species           Species
   nameRu            String
   nameEn            String
   maleIdealWeight   Float
   femaleIdealWeight Float
   pets              Pet[]
+  standards         BreedStandard[]
 
   @@index([species, nameRu])
 }
 
 model Calculation {
-  id             String   @id @default(cuid())
-  petId          String?
-  moduleId       String
-  actualWeight   Float
-  idealWeight    Float
-  bcs            Int
-  energyFactor   Float    @default(1)
-  lactationWeek  Int      @default(1)
-  childrenCount  Int      @default(0)
-  baseEnergy     Int
-  adjustedEnergy Int
-  createdAt      DateTime @default(now())
-  pet            Pet?     @relation(fields: [petId], references: [id], onDelete: SetNull)
-  module         Module   @relation(fields: [moduleId], references: [id])
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String                @id @default(cuid())
+  petId            String?
+  moduleId         String
+  formulaVersionId String
+  actualWeight     Float
+  idealWeight      Float
+  bcs              Int
+  energyFactor     Float                 @default(1)
+  lactationWeek    Int                   @default(1)
+  childrenCount    Int                   @default(0)
+  baseEnergy       Int
+  adjustedEnergy   Int
+  protein          Float                 @default(0)
+  fat              Float                 @default(0)
+  carbs            Float                 @default(0)
+  createdAt        DateTime              @default(now())
+  pet              Pet?                  @relation(fields: [petId], references: [id], onDelete: SetNull)
+  module           Module                @relation(fields: [moduleId], references: [id])
+  formulaVersion   ModuleFormulaVersion  @relation(fields: [formulaVersionId], references: [id])
+  userId           String
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nutrients        CalculationNutrient[]
+  rations          Ration[]
 
   @@index([createdAt])
   @@index([petId])
   @@index([userId, createdAt])
+  @@index([formulaVersionId])
+}
+
+model CalculationNutrient {
+  calculationId String
+  nutrientId    String
+  targetAmount  Float
+  calculation   Calculation @relation(fields: [calculationId], references: [id], onDelete: Cascade)
+  nutrient      Nutrient    @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
+
+  @@id([calculationId, nutrientId])
+  @@index([nutrientId])
+}
+
+model BreedStandard {
+  id                 String                  @id @default(cuid())
+  breedId            String
+  sex                Sex
+  idealWeight        Float
+  proteinPer1000Kcal Float
+  fatPer1000Kcal     Float
+  carbsPer1000Kcal   Float
+  source             String?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  breed              Breed                   @relation(fields: [breedId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nutrients          BreedStandardNutrient[]
+
+  @@unique([userId, breedId, sex])
+  @@index([breedId, sex])
+}
+
+model BreedStandardNutrient {
+  standardId        String
+  nutrientId        String
+  amountPer1000Kcal Float
+  standard          BreedStandard @relation(fields: [standardId], references: [id], onDelete: Cascade)
+  nutrient          Nutrient      @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
+
+  @@id([standardId, nutrientId])
+  @@index([nutrientId])
 }
 
 model Customer {
@@ -185,41 +253,69 @@ model ProductGroup {
 }
 
 model Nutrient {
-  id       String            @id @default(cuid())
-  code     String
-  name     String
-  category String
-  unit     String
-  values   ProductNutrient[]
-  userId   String
-  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                 String                  @id @default(cuid())
+  code               String
+  name               String
+  category           String
+  unit               String
+  values             ProductNutrient[]
+  calculationTargets CalculationNutrient[]
+  standardValues     BreedStandardNutrient[]
+  userId             String
+  user               User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, code])
   @@index([userId, category, name])
 }
 
 model Product {
-  id           String            @id @default(cuid())
-  name         String
-  kind         ProductKind       @default(PRODUCT)
-  groupId      String?
-  baseQuantity Float             @default(100)
-  unit         String            @default("г")
-  calories     Float             @default(0)
-  protein      Float             @default(0)
-  fat          Float             @default(0)
-  carbs        Float             @default(0)
-  archived     Boolean           @default(false)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  group        ProductGroup?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
-  nutrients    ProductNutrient[]
-  measures     ProductMeasure[]
-  rationItems  RationItem[]
-  userId       String
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String            @id @default(cuid())
+  name             String
+  kind             ProductKind       @default(PRODUCT)
+  groupId          String?
+  baseQuantity     Float             @default(100)
+  unit             String            @default("г")
+  calories         Float             @default(0)
+  protein          Float             @default(0)
+  fat              Float             @default(0)
+  carbs            Float             @default(0)
+  source           String?
+  sourceExternalId String?
+  archived         Boolean           @default(false)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  group            ProductGroup?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  nutrients        ProductNutrient[]
+  tags             ProductTagLink[]
+  measures         ProductMeasure[]
+  rationItems      RationItem[]
+  userId           String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, source, sourceExternalId])
   @@index([userId, groupId, name])
+}
+
+model ProductTag {
+  id       String           @id @default(cuid())
+  name     String
+  slug     String
+  products ProductTagLink[]
+  userId   String
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, slug])
+  @@index([userId, name])
+}
+
+model ProductTagLink {
+  productId String
+  tagId     String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       ProductTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
+  @@index([tagId])
 }
 
 model ProductNutrient {
@@ -244,21 +340,25 @@ model ProductMeasure {
 }
 
 model Ration {
-  id           String       @id @default(cuid())
-  name         String
-  petId        String?
-  mode         RationMode   @default(DAILY)
-  targetEnergy Float        @default(0)
-  note         String?
-  sharedToken  String?      @unique
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  pet          Pet?         @relation(fields: [petId], references: [id], onDelete: SetNull)
-  items        RationItem[]
-  userId       String
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String       @id @default(cuid())
+  name             String
+  petId            String?
+  mode             RationMode   @default(DAILY)
+  targetEnergy     Float        @default(0)
+  tolerancePercent Float        @default(10)
+  calculationId    String?
+  note             String?
+  sharedToken      String?      @unique
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  pet              Pet?         @relation(fields: [petId], references: [id], onDelete: SetNull)
+  calculation      Calculation? @relation(fields: [calculationId], references: [id], onDelete: SetNull)
+  items            RationItem[]
+  userId           String
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, petId, updatedAt])
+  @@index([calculationId])
 }
 
 model RationItem {

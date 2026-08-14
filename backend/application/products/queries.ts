@@ -7,7 +7,7 @@ export async function getProductEditorData(id: string) {
   const userId = (await getCurrentUser())?.id;
   if (!userId) return null;
 
-  const [product, nutrients, groups] = await Promise.all([
+  const [product, nutrients, groups, tags] = await Promise.all([
     prisma.product.findFirst({
       where: { id, userId },
       include: {
@@ -16,6 +16,7 @@ export async function getProductEditorData(id: string) {
           include: { nutrient: true },
           orderBy: { nutrient: { name: "asc" } },
         },
+        tags: { include: { tag: true } },
       },
     }),
     prisma.nutrient.findMany({
@@ -25,6 +26,11 @@ export async function getProductEditorData(id: string) {
     prisma.productGroup.findMany({
       where: { userId },
       select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.productTag.findMany({
+      where: { userId },
+      select: { id: true, name: true, slug: true },
       orderBy: { name: "asc" },
     }),
   ]);
@@ -43,6 +49,7 @@ export async function getProductEditorData(id: string) {
       fat: product.fat,
       carbs: product.carbs,
       archived: product.archived,
+      tagIds: product.tags.map((value) => value.tagId),
       nutrients: product.nutrients.map((value) => ({
         nutrientId: value.nutrientId,
         amount: value.amount,
@@ -51,5 +58,6 @@ export async function getProductEditorData(id: string) {
     },
     nutrients,
     groups,
+    tags,
   };
 }
