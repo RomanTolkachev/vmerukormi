@@ -19,8 +19,8 @@ import type {
   ProductKind,
   ProductMeasureValue,
   ProductTagOption,
-} from "../model/types";
-import { ui } from "@/shared/ui/styles/ui";
+} from "../model/edit-product";
+import { ui } from "@/shared/ui/styles";
 
 const measurePresets = [
   { name: "мг", grams: 0.001 },
@@ -95,7 +95,7 @@ export function ProductEditor({
     setPending(true);
     setError("");
     try {
-      const tag = await createProductTag(newTag);
+      const tag = await createProductTag(newTag, product.isShared);
       setTags((current) => current.some((item) => item.id === tag.id) ? current : [...current, tag].sort((a, b) => a.name.localeCompare(b.name, "ru")));
       setProduct((current) => ({ ...current, tagIds: current.tagIds.includes(tag.id) ? current.tagIds : [...current.tagIds, tag.id] }));
       setNewTag("");
@@ -205,6 +205,9 @@ export function ProductEditor({
       <span className={ui("badge")}>{values.length} нутриентов</span>
     </header>
 
+    {product.isShared && <p className={ui("meta")}>Общий каталог. {product.canEdit ? "Вы можете редактировать эту запись." : "Редактирование доступно администратору."}</p>}
+    {product.source === "health-diet" && product.sourceExternalId && <a href={`https://health-diet.ru/base_of_food/sostav/${product.sourceExternalId}.php`} target="_blank" rel="noreferrer">Источник состава: health-diet.ru</a>}
+    <fieldset disabled={!product.canEdit} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
     <div className={ui("productEditorGrid")}>
       <section className={ui("card", "productMainCard")}>
         <form onSubmit={saveProduct}>
@@ -222,7 +225,7 @@ export function ProductEditor({
               <label className={ui("field")}><span>Углеводы, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={product.carbs} onChange={(event) => setProduct({ ...product, carbs: Number(event.target.value) })} /></label>
               <label className={ui("productArchive")}><input type="checkbox" checked={product.archived} onChange={(event) => setProduct({ ...product, archived: event.target.checked })} /> Архивный продукт</label>
               <div className={ui("field", "full")}>
-                <span>Теги для подбора рациона</span>
+                <span>Теги для поиска в каталоге</span>
                 <div className={ui("productTagList")}>
                   {tags.map((tag) => <button className={ui("tagChip", product.tagIds.includes(tag.id) && "tagChipActive")} type="button" aria-pressed={product.tagIds.includes(tag.id)} key={tag.id} onClick={() => setProduct((current) => ({ ...current, tagIds: current.tagIds.includes(tag.id) ? current.tagIds.filter((id) => id !== tag.id) : [...current.tagIds, tag.id] }))}>{tag.name}</button>)}
                   {!tags.length && <small className={ui("fieldHint")}>Тегов пока нет — создайте первый.</small>}
@@ -285,6 +288,7 @@ export function ProductEditor({
         </section>
       </div>
     </div>
+    </fieldset>
     {message && <div className={ui("productEditorMessage")}>{message}</div>}
     {error && <div className={ui("error")}>{error}</div>}
   </div>;

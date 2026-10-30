@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./styles/globals.css";
 import styles from "./styles/base.module.css";
-import { QueryProvider } from "@/shared/lib/query-provider";
+import { QueryProvider } from "@/app/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "VetEnergy — калькулятор рационов",

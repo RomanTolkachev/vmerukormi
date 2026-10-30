@@ -1,7 +1,7 @@
-import { apiFetch, requestJson } from "@/shared/api/http";
-import type { EditableProduct, ProductMeasureValue, ProductNutrientValue, ProductTagOption } from "../model/types";
+import { apiFetch, requestJson } from "@/shared/api";
+import type { EditableProduct, ProductMeasureValue, ProductNutrientValue, ProductTagOption } from "../model/edit-product";
 
-export type ProductUpdate = Omit<EditableProduct, "id" | "measures" | "nutrients">;
+export type ProductUpdate = Omit<EditableProduct, "id" | "measures" | "nutrients" | "isShared" | "canEdit" | "source" | "sourceExternalId">;
 
 export function updateProduct(id: string, input: ProductUpdate) {
   return requestJson<EditableProduct>(`/api/products/${id}`, {
@@ -11,11 +11,11 @@ export function updateProduct(id: string, input: ProductUpdate) {
   });
 }
 
-export function createProductTag(name: string) {
+export function createProductTag(name: string, isShared = false) {
   return requestJson<ProductTagOption>("/api/product-tags", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, isShared }),
   });
 }
 

@@ -1,5 +1,5 @@
-import type { BreedStandardsValue } from "@/entities/standard/model/types";
-import { requestJson } from "@/shared/api/http";
+import type { BreedStandardsValue } from "@/entities/standard";
+import { requestJson } from "@/shared/api";
 
 export function updateBreedStandards(value: BreedStandardsValue) {
   return requestJson<{ ok: true }>(`/api/standards/${value.breed.id}`, {

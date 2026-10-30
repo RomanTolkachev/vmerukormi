@@ -1,0 +1,146 @@
+[
+  {
+    "id": "698",
+    "name": "Куриная грудка (филе)",
+    "group": "meat",
+    "preparation": "raw"
+  },
+  {
+    "id": "14582",
+    "name": "Курица, цыплята-бройлеры, грудка, только мясо, тушеное",
+    "group": "meat",
+    "preparation": "cooked"
+  },
+  {
+    "id": "14736",
+    "name": "Индейка, грудка, только мясо",
+    "group": "meat",
+    "preparation": "raw"
+  },
+  {
+    "id": "679",
+    "name": "Говядина, вырезка",
+    "group": "meat",
+    "preparation": "raw"
+  },
+  {
+    "id": "17551",
+    "name": "Печень говяжья",
+    "group": "offal",
+    "preparation": "raw"
+  },
+  {
+    "id": "17552",
+    "name": "Печень говяжья, тушеная",
+    "group": "offal",
+    "preparation": "cooked"
+  },
+  {
+    "id": "17547",
+    "name": "Сердце говяжье",
+    "group": "offal",
+    "preparation": "raw"
+  },
+  {
+    "id": "18322",
+    "name": "Лосось атлантический, разведенный на ферме, сырой",
+    "group": "fish",
+    "preparation": "raw"
+  },
+  {
+    "id": "18323",
+    "name": "Лосось атлантический, разведенный на ферме, приготовленный на жару",
+    "group": "fish",
+    "preparation": "cooked"
+  },
+  {
+    "id": "18105",
+    "name": "Треска атлантическая, сырая",
+    "group": "fish",
+    "preparation": "raw"
+  },
+  {
+    "id": "18106",
+    "name": "Треска атлантическая, приготовленная на жару",
+    "group": "fish",
+    "preparation": "cooked"
+  },
+  {
+    "id": "23887",
+    "name": "Творог 5% жирности",
+    "group": "dairy",
+    "preparation": "plain"
+  },
+  {
+    "id": "135",
+    "name": "Кефир 1% жирности",
+    "group": "dairy",
+    "preparation": "plain"
+  },
+  {
+    "id": "13914",
+    "name": "Яйцо куриное вареное вкрутую",
+    "group": "eggs",
+    "preparation": "boiled"
+  },
+  {
+    "id": "19914",
+    "name": "Гречиха, зерно",
+    "group": "grains",
+    "preparation": "dry"
+  },
+  {
+    "id": "19916",
+    "name": "Гречневая крупа, обжаренная, приготовленная",
+    "group": "grains",
+    "preparation": "cooked"
+  },
+  {
+    "id": "20060",
+    "name": "Рис белый длиннозерный, пропаренный, приготовленный",
+    "group": "grains",
+    "preparation": "cooked"
+  },
+  {
+    "id": "15650",
+    "name": "Овсяная каша жидкая, приготовленная на воде, без соли",
+    "group": "grains",
+    "preparation": "cooked"
+  },
+  {
+    "id": "115",
+    "name": "Кабачок",
+    "group": "vegetables",
+    "preparation": "raw"
+  },
+  {
+    "id": "17080",
+    "name": "Кабачок, все сорта, вареный, без соли",
+    "group": "vegetables",
+    "preparation": "boiled"
+  },
+  {
+    "id": "16698",
+    "name": "Морковь",
+    "group": "vegetables",
+    "preparation": "raw"
+  },
+  {
+    "id": "16699",
+    "name": "Морковь, вареная, без соли",
+    "group": "vegetables",
+    "preparation": "boiled"
+  },
+  {
+    "id": "449",
+    "name": "Яблоко",
+    "group": "fruit",
+    "preparation": "raw"
+  },
+  {
+    "id": "249",
+    "name": "Оливковое масло",
+    "group": "oils",
+    "preparation": "plain"
+  }
+]

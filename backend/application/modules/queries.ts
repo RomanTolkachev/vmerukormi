@@ -3,7 +3,7 @@ import "server-only";
 import { getCurrentUser } from "@backend/auth/session";
 import { dateTime, isVersionCurrent } from "@backend/domain/nutrition/formula-versions";
 import { prisma } from "@backend/infrastructure/database/prisma";
-import type { CalculationModule, FormulaModuleDetails, FormulaVersion } from "@/entities/module/model/types";
+import type { CalculationModule, FormulaModuleDetails, FormulaVersion } from "@/entities/module";
 
 function serializeVersion(version: { id: string; moduleId: string; formula: string; description: string | null; techBegin: Date; techEnd: Date; module: { name: string; species: "CAT" | "DOG" } }): FormulaVersion {
   const now = new Date();

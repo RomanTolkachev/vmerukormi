@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { BreedStandardsValue, SexStandardValue } from "@/entities/standard/model/types";
-import { updateBreedStandards } from "@/features/edit-standard/api/update-standards";
-import { macroEnergy } from "@/entities/calculation/lib/macro-energy";
-import { ui } from "@/shared/ui/styles/ui";
+import type { BreedStandardsValue, SexStandardValue } from "@/entities/standard";
+import { updateBreedStandards } from "../api/update-standards";
+import { macroEnergy } from "@/entities/calculation";
+import { ui } from "@/shared/ui/styles";
 
 export function BreedStandardEditor({ initialValue }: { initialValue: BreedStandardsValue }) {
   const [value, setValue] = useState(initialValue);

@@ -1,5 +1,5 @@
 import { getRationsPageData } from "@backend/application/rations/queries";
-import { RationsPage } from "@/widgets/rations/ui/rations-page";
+import { RationsPage } from "@/_pages/rations";
 
 export default async function Page({
   searchParams,

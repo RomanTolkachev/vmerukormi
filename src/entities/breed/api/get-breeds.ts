@@ -1,5 +1,5 @@
-import type { Breed } from "@/entities/breed/model/types";
-import { requestJson } from "@/shared/api/http";
+import type { Breed } from "../model/breed";
+import { requestJson } from "@/shared/api";
 
 export function getBreeds(signal?: AbortSignal) {
   return requestJson<Breed[]>("/api/breeds", { signal });

@@ -1,6 +1,8 @@
 import { prisma } from "@backend/infrastructure/database/prisma";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 
+import { readableCatalog, writableCatalog, canEditCatalog, catalogReferences } from "@backend/domain/catalog/access";
+
 const columns: Record<string, { name: string; label: string }[]> = {
   customers: [
     { name: "name", label: "Клиент" },
@@ -19,6 +21,8 @@ const columns: Record<string, { name: string; label: string }[]> = {
     { name: "name", label: "Продукт" },
     { name: "kind", label: "Тип" },
     { name: "groupName", label: "Группа" },
+    { name: "tagNames", label: "Теги" },
+    { name: "catalogLabel", label: "Каталог" },
     { name: "calories", label: "ккал / 100 г" },
     { name: "protein", label: "Белок" },
     { name: "fat", label: "Жир" },
@@ -69,7 +73,7 @@ function page<T extends Record<string, unknown>>(
     sort = url.searchParams.get("sort_col"),
     dir = url.searchParams.get("sort_dir") === "desc" ? -1 : 1;
   const searchFields =
-    resource === "customers" ? ["name", "email", "phone"] : undefined;
+    resource === "customers" ? ["name", "email", "phone"] : resource === "products" ? ["name", "groupName", "tagNames"] : undefined;
   let result = search
     ? rows.filter((r) =>
         (searchFields ?? Object.keys(r)).some((field) =>
@@ -124,13 +128,14 @@ export async function listWorkspace(
     );
   }
   if (resource === "products") {
+    const tagId = new URL(request.url).searchParams.get("tagId");
     const rows = await prisma.product.findMany({
-      where: { userId: user.id },
-      include: { group: true, measures: true },
+      where: { ...readableCatalog(user.id), ...(tagId ? { tags: { some: { tagId } } } : {}) },
+      include: { group: true, measures: true, tags: { include: { tag: true } } },
       orderBy: { name: "asc" },
     });
     return page(
-      rows.map((r) => ({ ...r, groupName: r.group?.name ?? "—" })),
+      rows.map((r) => ({ ...r, groupName: r.group?.name ?? "—", tagNames: r.tags.map(({ tag }) => tag.name).join(", "), catalogLabel: r.isShared ? "Общий" : "Личный", canEdit: canEditCatalog(r, user) })),
       request,
       resource,
     );
@@ -138,7 +143,7 @@ export async function listWorkspace(
   if (resource === "nutrients")
     return page(
       await prisma.nutrient.findMany({
-        where: { userId: user.id },
+        where: readableCatalog(user.id),
         orderBy: [{ category: "asc" }, { name: "asc" }],
       }),
       request,
@@ -175,7 +180,7 @@ export async function listWorkspace(
     );
   if (resource === "groups")
     return Response.json(
-      await prisma.productGroup.findMany({ where: { userId: user.id }, orderBy: { name: "asc" } }),
+      await prisma.productGroup.findMany({ where: readableCatalog(user.id), orderBy: { name: "asc" } }),
     );
   if (resource === "standards") {
     const breeds = await prisma.breed.findMany({
@@ -209,8 +214,10 @@ export async function createWorkspace(
   const user = await requireUser(request, { csrf: true });
   const { resource } = await params;
   const b = await request.json();
+  const isShared = b.isShared === true;
+  if (isShared && user.role !== "ADMIN") return Response.json({ error: "Общий каталог изменяет только администратор" }, { status: 403 });
   if (resource === "products" && b.groupId) {
-    const group = await prisma.productGroup.findFirst({ where: { id: b.groupId, userId: user.id }, select: { id: true } });
+    const group = await prisma.productGroup.findFirst({ where: { id: b.groupId, ...catalogReferences(user.id, isShared) }, select: { id: true } });
     if (!group) return Response.json({ error: "Группа не найдена" }, { status: 404 });
   }
   if (resource === "rations" && b.petId) {
@@ -218,7 +225,7 @@ export async function createWorkspace(
     if (!pet) return Response.json({ error: "Питомец не найден" }, { status: 404 });
   }
   if (resource === "groups" && b.parentId) {
-    const parent = await prisma.productGroup.findFirst({ where: { id: b.parentId, userId: user.id }, select: { id: true } });
+    const parent = await prisma.productGroup.findFirst({ where: { id: b.parentId, ...catalogReferences(user.id, isShared) }, select: { id: true } });
     if (!parent) return Response.json({ error: "Родительская группа не найдена" }, { status: 404 });
   }
   if (resource === "customers")
@@ -239,6 +246,7 @@ export async function createWorkspace(
       await prisma.product.create({
         data: {
           name: b.name,
+          isShared,
           kind: b.kind,
           groupId: b.groupId || null,
           calories: +b.calories || 0,
@@ -254,6 +262,7 @@ export async function createWorkspace(
     return Response.json(
       await prisma.nutrient.create({
         data: {
+          isShared,
           code: b.code,
           name: b.name,
           category: b.category,
@@ -287,7 +296,7 @@ export async function createWorkspace(
   if (resource === "groups")
     return Response.json(
       await prisma.productGroup.create({
-        data: { name: b.name, parentId: b.parentId || null, userId: user.id },
+        data: { isShared, name: b.name, parentId: b.parentId || null, userId: user.id },
       }),
       { status: 201 },
     );
@@ -309,9 +318,15 @@ export async function mutateWorkspace(
     if (resource === "customers")
       await prisma.customer.deleteMany({ where: { id, userId: user.id } });
     else if (resource === "products")
-      await prisma.product.deleteMany({ where: { id, userId: user.id } });
+      {
+      const deleted = await prisma.product.deleteMany({ where: { id, ...writableCatalog(user) } });
+      if (!deleted.count) return Response.json({ error: "Продукт недоступен для удаления" }, { status: 404 });
+    }
     else if (resource === "nutrients")
-      await prisma.nutrient.deleteMany({ where: { id, userId: user.id } });
+      {
+      const deleted = await prisma.nutrient.deleteMany({ where: { id, ...writableCatalog(user) } });
+      if (!deleted.count) return Response.json({ error: "Нутриент недоступен для удаления" }, { status: 404 });
+    }
     else if (resource === "rations")
       await prisma.ration.deleteMany({ where: { id, userId: user.id } });
     else if (resource === "notifications")

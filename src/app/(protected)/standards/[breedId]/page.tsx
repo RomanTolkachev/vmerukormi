@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getBreedStandards } from "@backend/application/standards/queries";
-import { BreedStandardEditor } from "@/features/edit-standard/ui/breed-standard-editor";
+import { BreedStandardEditor } from "@/features/edit-standard";
 
 export default async function BreedStandardPage({ params }: { params: Promise<{ breedId: string }> }) {
   const { breedId } = await params;

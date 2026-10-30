@@ -1,4 +1,4 @@
-import { requestJson } from "@/shared/api/http";
+import { requestJson } from "@/shared/api";
 
 export type FormulaDraft = { formula: string; description: string | null };
 

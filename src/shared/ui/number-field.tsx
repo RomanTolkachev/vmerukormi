@@ -1,5 +1,5 @@
 import type { UseFormRegisterReturn } from "react-hook-form";
-import { ui } from "@/shared/ui/styles/ui";
+import { ui } from "@/shared/ui/styles";
 
 export function NumberField({ label, registration, min = 0.1, max = 150, step = 0.1, readOnly = false, hint }: {
   label: string;

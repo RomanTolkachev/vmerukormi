@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { validateFormula } from "../api/update-module";
-import { ui } from "@/shared/ui/styles/ui";
+import { ui } from "@/shared/ui/styles";
 
 export function FormulaInput({ value, onChange, onValidityChange }: { value: string; onChange: (value: string) => void; onValidityChange: (valid: boolean) => void }) {
   const [checking, setChecking] = useState(false);

@@ -1,5 +1,5 @@
-import type { CalculationHistoryItem } from "@/entities/calculation/model/types";
-import { requestJson } from "@/shared/api/http";
+import type { CalculationHistoryItem } from "../model/calculation";
+import { requestJson } from "@/shared/api";
 
 export function getCalculations(signal?: AbortSignal) {
   return requestJson<CalculationHistoryItem[]>("/api/calculations", { signal });

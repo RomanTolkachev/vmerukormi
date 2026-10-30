@@ -1,4 +1,4 @@
-import { apiFetch } from "@/shared/api/http";
+import { apiFetch } from "@/shared/api";
 
 export async function deleteCustomer(id: string) {
   const response = await apiFetch(`/api/workspace/customers/${id}`, { method: "DELETE" });

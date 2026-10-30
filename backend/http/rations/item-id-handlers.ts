@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readableCatalog } from "@backend/domain/catalog/access";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
 
@@ -30,7 +31,7 @@ export async function PATCH(request: Request, { params }: Context) {
 
     const productId = parsed.data.productId ?? existing.productId;
     const product = await prisma.product.findFirst({
-      where: { id: productId, userId: user.id, archived: false },
+      where: { id: productId, ...readableCatalog(user.id), archived: false },
       include: { measures: true },
     });
     if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });

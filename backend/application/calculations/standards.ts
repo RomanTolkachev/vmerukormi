@@ -1,4 +1,6 @@
 import "server-only";
+import { readableCatalog } from "@backend/domain/catalog/access";
+import { uniqueCatalogNutrients, catalogDefault } from "@backend/domain/catalog/nutrients";
 
 import type { Sex, Species } from "@prisma/client";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -22,7 +24,7 @@ export async function getCalculationStandards(input: {
           include: { nutrients: { include: { nutrient: true } } },
         })
       : null,
-    prisma.nutrient.findMany({ where: { userId: input.userId }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    prisma.nutrient.findMany({ where: readableCatalog(input.userId), orderBy: [{ category: "asc" }, { name: "asc" }] }),
   ]);
 
   const baseMacros = DEFAULT_MACROS_PER_1000_KCAL[input.species];
@@ -36,8 +38,8 @@ export async function getCalculationStandards(input: {
 
   return {
     macros,
-    nutrients: nutrients.map((nutrient) => {
-      const per1000 = overrides.get(nutrient.id) ?? defaults[nutrient.code];
+    nutrients: uniqueCatalogNutrients(nutrients, new Set(overrides.keys())).map((nutrient) => {
+      const per1000 = overrides.get(nutrient.id) ?? catalogDefault(nutrient, defaults);
       return {
         nutrientId: nutrient.id,
         code: nutrient.code,

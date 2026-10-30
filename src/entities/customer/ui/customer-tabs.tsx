@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ui } from "@/shared/ui/styles/ui";
+import { ui } from "@/shared/ui/styles";
 
 export function CustomerTabs({ customerId }: { customerId: string }) {
   const pathname = usePathname();

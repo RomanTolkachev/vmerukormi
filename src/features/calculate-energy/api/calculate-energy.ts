@@ -1,5 +1,5 @@
-import type { EnergyResult } from "@/entities/calculation/model/types";
-import { requestJson } from "@/shared/api/http";
+import type { EnergyResult } from "@/entities/calculation";
+import { requestJson } from "@/shared/api";
 
 export type EnergyCalculationInput = {
   petId: string | null;

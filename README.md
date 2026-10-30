@@ -157,7 +157,7 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5434/vet_calorie?schema=p
 
 ```text
 Браузер
-  └─ FSD frontend: app → widgets → features → entities → shared
+  └─ FSD frontend: app → _pages → features → entities → shared
        └─ /api/* — обязательные тонкие Route Handlers Next.js
             └─ backend/http
                  ├─ Zod validation
@@ -165,14 +165,14 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5434/vet_calorie?schema=p
                  └─ backend/infrastructure → Prisma → PostgreSQL
 ```
 
-Frontend организован по Feature-Sliced Design. Слой `pages` отдельно не создаётся, потому что его роль в Next.js App Router выполняет `src/app`, а каталог `src/pages` включил бы второй Pages Router.
+Frontend организован по Feature-Sliced Design. Экранные композиции находятся в `src/_pages`, чтобы не включать Next.js Pages Router. Правила импортов и локальные решения описаны в [docs/architecture.md](docs/architecture.md). Официальный проектный skill находится в `.agents/skills/feature-sliced-design/SKILL.md`.
 
 Основные каталоги:
 
 ```text
 src/
   app/                       Next.js composition, routing and API adapters
-  widgets/                   крупные самостоятельные блоки страниц
+  _pages/                    экранные композиции и локальная логика
   features/                  пользовательские действия
   entities/                  Pet, Breed, Calculation, Module, Reference
   shared/                    HTTP-клиент и переиспользуемый UI
@@ -425,6 +425,14 @@ curl -I http://localhost:3000
 
 ## Источники и стандарты
 
+### Общий каталог базовых продуктов
+
+Миграции добавляют 24 отобранных продукта health-diet и 1555 значений состава. Каталог доступен всем пользователям без копирования при регистрации; общие записи редактирует только ADMIN, личные продукты остаются личными. Поиск в «Продуктах» учитывает названия тегов, есть отдельный фильтр по тегу. Состав, влага и обязательные нутриенты выводятся в рационе и Excel, отсутствующие данные отмечаются явно.
+
+Установка: `npm run db:deploy` (в production выполняется сервисом `migrate`). Сеть и повторный парсинг при запуске не требуются. Подробности отбора, единиц и воспроизводимости: [health-diet](backend/database/prisma/catalog/health-diet/README.md).
+
+Проверки: `npm run test:catalog`. Интеграционный сценарий `tooling/catalog-smoke.mjs` запускается только с изолированной базой `catalog_test` и локальным тестовым сервером через переменные `DATABASE_URL` и `CATALOG_TEST_APP_URL`; создаёт и удаляет собственных тестовых пользователей.
+
 - [FEDIAF Nutritional Guidelines 2025](https://www.europeanpetfood.org/wp-content/uploads/2025/09/FEDIAF-Nutritional-Guidelines_2025.pdf), раздел 7.2 Energy.
 - [NRC: Nutrient Requirements of Dogs and Cats](https://www.nationalacademies.org/publications/10668).
 - [AAHA: Energy Requirement Calculations](https://www.aaha.org/globalassets/02-guidelines/2021-nutrition-and-weight-management/resourcepdfs/nutritiongl_box1.pdf).
@@ -443,7 +451,7 @@ curl -I http://localhost:3000
 - `cat-senior-cardio` сейчас использует ту же энергетическую формулу, что и взрослая кошка.
 - Две фазы роста щенка имеют одинаковую формулу ОЭ; различия могут быть в нутриентных нормах, которые приложение пока не рассчитывает.
 - История ограничена последними 50 записями.
-- Нет автоматических unit/integration/e2e тестов; используются lint, TypeScript build, API-smoke и визуальная проверка.
+- Есть тесты FSD, парсера, прав каталога, агрегации нутриентов и интеграционный сценарий каталога; остальные сценарии пока проверяются вручную.
 - Локальные credentials PostgreSQL нельзя использовать в production.
 
 ## Следующие разумные шаги

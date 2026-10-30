@@ -1,5 +1,5 @@
-import { apiFetch, requestJson } from "@/shared/api/http";
-import type { RationItem, RationMode } from "@/entities/ration/model/types";
+import { apiFetch, requestJson } from "@/shared/api";
+import type { RationItem, RationMode } from "@/entities/ration";
 
 export type RationInput = {
   name: string;

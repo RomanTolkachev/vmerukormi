@@ -240,6 +240,7 @@ model PetMeasurement {
 }
 
 model ProductGroup {
+  isShared Boolean        @default(false)
   id       String         @id @default(cuid())
   name     String
   parentId String?
@@ -253,6 +254,7 @@ model ProductGroup {
 }
 
 model Nutrient {
+  isShared           Boolean                 @default(false)
   id                 String                  @id @default(cuid())
   code               String
   name               String
@@ -269,6 +271,7 @@ model Nutrient {
 }
 
 model Product {
+  isShared         Boolean           @default(false)
   id               String            @id @default(cuid())
   name             String
   kind             ProductKind       @default(PRODUCT)
@@ -297,6 +300,7 @@ model Product {
 }
 
 model ProductTag {
+  isShared Boolean          @default(false)
   id       String           @id @default(cuid())
   name     String
   slug     String

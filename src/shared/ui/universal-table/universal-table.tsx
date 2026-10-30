@@ -9,8 +9,8 @@ import type {
   UniversalTableProps,
 } from "./types";
 import styles from "./universal-table.module.css";
-import { apiFetch } from "@/shared/api/http";
-import { ui } from "@/shared/ui/styles/ui";
+import { apiFetch } from "@/shared/api";
+import { ui } from "@/shared/ui/styles";
 
 type Settings = {
   visible?: Record<string, boolean>;

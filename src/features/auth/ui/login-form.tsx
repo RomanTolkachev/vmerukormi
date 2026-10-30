@@ -2,8 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/shared/api/http";
-import { ui } from "@/shared/ui/styles/ui";
+import { apiFetch } from "@/shared/api";
+import { ui } from "@/shared/ui/styles";
 
 export function LoginForm() {
   const router = useRouter();

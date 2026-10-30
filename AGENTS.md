@@ -7,3 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Feature-Sliced Design
+
+Read `.agents/skills/feature-sliced-design/SKILL.md` for frontend architecture work.
+Follow the project mapping and documented exceptions in `docs/architecture.md`.
+Use slice public APIs, keep imports directed down the layers, and run `npm run lint`.

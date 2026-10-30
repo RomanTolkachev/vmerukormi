@@ -1,5 +1,5 @@
-import type { Pet } from "@/entities/pet/model/types";
-import { requestJson } from "@/shared/api/http";
+import type { Pet } from "../model/pet";
+import { requestJson } from "@/shared/api";
 
 export function getPets(signal?: AbortSignal) {
   return requestJson<Pet[]>("/api/pets", { signal });

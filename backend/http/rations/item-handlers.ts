@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readableCatalog } from "@backend/domain/catalog/access";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
 
@@ -27,7 +28,7 @@ export async function POST(
         select: { id: true, mode: true },
       }),
       prisma.product.findFirst({
-        where: { id: parsed.data.productId, userId: user.id, archived: false },
+        where: { id: parsed.data.productId, ...readableCatalog(user.id), archived: false },
         include: { measures: true },
       }),
     ]);

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getFormulaModuleDetails } from "@backend/application/modules/queries";
-import { FormulaModulePage } from "@/widgets/modules/ui/formula-module-page";
+import { FormulaModulePage } from "@/_pages/modules";
 
 export default async function ModulePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

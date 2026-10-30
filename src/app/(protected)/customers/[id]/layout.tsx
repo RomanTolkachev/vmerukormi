@@ -1,9 +1,9 @@
-import { ui } from "@/shared/ui/styles/ui";
+import { ui } from "@/shared/ui/styles";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCustomerHeader } from "@backend/application/customers/queries";
-import { CustomerTabs } from "@/entities/customer/ui/customer-tabs";
+import { CustomerTabs } from "@/entities/customer";
 
 export default async function CustomerLayout({ children, params }: { children: ReactNode; params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createFormulaVersion } from "../api/update-module";
 import { FormulaInput } from "./formula-input";
-import { ui } from "@/shared/ui/styles/ui";
+import { ui } from "@/shared/ui/styles";
 
 export function CreateVersionForm({ moduleId, moduleName, latestFormula, latestDescription }: { moduleId: string; moduleName: string; latestFormula: string; latestDescription: string | null }) {
   const router = useRouter();

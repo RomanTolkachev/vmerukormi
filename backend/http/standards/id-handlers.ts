@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readableCatalog } from "@backend/domain/catalog/access";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
 
@@ -22,7 +23,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ bree
     const breed = await prisma.breed.findUnique({ where: { id: breedId }, select: { id: true } });
     if (!breed) return Response.json({ error: "Порода не найдена" }, { status: 404 });
     const nutrientIds = [...new Set(parsed.data.standards.flatMap((item) => item.nutrients.map((value) => value.nutrientId)))];
-    const ownedNutrients = await prisma.nutrient.count({ where: { userId: user.id, id: { in: nutrientIds } } });
+    const ownedNutrients = await prisma.nutrient.count({ where: { ...readableCatalog(user.id), id: { in: nutrientIds } } });
     if (ownedNutrients !== nutrientIds.length) return Response.json({ error: "Часть нутриентов не найдена" }, { status: 400 });
 
     await prisma.$transaction(async (tx) => {

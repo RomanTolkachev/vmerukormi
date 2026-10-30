@@ -1,4 +1,5 @@
 import "server-only";
+import { readableCatalog } from "@backend/domain/catalog/access";
 
 import { getCurrentUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -10,7 +11,7 @@ import type {
   RationItem,
   RationCalculationOption,
   RationCustomerOption,
-} from "@/entities/ration/model/types";
+} from "@/entities/ration";
 
 const productInclude = {
   measures: { orderBy: { name: "asc" as const } },
@@ -168,9 +169,9 @@ export async function getRationEditorData(id: string) {
   });
   if (!ration) return null;
 
-  const [products, customers, pets, calculations] = await Promise.all([
+  const [products, customers, pets, calculations, nutrients] = await Promise.all([
     prisma.product.findMany({
-      where: { userId, archived: false },
+      where: { ...readableCatalog(userId), archived: false },
       include: productInclude,
       orderBy: { name: "asc" },
     }),
@@ -193,6 +194,7 @@ export async function getRationEditorData(id: string) {
       orderBy: { createdAt: "desc" },
       take: 100,
     }),
+    prisma.nutrient.findMany({ where: readableCatalog(userId), orderBy: [{ category: "asc" }, { name: "asc" }] }),
   ]);
 
   const value: RationEditorValue = {
@@ -235,5 +237,6 @@ export async function getRationEditorData(id: string) {
     customers,
     pets: pets.map(petOption),
     calculations: calculations.map(calculationOption),
+    nutrients,
   };
 }

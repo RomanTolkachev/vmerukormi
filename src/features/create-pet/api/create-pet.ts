@@ -1,5 +1,5 @@
-import type { Pet, PetDraft } from "@/entities/pet/model/types";
-import { requestJson } from "@/shared/api/http";
+import type { Pet, PetDraft } from "@/entities/pet";
+import { requestJson } from "@/shared/api";
 
 export function createPet(draft: PetDraft) {
   return requestJson<Pet>("/api/pets", {

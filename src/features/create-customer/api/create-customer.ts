@@ -1,4 +1,4 @@
-import { requestJson } from "@/shared/api/http";
+import { requestJson } from "@/shared/api";
 
 export function createCustomer(input: Record<string, FormDataEntryValue>) {
   return requestJson<{ id: string }>("/api/workspace/customers", {

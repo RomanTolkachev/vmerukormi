@@ -1,4 +1,4 @@
-import { apiFetch } from "@/shared/api/http";
+import { apiFetch } from "@/shared/api";
 
 export async function logout() {
   const response = await apiFetch("/api/auth/logout", { method: "POST" });

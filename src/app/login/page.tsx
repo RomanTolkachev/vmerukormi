@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@backend/auth/session";
-import { LoginForm } from "@/features/auth/ui/login-form";
-import { ui } from "@/shared/ui/styles/ui";
+import { LoginForm } from "@/features/auth";
+import { ui } from "@/shared/ui/styles";
 
 export default async function LoginPage() {
   if (await getCurrentUser()) redirect("/");

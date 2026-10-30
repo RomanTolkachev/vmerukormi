@@ -5,6 +5,7 @@ import { energyFromMacros } from "@backend/domain/nutrition/standards";
 import { getCalculationStandards } from "@backend/application/calculations/standards";
 import { prisma } from "@backend/infrastructure/database/prisma";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
+import { readableCatalog } from "@backend/domain/catalog/access";
 
 const schema = z.object({
   petId: z.string().optional().nullable(),
@@ -45,6 +46,11 @@ export async function POST(request: Request) {
     const parsed = schema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: "Проверьте параметры", details: parsed.error.flatten() }, { status: 400 });
     const { save, breedId, sex, nutrients: submittedNutrients, adjustedEnergy: submittedEnergy, protein, fat, carbs, ...input } = parsed.data;
+    if (submittedNutrients) {
+      const nutrientIds = submittedNutrients.map((value) => value.nutrientId);
+      const visibleCount = await prisma.nutrient.count({ where: { id: { in: nutrientIds }, ...readableCatalog(user.id) } });
+      if (visibleCount !== nutrientIds.length) return NextResponse.json({ error: "Нутриенты недоступны или повторяются" }, { status: 400 });
+    }
     let effectiveBreedId = breedId;
     let effectiveSex = sex;
     if (input.petId) {

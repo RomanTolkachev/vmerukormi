@@ -1,5 +1,7 @@
 import "server-only";
 
+import { readableCatalog } from "@backend/domain/catalog/access";
+import { summarizeNutrients, type SummaryNutrient } from "@/entities/ration";
 import ExcelJS, { type Cell, type Row, type Worksheet } from "exceljs";
 import { prisma } from "@backend/infrastructure/database/prisma";
 
@@ -98,7 +100,7 @@ function safeFilePart(value: string) {
   return normalized || "ration";
 }
 
-function buildWorkbook(ration: ExportRation) {
+function buildWorkbook(ration: ExportRation, nutrients: SummaryNutrient[]) {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "В меру корми";
   workbook.created = new Date();
@@ -190,21 +192,7 @@ function buildWorkbook(ration: ExportRation) {
     }),
     { grams: 0, calories: 0, protein: 0, fat: 0, carbs: 0 },
   );
-  const nutrientTotals = new Map<string, { code: string; name: string; category: string; unit: string; amount: number }>();
-  enabledItems.forEach((item) => {
-    const factor = item.grams / item.product.baseQuantity / divisor;
-    item.product.nutrients.forEach((value) => {
-      if (value.amount === null) return;
-      const current = nutrientTotals.get(value.nutrientId);
-      nutrientTotals.set(value.nutrientId, {
-        code: value.nutrient.code,
-        name: value.nutrient.name,
-        category: value.nutrient.category,
-        unit: value.nutrient.unit,
-        amount: (current?.amount ?? 0) + value.amount * factor,
-      });
-    });
-  });
+  const nutrientSummary = summarizeNutrients(ration.items, ration.mode, nutrients, ration.calculation?.nutrients);
   const percent = ration.targetEnergy ? daily.calories / ration.targetEnergy : 0;
   const status = !ration.targetEnergy
     ? "Цель не указана"
@@ -290,29 +278,14 @@ function buildWorkbook(ration: ExportRation) {
   mainNutrientHeader.values = ["Код", "Нутриент", "Норма", "Факт", "Допуск, %", "Допустимый максимум", "Статус", "Единица"];
   styleTableHeader(mainNutrientHeader);
 
-  const rationNutrientRows = ration.calculation?.nutrients.length
-    ? ration.calculation.nutrients.map((target) => ({
-        nutrientId: target.nutrientId,
-        code: target.nutrient.code,
-        name: target.nutrient.name,
-        category: target.nutrient.category,
-        unit: target.nutrient.unit,
-        target: target.targetAmount,
-        actual: nutrientTotals.get(target.nutrientId)?.amount ?? 0,
-      }))
-    : [...nutrientTotals.entries()].map(([nutrientId, nutrient]) => ({
-        nutrientId,
-        ...nutrient,
-        target: null,
-        actual: nutrient.amount,
-      }));
+  const rationNutrientRows = nutrientSummary.map(({ nutrient, amount, target, complete }) => ({ ...nutrient, target: target?.targetAmount ?? null, actual: amount, complete }));
   rationNutrientRows
     .sort((left, right) => `${left.category}-${left.name}`.localeCompare(`${right.category}-${right.name}`, "ru"))
     .forEach((nutrient, index) => {
       const rowNumber = rationNutrientStartRow + index;
       const row = rationSheet.getRow(rowNumber);
       const maximum = nutrient.target === null ? null : nutrient.target * (1 + ration.tolerancePercent / 100);
-      const nutrientStatus = nutrient.target === null
+      const nutrientStatus = !nutrient.complete ? "Нет полных данных" : nutrient.target === null
         ? "Норма не указана"
         : comparisonStatus(nutrient.actual, nutrient.target, ration.tolerancePercent);
       row.values = [nutrient.code, nutrient.name, nutrient.target, nutrient.actual, ration.tolerancePercent / 100, maximum, nutrientStatus, nutrient.unit];
@@ -331,30 +304,30 @@ function buildWorkbook(ration: ExportRation) {
     properties: { defaultRowHeight: 20 },
     views: [{ state: "frozen", ySplit: 3, showGridLines: false }],
   });
-  nutrientsSheet.columns = [{ width: 14 }, { width: 34 }, { width: 24 }, { width: 13 }, { width: 18 }];
-  nutrientsSheet.mergeCells("A1:E1");
+  nutrientsSheet.columns = [{ width: 14 }, { width: 34 }, { width: 24 }, { width: 13 }, { width: 18 }, { width: 24 }];
+  nutrientsSheet.mergeCells("A1:F1");
   nutrientsSheet.getCell("A1").value = "Нутриенты в сутки";
   nutrientsSheet.getCell("A1").fill = { type: "pattern", pattern: "solid", fgColor: { argb: BLUE } };
   nutrientsSheet.getCell("A1").font = { bold: true, color: { argb: WHITE }, size: 18 };
   nutrientsSheet.getRow(1).height = 36;
   const nutrientHeader = nutrientsSheet.getRow(3);
-  nutrientHeader.values = ["Код", "Нутриент", "Категория", "Единица", "Количество в сутки"];
+  nutrientHeader.values = ["Код", "Нутриент", "Категория", "Единица", "Количество в сутки", "Полнота данных"];
   styleTableHeader(nutrientHeader);
 
-  [...nutrientTotals.values()]
+  rationNutrientRows
     .sort((left, right) => `${left.category}-${left.name}`.localeCompare(`${right.category}-${right.name}`, "ru"))
     .forEach((nutrient, index) => {
       const row = nutrientsSheet.getRow(index + 4);
-      row.values = [nutrient.code, nutrient.name, nutrient.category, nutrient.unit, nutrient.amount];
+      row.values = [nutrient.code, nutrient.name, nutrient.category, nutrient.unit, nutrient.actual, nutrient.complete ? "Полные" : "Нет полных данных"];
       row.getCell(5).numFmt = "0.000";
       row.eachCell((cell) => thinBottom(cell));
     });
-  if (!nutrientTotals.size) {
-    nutrientsSheet.mergeCells("A4:E4");
+  if (!rationNutrientRows.length) {
+    nutrientsSheet.mergeCells("A4:F4");
     nutrientsSheet.getCell("A4").value = "Для включённых продуктов нутриенты не заполнены";
     nutrientsSheet.getCell("A4").font = { italic: true, color: { argb: MUTED } };
   }
-  nutrientsSheet.autoFilter = "A3:E3";
+  nutrientsSheet.autoFilter = "A3:F3";
 
   const productsSheet = workbook.addWorksheet("Состав продуктов", {
     properties: { defaultRowHeight: 20 },
@@ -389,7 +362,8 @@ export async function exportRationXlsx(userId: string, rationId: string) {
   const ration = await findRation(userId, rationId);
   if (!ration) return null;
 
-  const workbook = buildWorkbook(ration);
+  const nutrients = await prisma.nutrient.findMany({ where: readableCatalog(userId) });
+  const workbook = buildWorkbook(ration, nutrients);
   const buffer = await workbook.xlsx.writeBuffer();
   return {
     buffer: new Uint8Array(buffer),

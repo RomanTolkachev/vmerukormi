@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test:catalog": "node --test backend/database/prisma/catalog/health-diet/parser.test.mjs && node --import tsx --test backend/domain/catalog/*.test.ts src/entities/ration/model/nutrient-summary.test.ts",
     "db:generate": "prisma generate --schema backend/database/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema backend/database/prisma/schema.prisma",
     "db:deploy": "prisma migrate deploy --schema backend/database/prisma/schema.prisma",

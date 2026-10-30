@@ -1,4 +1,4 @@
-import { ui } from "@/shared/ui/styles/ui";
+import { ui } from "@/shared/ui/styles";
 import Link from "next/link";
 import { getCustomerPets } from "@backend/application/customers/queries";
 

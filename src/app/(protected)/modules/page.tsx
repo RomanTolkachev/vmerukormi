@@ -1,5 +1,5 @@
 import { getFormulaVersionsPageData } from "@backend/application/modules/queries";
-import { FormulaVersionsPage } from "@/widgets/modules/ui/formula-versions-page";
+import { FormulaVersionsPage } from "@/_pages/modules";
 
 export default async function ModulesPage() {
   const data = await getFormulaVersionsPageData();
