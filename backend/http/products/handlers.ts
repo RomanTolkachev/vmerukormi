@@ -83,7 +83,7 @@ export async function POST_NUTRIENT(request: Request, { params }: ProductContext
     if (!parsed.success) return Response.json({ error: "Проверьте нутриент и количество" }, { status: 400 });
     const product = await ownedProduct(id, user);
     if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });
-    const nutrient = await prisma.nutrient.findFirst({ where: { id: parsed.data.nutrientId, ...catalogReferences(user.id, product.isShared) }, select: { id: true } });
+    const nutrient = await prisma.nutrient.findFirst({ where: { id: parsed.data.nutrientId, isReferenceOnly: false, ...catalogReferences(user.id, product.isShared) }, select: { id: true } });
     if (!nutrient) return Response.json({ error: "Нутриент не найден" }, { status: 404 });
     await prisma.productNutrient.upsert({
       where: { productId_nutrientId: { productId: id, nutrientId: parsed.data.nutrientId } },
@@ -105,7 +105,7 @@ export async function PATCH_NUTRIENT(request: Request, { params }: NutrientConte
     const product = await ownedProduct(id, user);
     if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });
     const updated = await prisma.productNutrient.updateMany({
-      where: { productId: id, nutrientId, nutrient: catalogReferences(user.id, product.isShared) },
+      where: { productId: id, nutrientId, nutrient: { ...catalogReferences(user.id, product.isShared), isReferenceOnly: false } },
       data: { amount: amount.data },
     });
     if (!updated.count) return Response.json({ error: "Нутриент не найден в продукте" }, { status: 404 });
@@ -122,7 +122,7 @@ export async function DELETE_NUTRIENT(request: Request, { params }: NutrientCont
     const product = await ownedProduct(id, user);
     if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });
     const deleted = await prisma.productNutrient.deleteMany({
-      where: { productId: id, nutrientId, nutrient: catalogReferences(user.id, product.isShared) },
+      where: { productId: id, nutrientId, nutrient: { ...catalogReferences(user.id, product.isShared), isReferenceOnly: false } },
     });
     if (!deleted.count) return Response.json({ error: "Нутриент не найден в продукте" }, { status: 404 });
     return new Response(null, { status: 204 });

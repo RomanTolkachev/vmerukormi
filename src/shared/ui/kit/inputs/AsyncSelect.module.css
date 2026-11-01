@@ -1,0 +1,140 @@
+.root {
+  display: grid;
+  gap: var(--spacing-2, 0.5rem);
+  min-width: 0;
+}
+
+.label {
+  color: var(--ui-text, rgba(var(--color-black, 17 24 39) / 0.86));
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.field {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  isolation: isolate;
+}
+
+.field :global(input) {
+  width: 100%;
+  background: var(--ui-input-background, rgb(var(--color-white, 255 255 255)));
+  background-clip: padding-box;
+  color: var(--ui-text, rgb(var(--color-black, 17 24 39)));
+  opacity: 1;
+}
+
+.fieldWithClear :global(input) {
+  padding-right: 2.75rem;
+}
+
+.clearButton {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 999rem;
+  background: rgba(var(--color-black, 17 24 39) / 0.08);
+  color: var(--ui-text, var(--primary-contrastText));
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.clearButton::before,
+.clearButton::after {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.125rem;
+  border-radius: 999rem;
+  background: currentColor;
+  content: '';
+}
+
+.clearButton::before {
+  transform: rotate(45deg);
+}
+
+.clearButton::after {
+  transform: rotate(-45deg);
+}
+
+.clearButton:hover,
+.clearButton:focus-visible {
+  background: rgba(var(--color-black, 17 24 39) / 0.14);
+  outline: none;
+}
+
+.clearButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.option {
+  display: grid;
+  flex-shrink: 0;
+  gap: var(--spacing-1);
+  width: 100%;
+  min-width: 0;
+  color: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  text-align: left;
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--ui-focus, var(--focus));
+  outline-offset: -2px;
+}
+
+.optionLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.optionDescription {
+  overflow: hidden;
+  color: var(--ui-muted, var(--primary-muted));
+  font-size: var(--text-xs, 0.75rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.error.error {
+  color: rgb(var(--color-red));
+}
+
+:global([data-theme='dark']) .label {
+  color: var(--ui-text, rgb(var(--color-white, 255 255 255)));
+}
+
+:global([data-theme='dark']) .field :global(input) {
+  background: var(--ui-input-background, rgb(20 36 93));
+  color: var(--ui-text, rgb(var(--color-white, 255 255 255)));
+  opacity: 1;
+}
+
+:global([data-theme='dark']) .clearButton {
+  background: rgba(var(--color-white, 255 255 255) / 0.12);
+  color: var(--ui-text, rgb(var(--color-white, 255 255 255)));
+}
+
+:global([data-theme='dark']) .clearButton:hover,
+:global([data-theme='dark']) .clearButton:focus-visible {
+  background: rgba(var(--color-white, 255 255 255) / 0.18);
+}
+
+/* wrapOptions: варианты показываются целиком, длинный текст переносится. */
+.wrapOptions .optionLabel,
+.wrapOptions .optionDescription {
+  overflow: visible;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+

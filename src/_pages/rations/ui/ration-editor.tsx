@@ -1,5 +1,6 @@
 "use client";
 
+import { EntitySelect } from "@/features/create-entity";
 import { ui } from "@/shared/ui/styles";
 
 import Link from "next/link";
@@ -55,10 +56,8 @@ function itemValues(item: RationItem) {
 
 export function RationEditor({
   initialRation,
-  products,
-  customers,
+  products: initialProducts,
   pets,
-  calculations,
   nutrients,
 }: {
   initialRation: RationEditorValue;
@@ -69,6 +68,7 @@ export function RationEditor({
   nutrients: { id: string; code: string; name: string; category: string; unit: string }[];
 }) {
   const router = useRouter();
+  const [products, setProducts] = useState(initialProducts);
   const initialCustomerId = pets.find((pet) => pet.id === initialRation.petId)?.customerId ?? "";
   const [ration, setRation] = useState(initialRation);
   const [customerId, setCustomerId] = useState(initialCustomerId);
@@ -91,14 +91,6 @@ export function RationEditor({
   const effectiveProductId = availableProducts.some((product) => product.id === productId) ? productId : availableProducts[0]?.id ?? "";
   const selectedProduct = products.find((product) => product.id === effectiveProductId);
   const selectedMeasure = selectedProduct?.measures.find((measure) => measure.id === measureId);
-  const availablePets = useMemo(
-    () => pets.filter((pet) => customerId ? pet.customerId === customerId : pet.customerId === null),
-    [customerId, pets],
-  );
-  const availableCalculations = useMemo(
-    () => calculations.filter((calculation) => calculation.petId === ration.petId),
-    [calculations, ration.petId],
-  );
 
   function focusProductPicker(focus: ProductFocus) {
     setProductFocus(focus);
@@ -152,8 +144,8 @@ export function RationEditor({
     setRation((current) => ({ ...current, petId: null, pet: null, calculationId: null, calculation: null, targetEnergy: 0 }));
   }
 
-  function choosePet(value: string) {
-    const pet = pets.find((item) => item.id === value) ?? null;
+  function choosePet(value: string, chosen?: RationPetOption | null) {
+    const pet = chosen ?? pets.find((item) => item.id === value) ?? null;
     setRation((current) => ({
       ...current,
       petId: pet?.id ?? null,
@@ -323,9 +315,10 @@ export function RationEditor({
           <section className={ui("card")}>
             <div className={ui("cardHead")}><div><h2>Нутриенты</h2><div className={ui("meta")}>Среднее значение в сутки по включённым продуктам</div></div></div>
             <div className={ui("cardBody")}>
+              <p className={ui("fieldHint")}>Показатели выбранных продуктов и обязательные показатели калькулятора. Если данных нет, показан 0 — это не подтверждённое отсутствие нутриента.</p>
               {nutrientSummary.length ? <div className={ui("nutrientSummaryGrid")}>{nutrientSummary.map(({ nutrient, amount, target, complete, missingItems }) => {
                 const status = target && complete ? targetStatus(amount, target.targetAmount, ration.tolerancePercent) : null;
-                return <div className={ui("nutrientSummaryCard", status && targetStatusClass(status))} key={nutrient.id}><span>{nutrient.code}</span><b>{target ? `${formatNumber(amount)} / ${formatNumber(target.targetAmount)}` : formatNumber(amount)} {nutrient.unit}</b><small>{nutrient.name}{!complete ? ` · ${missingItems ? `Нет данных у ${missingItems} позиций` : "Нет данных"}; 0 не подтверждает отсутствие нутриента` : ""}{status ? ` · ${targetStatusLabel(status, ration.tolerancePercent)}` : ""}</small></div>;
+                return <div className={ui("nutrientSummaryCard", status && targetStatusClass(status))} key={`${nutrient.code}|${nutrient.unit}`}><span>{nutrient.name}</span><b>{target ? `${formatNumber(amount)} / ${formatNumber(target.targetAmount)}` : formatNumber(amount)} {nutrient.unit}</b><small>{!complete ? (missingItems ? `Нет данных у ${missingItems} позиций` : "Нет данных") : (status ? targetStatusLabel(status, ration.tolerancePercent) : "в сутки")}</small></div>;
               })}</div> : <div className={ui("empty")}>Нутриенты пока не заполнены</div>}
             </div>
           </section>
@@ -339,7 +332,8 @@ export function RationEditor({
                 {products.length ? <div className={ui("formGrid", "single")}>
                   {productFocus && <div className={ui("productFocus")}><span>Сортировка по содержанию на 100 ккал</span><b>{productFocus.name}</b><button type="button" onClick={() => setProductFocus(null)}>Сбросить</button></div>}
                   <label className={ui("field")}><span>Поиск по названию</span><input className={ui("input")} type="search" value={productSearch} onChange={(event) => setProductSearch(event.target.value)} placeholder="Начните вводить название" /></label>
-                  <label className={ui("field")}><span>Продукт ({availableProducts.length})</span><select className={ui("input")} value={effectiveProductId} onChange={(event) => { setProductId(event.target.value); setMeasureId(""); }} required disabled={!availableProducts.length}>{availableProducts.length ? availableProducts.map((product) => <option value={product.id} key={product.id}>{product.name}{productFocus ? ` · ${formatNumber(scoreProduct(product, productFocus), 2)} ${productFocus.unit}/100 ккал` : ""}</option>) : <option value="">Ничего не найдено</option>}</select></label>
+                  <EntitySelect entity="products" label="Продукт" value={effectiveProductId} onChange={(value, option) => { if (option) setProducts(current => current.some(product => product.id === value) ? current : [...current, { ...option.data, measures: option.data.measures ?? [], nutrients: option.data.nutrients ?? [], tags: [] } as unknown as RationProduct]); setProductId(value); setProductSearch(""); setMeasureId(""); }} />
+                  {productFocus && <label className={ui("field")}><span>Рейтинг по выбранному нутриенту</span><select className={ui("input")} value={effectiveProductId} onChange={event => { setProductId(event.target.value); setMeasureId(""); }}>{availableProducts.map(product => <option key={product.id} value={product.id}>{product.name} · {formatNumber(scoreProduct(product, productFocus), 2)} {productFocus.unit}/100 ккал</option>)}</select></label>}
                   <label className={ui("field")}><span>Мера</span><select className={ui("input")} value={measureId} onChange={(event) => setMeasureId(event.target.value)}><option value="">Граммы</option>{selectedProduct?.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name} ({measure.grams} г)</option>)}</select></label>
                   <label className={ui("field")}><span>Количество{selectedMeasure ? `, ${selectedMeasure.name}` : ", г"}</span><input className={ui("input")} type="number" min="0.000001" step="any" value={quantity} onChange={(event) => setQuantity(event.target.value)} required />{selectedMeasure && <div className={ui("fieldHint")}>{formatNumber(Number(quantity) * selectedMeasure.grams)} г продукта</div>}</label>
                   {ration.mode === "WEEKLY" && <label className={ui("field")}><span>День</span><select className={ui("input")} value={day} onChange={(event) => setDay(event.target.value)}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</select></label>}
@@ -355,9 +349,9 @@ export function RationEditor({
               <div className={ui("cardBody")}>
                 <div className={ui("formGrid", "single")}>
                   <label className={ui("field")}><span>Название</span><input className={ui("input")} value={ration.name} onChange={(event) => setRation({ ...ration, name: event.target.value })} required /></label>
-                  <label className={ui("field")}><span>Хозяин</span><select className={ui("input")} value={customerId} onChange={(event) => chooseCustomer(event.target.value)}><option value="">Без хозяина</option>{customers.map((customer) => <option value={customer.id} key={customer.id}>{customer.name}</option>)}</select></label>
-                  <label className={ui("field")}><span>Питомец</span><select className={ui("input")} value={ration.petId ?? ""} onChange={(event) => choosePet(event.target.value)}><option value="">Не выбран</option>{availablePets.map((pet) => <option value={pet.id} key={pet.id}>{pet.name}</option>)}</select>{!availablePets.length && <div className={ui("fieldHint")}>{customerId ? "У хозяина нет питомцев" : "Нет питомцев без хозяина"}</div>}</label>
-                  <label className={ui("field")}><span>Расчёт нормы</span><select className={ui("input", "highlight")} value={ration.calculationId ?? ""} onChange={(event) => { const calculationId = event.target.value || null; const calculation = availableCalculations.find((item) => item.id === calculationId) ?? null; setRation({ ...ration, calculationId, calculation, targetEnergy: calculation?.adjustedEnergy ?? 0 }); }} disabled={!ration.petId}><option value="">{ration.petId ? "Выберите расчёт" : "Сначала выберите питомца"}</option>{availableCalculations.map((calculation) => <option value={calculation.id} key={calculation.id}>{calculation.moduleName} · {new Date(calculation.createdAt).toLocaleDateString("ru-RU")}</option>)}</select>{ration.petId && !availableCalculations.length && <div className={ui("fieldHint")}>У питомца пока нет сохранённых расчётов</div>}</label>
+                  <EntitySelect entity="customers" label="Хозяин" value={customerId} onChange={chooseCustomer} />
+                  <EntitySelect entity="pets" label="Питомец" value={ration.petId ?? ""} filters={{ customerId }} initial={{ customerId }} onChange={(value, option) => choosePet(value, option ? { id: value, name: option.label, customerId, customerName: null, latestEnergy: null } : null)} />
+                  <EntitySelect entity="calculations" label="Расчёт нормы" value={ration.calculationId ?? ""} filters={{ petId: ration.petId ?? "" }} initial={{ petId: ration.petId }} disabled={!ration.petId} onChange={(value, option) => { const calculation = option ? option.data as unknown as RationCalculationOption : null; setRation({ ...ration, calculationId: value || null, calculation, targetEnergy: calculation?.adjustedEnergy ?? 0 }); }} />
                   <label className={ui("field")}><span>Режим</span><select className={ui("input")} value={ration.mode} onChange={(event) => setRation({ ...ration, mode: event.target.value as RationMode })}><option value="DAILY">На день</option><option value="WEEKLY">На неделю</option></select></label>
                   <label className={ui("field")}><span>Цель, ккал/сут</span><input className={ui("input", "highlight")} type="number" min="0" value={ration.targetEnergy} onChange={(event) => setRation({ ...ration, targetEnergy: Number(event.target.value) })} /></label>
                   <label className={ui("field")}><span>Допустимое превышение, %</span><input className={ui("input")} type="number" min="0" max="100" step="1" value={ration.tolerancePercent} onChange={(event) => setRation({ ...ration, tolerancePercent: Number(event.target.value) })} /><div className={ui("fieldHint")}>По умолчанию 10%. Недобор и превышение диапазона подсвечиваются красным.</div></label>

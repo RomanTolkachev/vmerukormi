@@ -1,0 +1,7 @@
+/* Pinning, фон и hover — общие, через классы .pinned/.pinnedRight в OrderedTable.module.css. */
+.cell {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+

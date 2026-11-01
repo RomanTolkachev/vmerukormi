@@ -1,0 +1,68 @@
+.root {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    pointer-events: none;
+    overflow: visible;
+}
+
+.surface {
+    position: fixed;
+    z-index: 10010;
+    border-radius: var(--floating-radius);
+    box-shadow: var(--ui-popup-shadow, var(--dropdown-shadow));
+    box-sizing: border-box;
+    pointer-events: auto;
+    transform-origin: top center;
+    animation: floatingSurfaceEnter 180ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+@keyframes floatingSurfaceEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-0.25rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+[data-theme="dark"] .surface {
+    color: var(--ui-text, var(--primary-contrastText));
+}
+
+.surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--floating-border);
+    opacity: 1;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .surface {
+        animation: floatingSurfaceFade 120ms ease both;
+    }
+}
+
+@keyframes floatingSurfaceFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+

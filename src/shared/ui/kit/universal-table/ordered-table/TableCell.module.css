@@ -1,0 +1,9 @@
+.cell {
+	position: relative;
+}
+
+.dragging {
+	opacity: 0.8;
+	z-index: 1;
+}
+

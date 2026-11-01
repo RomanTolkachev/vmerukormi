@@ -254,6 +254,7 @@ model ProductGroup {
 }
 
 model Nutrient {
+  isReferenceOnly    Boolean                 @default(false)
   isShared           Boolean                 @default(false)
   id                 String                  @id @default(cuid())
   code               String

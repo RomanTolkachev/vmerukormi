@@ -1,0 +1,135 @@
+[data-size="sm"] .modalOverlay {
+    --modal-overlay--padding: var(--spacing-4);
+}
+
+[data-size="md"] .modalOverlay {
+    --modal-overlay--padding: var(--spacing-4);
+}
+
+[data-size="lg"] .modalOverlay {
+    --modal-overlay--padding: var(--spacing-10);
+}
+
+[data-size="lg"] .modalContent {
+    max-width: var(--screen-xl);
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--modal-overlay-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--modal-overlay--padding, 24px);
+    animation: modalOverlayEnter 220ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+.modalContent {
+    background: var(--ui-modal-background, var(--primary-main));
+    color: var(--ui-text, inherit);
+    border-radius: var(--modal-radius);
+    padding: var(--spacing-6);
+    width: 90%;
+    max-width: 760px;
+    max-height: 90vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-shadow: var(--modal-shadow);
+    position: relative;
+    z-index: 1;
+    transform-origin: center;
+    animation: modalContentEnter 240ms var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1)) both;
+}
+
+.modalFloatingHost {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+@media (max-width: 767px) {
+    .modalOverlay { padding: 0; }
+    .modalContent { width: 100%; max-width: none; height: 100dvh; max-height: 100dvh; border-radius: 0; padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+}
+
+@keyframes modalOverlayEnter {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalContentEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.closeButton {
+    position: absolute;
+    top: var(--spacing-3);
+    right: var(--spacing-3);
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacing-9);
+    height: var(--spacing-9);
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--ui-text, var(--primary-contrastText));
+    cursor: pointer;
+    line-height: 0;
+}
+
+.closeButton:hover {
+    opacity: 0.85;
+}
+
+.closeButton:focus-visible {
+    outline: 2px solid rgb(var(--color-white));
+    outline-offset: 2px;
+}
+
+.closeButtonIcon {
+    width: 18px;
+    height: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .modalOverlay {
+        animation: modalOverlayEnter 140ms ease both;
+    }
+
+    .modalContent {
+        animation: modalContentFade 140ms ease both;
+    }
+}
+
+@keyframes modalContentFade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+

@@ -20,11 +20,11 @@ export const DEFAULT_MACROS_PER_1000_KCAL: Record<StandardSpecies, { protein: nu
 export const DEFAULT_NUTRIENTS_PER_1000_KCAL: Record<StandardSpecies, Record<string, number>> = {
   DOG: {
     CP: 52.1, CFa: 13.75, Ca: 1450, P: 1160, Fe: 10.4, Cu: 2.08,
-    Zn: 20.8, Mn: 1.67, J: 0.3, A: 1754, D3: 159, B1: 0.62, LA: 3.82,
+    Zn: 20.8, Mn: 1.67, J: 300, A: 1754, D: 159, B1: 0.62, LA: 3.82,
   },
   CAT: {
     CP: 62.5, CFa: 22.5, Ca: 1000, P: 640, Fe: 20, Cu: 1.25,
-    Zn: 18.8, Mn: 1.25, J: 0.33, A: 833, D3: 62.5, B1: 1.1, LA: 1.25,
+    Zn: 18.8, Mn: 1.25, J: 330, A: 833, D: 62.5, B1: 1.1, LA: 1.25,
   },
 };
 

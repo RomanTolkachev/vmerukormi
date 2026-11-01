@@ -1,0 +1,28 @@
+.root {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--table-spacing-2, var(--spacing-2));
+	flex-shrink: 0;
+	min-width: var(--table-spacing-8, var(--spacing-8));
+}
+
+.label {
+	white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+	.label { display: none; }
+	.root { min-width: 0; }
+	.select { width: 110px; }
+}
+
+.select {
+	width: 180px;
+	flex-shrink: 0;
+}
+
+.select > * {
+	width: 100%;
+	max-width: 100%;
+}
+

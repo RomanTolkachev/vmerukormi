@@ -16,6 +16,7 @@ FROM dependencies AS migrate
 ENV NODE_ENV=production
 COPY backend/database/prisma ./backend/database/prisma
 COPY backend/domain/nutrition ./backend/domain/nutrition
+COPY backend/domain/catalog ./backend/domain/catalog
 RUN npm run db:generate
 CMD ["npm", "run", "db:deploy"]
 

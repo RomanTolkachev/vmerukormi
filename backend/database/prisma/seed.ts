@@ -11,10 +11,11 @@ import { MODULES, type ModuleId } from "../../domain/nutrition/modules";
 import { formulaOpenEnd } from "../../domain/nutrition/formula-versions";
 import { DEFAULT_MACROS_PER_1000_KCAL, DEFAULT_NUTRIENTS_PER_1000_KCAL, scalePer1000 } from "../../domain/nutrition/standards";
 import breeds from "./breeds.json";
+import { referenceNutrients } from "../../domain/catalog/nutrient-conventions";
 
 const prisma = new PrismaClient();
 
-const nutrientDefinitions = [
+const legacyNutrientDefinitions = [
   { code: "CP", name: "Сырой протеин", category: "Основные", unit: "г" },
   { code: "CFa", name: "Сырой жир", category: "Основные", unit: "г" },
   { code: "CFi", name: "Сырая клетчатка", category: "Основные", unit: "г" },
@@ -38,6 +39,14 @@ const nutrientDefinitions = [
   { code: "O3", name: "Омега-3", category: "Жирные кислоты", unit: "мг" },
   { code: "O6", name: "Омега-6", category: "Жирные кислоты", unit: "мг" },
 ] as const;
+
+const seedCode = (code: string) => code === "D3" ? "D" : code === "E" ? "E_MG" : code;
+const nutrientDefinitions = legacyNutrientDefinitions.map((definition) => {
+  const code = seedCode(definition.code);
+  const canonical = referenceNutrients.find((nutrient) => nutrient.code === code);
+  return { ...definition, ...canonical, code, isReferenceOnly: code === "E_MG" };
+});
+const seedFactor = (code: string) => code === "J" ? 1000 : ["Tau", "O3", "O6"].includes(code) ? 0.001 : 1;
 
 type SeedProduct = {
   id: string;
@@ -261,7 +270,7 @@ async function seedCatalog(userId: string) {
   for (const definition of nutrientDefinitions) {
     const nutrient = await prisma.nutrient.upsert({
       where: { userId_code: { userId, code: definition.code } },
-      update: { name: definition.name, category: definition.category, unit: definition.unit },
+      update: { name: definition.name, category: definition.category, unit: definition.unit, isReferenceOnly: definition.isReferenceOnly },
       create: { ...definition, userId },
     });
     nutrientIds.set(definition.code, nutrient.id);
@@ -351,14 +360,15 @@ async function seedCatalog(userId: string) {
       ...product.nutrients,
     };
     const desiredNutrientIds = Object.keys(values)
-      .map((code) => nutrientIds.get(code))
+      .map((code) => nutrientIds.get(seedCode(code)))
       .filter((id): id is string => Boolean(id));
     await prisma.productNutrient.deleteMany({
       where: { productId: product.id, nutrientId: { notIn: desiredNutrientIds } },
     });
-    for (const [code, amount] of Object.entries(values)) {
-      const nutrientId = nutrientIds.get(code);
+    for (const [code, sourceAmount] of Object.entries(values)) {
+      const nutrientId = nutrientIds.get(seedCode(code));
       if (!nutrientId) continue;
+      const amount = sourceAmount * seedFactor(code);
       await prisma.productNutrient.upsert({
         where: { productId_nutrientId: { productId: product.id, nutrientId } },
         update: { amount },
@@ -378,7 +388,7 @@ async function seedClientsAndPets(userId: string) {
   }
 
   const energyByPet = new Map<string, number>();
-  const userNutrients = await prisma.nutrient.findMany({ where: { userId }, select: { id: true, code: true } });
+  const userNutrients = await prisma.nutrient.findMany({ where: { userId, isReferenceOnly: false }, select: { id: true, code: true } });
   for (const pet of pets) {
     await prisma.pet.upsert({
       where: { id: pet.id },

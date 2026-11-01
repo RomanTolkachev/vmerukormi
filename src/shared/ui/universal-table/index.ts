@@ -1,2 +1,3 @@
-export { UniversalTable } from "./universal-table";
-export type * from "./types";
+"use client";
+
+export * from "../kit/universal-table";

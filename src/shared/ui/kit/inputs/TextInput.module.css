@@ -1,0 +1,225 @@
+.wrapper {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.inputFrame {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    padding: 1px;
+    outline: none;
+}
+
+.inputFrame.sm {
+    --text-input-compact-height: var(--workspace-control-height, var(--composable-table-compact-control-height, 2.25rem));
+    --text-input-compact-radius: var(--ui-control-radius, var(--workspace-control-radius, var(--composable-table-compact-control-radius, 0.375rem)));
+    --text-input-compact-background: var(--ui-input-background, var(--workspace-control-background, var(--composable-table-compact-control-background, var(--input-control-background))));
+    --text-input-compact-border: var(--ui-input-border, var(--workspace-control-border, var(--composable-table-compact-control-border, var(--input-control-border))));
+    --text-input-compact-border-active: var(--ui-focus, var(--workspace-control-border-active, var(--composable-table-compact-control-border-active, var(--input-control-focus-border))));
+    --text-input-compact-shadow: var(--ui-input-shadow, var(--workspace-control-shadow, var(--composable-table-compact-control-shadow, none)));
+    --text-input-compact-shadow-active: var(--ui-focus-shadow, var(--workspace-control-shadow-active, var(--composable-table-compact-control-shadow-active, var(--input-control-focus-shadow))));
+
+    padding: 0;
+    border-radius: var(--text-input-compact-radius);
+}
+
+.inputFrame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    background: var(--ui-input-border, var(--input-control-border));
+    opacity: 1;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.inputFrame.sm::before {
+    border-radius: var(--text-input-compact-radius);
+    background: var(--text-input-compact-border);
+}
+
+[data-theme="light"] .inputFrame::before {
+    padding: 1px;
+}
+
+.inputFrame:focus-within::before {
+    background: var(--ui-focus, var(--input-control-focus-border));
+    opacity: 1;
+    padding: 1px;
+}
+
+.inputFrame.sm:focus-within::before {
+    background: var(--text-input-compact-border-active);
+}
+
+.inputFrame:focus-within {
+    box-shadow: var(--ui-focus-shadow, var(--input-control-focus-shadow));
+}
+
+.inputFrame.sm:focus-within {
+    box-shadow: var(--text-input-compact-shadow-active);
+}
+
+.inputFrame.error::before {
+    background: var(--color-error-gradient);
+    opacity: 1;
+}
+
+.inner {
+    width: 100%;
+    min-width: 0;
+    /* The surrounding frame contributes 1px on each side. */
+    height: calc(var(--control-min-height) - 2px);
+    padding: 0 1rem;
+    border: none;
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    font-size: 1rem;
+    line-height: normal;
+    background: var(--ui-input-background, var(--input-control-background));
+    box-shadow: var(--ui-input-shadow, var(--input-inner-shadow));
+    display: block;
+    box-sizing: border-box;
+    outline: transparent;
+    color: var(--ui-input-text, var(--input-control-text));
+}
+
+.inputFrame.sm .inner {
+    height: var(--text-input-compact-height);
+    min-height: var(--text-input-compact-height);
+    padding: 0 var(--spacing-3);
+    border-radius: var(--text-input-compact-radius);
+    background: var(--text-input-compact-background);
+    box-shadow: var(--text-input-compact-shadow);
+    font-size: 0.875rem;
+    line-height: var(--text-input-compact-height);
+}
+
+[data-theme="dark"] .inner {
+    background: var(--ui-input-background, var(--input-control-background));
+    color: var(--ui-input-text, var(--input-control-text));
+}
+
+/* Нативные части поля (иконка календаря у type="date") — по теме приложения, а не по теме ОС. */
+[data-theme="light"] .inner {
+    color-scheme: light;
+}
+
+[data-theme="dark"] .inner {
+    color-scheme: dark;
+}
+
+.inner::placeholder {
+    font-size: 1rem;
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+}
+
+.inputFrame.sm .inner::placeholder,
+.inputFrame.sm .inner::-webkit-input-placeholder,
+.inputFrame.sm .inner::-moz-placeholder,
+.inputFrame.sm .inner:-ms-input-placeholder {
+    font-size: 0.875rem;
+    color: var(--composable-table-muted-text, var(--ui-input-placeholder, rgb(var(--color-grey))));
+}
+
+[data-theme="dark"] .inner::placeholder {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.85;
+}
+
+.inner::-webkit-input-placeholder {
+    font-size: 1rem;
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+}
+
+[data-theme="dark"] .inner::-webkit-input-placeholder {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.85;
+}
+
+.inner::-moz-placeholder {
+    font-size: 1rem;
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+}
+
+[data-theme="dark"] .inner::-moz-placeholder {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.85;
+}
+
+.inner:-ms-input-placeholder {
+    font-size: 1rem;
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+}
+
+[data-theme="dark"] .inner:-ms-input-placeholder {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.85;
+}
+
+/* Autofill: same typography/colors as manual input (WebKit + standard :autofill + Firefox filter) */
+.inner:-webkit-autofill,
+.inner:-webkit-autofill:hover,
+.inner:-webkit-autofill:focus,
+.inner:-webkit-autofill:active {
+    font-size: 1rem;
+    -webkit-text-fill-color: var(--ui-input-text, var(--input-control-text));
+    caret-color: var(--ui-input-text, var(--input-control-text));
+    box-shadow: var(--ui-input-autofill-shadow, var(--input-inner-shadow), 0 0 0 1000px var(--input-control-background) inset);
+}
+
+[data-theme="dark"] .inner:-webkit-autofill,
+[data-theme="dark"] .inner:-webkit-autofill:hover,
+[data-theme="dark"] .inner:-webkit-autofill:focus,
+[data-theme="dark"] .inner:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--ui-input-text, var(--input-control-text));
+    caret-color: var(--ui-input-text, var(--input-control-text));
+    box-shadow: var(--ui-input-autofill-shadow, var(--input-inner-shadow), 0 0 0 1000px var(--input-control-background) inset);
+}
+
+.inner:autofill,
+.inner:autofill:hover,
+.inner:autofill:focus {
+    font-size: 1rem;
+    color: var(--ui-input-text, var(--input-control-text));
+    caret-color: var(--ui-input-text, var(--input-control-text));
+    box-shadow: var(--ui-input-autofill-shadow, var(--input-inner-shadow), 0 0 0 1000px var(--input-control-background) inset);
+    filter: none;
+}
+
+[data-theme="dark"] .inner:autofill,
+[data-theme="dark"] .inner:autofill:hover,
+[data-theme="dark"] .inner:autofill:focus {
+    color: var(--ui-input-text, var(--input-control-text));
+    caret-color: var(--ui-input-text, var(--input-control-text));
+    box-shadow: var(--ui-input-autofill-shadow, var(--input-inner-shadow), 0 0 0 1000px var(--input-control-background) inset);
+}
+
+.inner:disabled {
+    background: var(--ui-input-disabled-background, rgb(var(--color-grey-light)));
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    cursor: not-allowed;
+}
+
+[data-theme="dark"] .inner:disabled {
+    background: var(--ui-input-disabled-background, rgb(var(--color-blue-darkest) / 0.55));
+    color: var(--ui-input-disabled-text, rgb(var(--color-grey) / 0.85));
+}
+
+.inputFrame:has(.inner:disabled)::before {
+    background: var(--ui-input-disabled-border, rgb(var(--color-grey-medium)));
+    /* opacity: 0.5; */
+}
+
+[data-theme="dark"] .inputFrame:has(.inner:disabled)::before {
+    background: var(--ui-input-disabled-border, rgb(var(--color-blue-dark) / 0.65));
+}
+

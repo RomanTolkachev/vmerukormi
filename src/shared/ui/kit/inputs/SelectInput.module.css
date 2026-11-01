@@ -1,0 +1,544 @@
+[data-theme="light"] .outer, [data-theme="light"] .dropdownPortal {
+    --select-list-bg: var(--ui-input-disabled-background, rgb(var(--color-grey-light)));
+    --select-option-border: rgba(var(--color-blue-darkest) / 0.16);
+    --select-option-active-border: rgba(var(--color-blue-medium) / 0.46);
+}
+[data-theme="dark"] .outer, [data-theme="dark"] .dropdownPortal {
+    --select-list-bg: var(--color-glass-15);
+    --select-option-border: rgba(var(--color-white) / 0.2);
+    --select-option-active-border: rgba(var(--color-blue-light) / 0.64);
+}
+
+.outer {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.selectWrapper {
+    position: relative;
+    width: 100%;
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    padding: 1px;
+    box-sizing: border-box;
+    outline: none;
+    --select-action-size: var(--control-min-height);
+    --select-actions-inset: var(--spacing-2);
+    --select-actions-padding: calc(var(--select-action-size) + var(--spacing-4));
+}
+
+.selectWrapper.sm {
+    --select-compact-height: var(--workspace-control-height, var(--composable-table-compact-control-height, 2.25rem));
+    --select-action-size: var(--select-compact-height);
+    --select-compact-radius: var(--ui-control-radius, var(--workspace-control-radius, var(--composable-table-compact-control-radius, 0.375rem)));
+    --select-compact-background: var(--ui-input-background, var(--workspace-control-background, var(--composable-table-compact-control-background, var(--input-control-background))));
+    --select-compact-border: var(--ui-input-border, var(--workspace-control-border, var(--composable-table-compact-control-border, var(--input-control-border))));
+    --select-compact-border-active: var(--ui-focus, var(--workspace-control-border-active, var(--composable-table-compact-control-border-active, var(--input-control-focus-border))));
+    --select-compact-shadow: var(--ui-input-shadow, var(--workspace-control-shadow, var(--composable-table-compact-control-shadow, none)));
+    --select-compact-shadow-active: var(--ui-focus-shadow, var(--workspace-control-shadow-active, var(--composable-table-compact-control-shadow-active, var(--input-control-focus-shadow))));
+    padding: 0;
+    border-radius: var(--select-compact-radius);
+}
+
+.selectWrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    background: var(--ui-input-border, var(--input-control-border));
+    opacity: 1;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.selectWrapper.sm::before {
+    border-radius: var(--select-compact-radius);
+    background: var(--select-compact-border);
+    z-index: 4;
+}
+
+[data-theme="light"] .selectWrapper::before {
+    padding: 1px;
+}
+
+.selectWrapper:focus-within::before {
+    background: var(--ui-focus, var(--input-control-focus-border));
+    opacity: 1;
+    padding: 1px;
+}
+
+.selectWrapper.sm:focus-within::before {
+    background: var(--select-compact-border-active);
+}
+
+.selectWrapper:focus-within {
+    box-shadow: var(--ui-focus-shadow, var(--input-control-focus-shadow));
+}
+
+.selectWrapper.sm:focus-within {
+    box-shadow: var(--select-compact-shadow-active);
+}
+
+.selectWrapper.error::before {
+    background: var(--color-error-gradient);
+    opacity: 1;
+}
+
+.selectWrapper[data-disabled]::before {
+    background: var(--ui-input-disabled-border, rgb(var(--color-grey-medium)));
+}
+
+[data-theme="dark"] .selectWrapper[data-disabled]::before {
+    background: var(--ui-input-disabled-border, rgb(var(--color-blue-dark) / 0.65));
+}
+
+.selectWrapper[data-disabled]:focus-within::before {
+    background: var(--ui-input-disabled-border, rgb(var(--color-grey-medium)));
+    opacity: 1;
+    padding: 1px;
+}
+
+[data-theme="dark"] .selectWrapper[data-disabled]:focus-within::before {
+    background: var(--ui-input-disabled-border, rgb(var(--color-blue-dark) / 0.65));
+}
+
+.selectWrapper.error[data-disabled]::before,
+.selectWrapper.error[data-disabled]:focus-within::before {
+    background: var(--color-error-gradient);
+}
+
+.selectTrigger {
+    width: 100%;
+    min-height: calc(var(--control-min-height) - 2px);
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    border: none;
+    font-size: 1rem;
+    font-family: inherit;
+    background: var(--ui-input-background, var(--input-control-background));
+    cursor: pointer;
+    padding: 0 var(--spacing-4);
+    padding-right: var(--select-actions-padding);
+    box-shadow: var(--ui-input-shadow, var(--input-inner-shadow));
+    box-sizing: border-box;
+    outline: transparent;
+    display: flex;
+    text-align: left;
+    z-index: 3;
+    position: relative;
+    color: var(--ui-input-text, var(--input-control-text));
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.selectWrapper.sm .selectTrigger {
+    min-height: var(--select-compact-height);
+    height: var(--select-compact-height);
+    padding: 0 var(--spacing-3);
+    padding-right: var(--select-actions-padding);
+    border-radius: var(--select-compact-radius);
+    background: var(--select-compact-background);
+    box-shadow: var(--select-compact-shadow);
+    font-size: 0.875rem;
+}
+
+.selectTriggerSearchable {
+    flex-direction: row;
+    align-items: center;
+    cursor: text;
+}
+
+.selectTriggerRow {
+    flex-direction: row;
+    align-items: center;
+    cursor: default;
+}
+
+.selectTrigger:has(.clearBtn),
+.selectWrapper.sm .selectTrigger:has(.clearBtn) {
+    padding-right: calc(var(--select-action-size) * 2 + var(--spacing-4));
+}
+
+.selectTriggerMain {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+    outline: none;
+}
+
+.selectTriggerMain:disabled {
+    cursor: not-allowed;
+}
+
+[data-theme="dark"] .selectTrigger {
+    background: var(--ui-input-background, var(--input-control-background));
+    color: var(--ui-input-text, var(--input-control-text));
+}
+
+.selectTrigger:focus {
+    outline: none;
+}
+
+.selectTrigger:disabled,
+.selectTriggerMain:disabled,
+.selectWrapper[data-disabled] .selectTrigger {
+    cursor: not-allowed;
+    background: var(--ui-input-disabled-background, rgb(var(--color-grey-light)));
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 1;
+}
+
+[data-theme="dark"] .selectTrigger:disabled,
+[data-theme="dark"] .selectTriggerMain:disabled,
+[data-theme="dark"] .selectWrapper[data-disabled] .selectTrigger,
+[data-theme="dark"] .selectWrapper.disabled .selectTrigger {
+    background: var(--ui-input-disabled-background, rgb(var(--color-blue-darkest) / 0.55));
+    color: var(--ui-input-disabled-text, rgb(var(--color-grey) / 0.85));
+}
+
+.selectWrapper.disabled .selectTrigger {
+    cursor: not-allowed;
+    background: var(--ui-input-disabled-background, rgb(var(--color-grey-light)));
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 1;
+}
+
+.clearBtn {
+    position: absolute;
+    right: calc(var(--select-actions-inset) + var(--select-action-size));
+    top: 50%;
+    transform: translateY(-50%);
+    flex-shrink: 0;
+    z-index: 5;
+}
+
+.clearBtnInner {
+    background: none !important;
+    box-shadow: none !important;
+    color: var(--ui-input-placeholder, rgb(var(--color-grey))) !important;
+}
+
+.clearBtn:hover .clearBtnInner {
+    box-shadow: none !important;
+    color: rgb(var(--color-grey-dark)) !important;
+}
+
+/* Крестик очистки не больше стрелки раскрытия; размер кнопки (область нажатия) не меняется. */
+.clearBtnInner svg {
+    width: var(--spacing-4) !important;
+    height: var(--spacing-4) !important;
+    flex: none;
+}
+
+.dropdownPortal {
+    margin: 0;
+    padding: var(--spacing-1);
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    background: var(--ui-input-background, var(--select-list-bg));
+    color: var(--ui-text, rgb(var(--color-blue-darkest)));
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.dropdownPortal.dropdownPortal {
+    position: fixed;
+    transform: none;
+    transform-origin: top left;
+    animation: none;
+}
+
+:global([data-theme="dark"]) .dropdownPortal {
+    color: var(--ui-text, var(--primary-contrastText));
+}
+
+.emptyOption {
+    position: relative;
+    z-index: 1;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    list-style: none;
+    text-align: center;
+}
+
+[data-theme="dark"] .emptyOption {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.85;
+}
+
+.selectValue {
+    color: var(--ui-input-text, var(--input-control-text));
+}
+
+[data-theme="dark"] .selectValue {
+    color: var(--ui-input-text, var(--input-control-text));
+}
+
+.selectTriggerMain:disabled .selectValue,
+.selectTrigger:disabled .selectValue,
+.selectWrapper[data-disabled] .selectTrigger .selectValue {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+}
+
+.selectPlaceholder {
+    font-size: 1rem;
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    height: 100%;
+    width: 100%
+}
+
+.selectWrapper.sm .selectInput,
+.selectWrapper.sm .selectPlaceholder {
+    font-size: 0.875rem;
+}
+
+.selectWrapper.sm .selectPlaceholder,
+.selectWrapper.sm .selectInput::placeholder {
+    color: var(--composable-table-muted-text, var(--ui-input-placeholder, rgb(var(--color-grey))));
+}
+
+[data-theme="dark"] .selectPlaceholder {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.85;
+}
+
+.selectWrapper .btn,
+.selectWrapper .clearBtn {
+    width: var(--select-action-size);
+    height: var(--select-action-size);
+    max-height: var(--select-action-size);
+}
+
+.btn {
+    position: absolute;
+    right: var(--select-actions-inset);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    pointer-events: none;
+    z-index: 4;
+    flex-shrink: 0;
+}
+
+.smBtn {
+    color: var(--composable-table-muted-text, var(--ui-input-placeholder, rgb(var(--color-grey))));
+}
+
+.smBtnInner {
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: currentColor !important;
+    transform: none !important;
+    overflow: visible !important;
+}
+
+.smBtn:hover .smBtnInner,
+.smBtnInner:hover,
+.smBtnInner:focus-visible {
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--composable-table-text, currentColor) !important;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+.btnClickable {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.selectInput {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+    color: inherit;
+    outline: none;
+    padding: 0;
+    width: 100%;
+}
+
+.smClearBtn {
+    color: var(--composable-table-muted-text, var(--ui-input-placeholder, rgb(var(--color-grey))));
+}
+
+.smClearBtnInner {
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: currentColor !important;
+    overflow: visible !important;
+}
+
+.selectInputClosed {
+    cursor: pointer;
+}
+
+.selectInput::placeholder {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+}
+
+[data-theme="dark"] .selectInput::placeholder {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.85;
+}
+
+.selectWrapper[data-disabled] .btn,
+.selectWrapper.disabled .btn {
+    color: var(--ui-input-placeholder, rgb(var(--color-grey)));
+    opacity: 0.7;
+}
+
+.selectWrapper.disabled .btn {
+    pointer-events: none;
+}
+
+.selectWrapper.open .icon {
+    transform: rotate(180deg);
+}
+.selectWrapper.open  {
+    z-index: 20;
+}
+
+.icon {
+    transition: transform 0.2s;
+}
+
+.dropdown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    transform: translateY(4px);
+    color: var(--ui-text, rgb(var(--color-blue-darkest)));
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    box-shadow: var(--ui-popup-shadow, var(--dropdown-shadow));
+    z-index: 1;
+    border-top-left-radius: var(--ui-control-radius, var(--control-radius));
+    border-top-right-radius: var(--ui-control-radius, var(--control-radius));
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 20rem;
+    background: var(--ui-input-background, var(--select-list-bg));
+}
+
+.searchBox {
+    padding: var(--spacing-2) var(--spacing-3);
+    padding-top: calc(var(--control-min-height) + var(--spacing-2));
+    background: var(--ui-input-background, var(--select-list-bg));
+    flex-shrink: 0;
+    height: fit-content;
+}
+
+.searchBoxInputWrapper > div {
+    margin-bottom: 0;
+}
+
+.searchBox input {
+    border-radius: var(--ui-control-radius, var(--control-radius));
+}
+
+.dropdownWithoutSearch .dropdownScrollMask {
+    padding-top: calc(var(--control-min-height) + var(--spacing-2));
+}
+
+.dropdownScrollMask {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    border-radius: inherit;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+[data-theme="light"] .dropdownScrollMask {
+    background: transparent;
+}
+
+.dropdownScroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    direction: rtl;
+    scroll-padding-top: var(--control-min-height);
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+
+
+.dropdownList {
+    margin: 0;
+    list-style: none;
+    direction: ltr;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+    padding: 0;
+    background: transparent;
+}
+
+.option {
+    position: relative;
+    z-index: 1;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--ui-input-border, var(--select-option-border));
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: var(--ui-control-radius, var(--control-radius));
+    background: var(--ui-field-background, var(--select-option));
+}
+
+.option:hover {
+    border-color: var(--ui-focus, var(--select-option-active-border));
+    background: var(--ui-hover-background, rgb(var(--color-blue-light)));
+}
+
+.optionSelected {
+    border-color: var(--ui-focus, var(--select-option-active-border));
+    background: var(--ui-hover-background, rgb(var(--color-blue-light)));
+}
+
+[data-theme="dark"] .option {
+    background: var(--ui-field-background, var(--color-glass-blue-70));
+}
+
+[data-theme="dark"] .option:hover {
+    background: var(--ui-hover-background, rgb(var(--color-blue-light)));
+}
+
+[data-theme="dark"] .optionSelected {
+    background: var(--ui-hover-background, rgb(var(--color-blue-light)));
+}
+
+/* Иконка очистки (крестик) компактнее стрелки раскрытия во всех селектах. */
+.clearBtnInner > span {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+}
+

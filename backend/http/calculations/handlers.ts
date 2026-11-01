@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     const { save, breedId, sex, nutrients: submittedNutrients, adjustedEnergy: submittedEnergy, protein, fat, carbs, ...input } = parsed.data;
     if (submittedNutrients) {
       const nutrientIds = submittedNutrients.map((value) => value.nutrientId);
-      const visibleCount = await prisma.nutrient.count({ where: { id: { in: nutrientIds }, ...readableCatalog(user.id) } });
+      const visibleCount = await prisma.nutrient.count({ where: { id: { in: nutrientIds }, isReferenceOnly: false, ...readableCatalog(user.id) } });
       if (visibleCount !== nutrientIds.length) return NextResponse.json({ error: "Нутриенты недоступны или повторяются" }, { status: 400 });
     }
     let effectiveBreedId = breedId;

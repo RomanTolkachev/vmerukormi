@@ -1,0 +1,7 @@
+.root { position:relative; width:100%; min-width:0; }
+.input { padding-right:calc(var(--control-min-height) * 2 + var(--spacing-4)) !important; }
+.actions { position:absolute; inset-inline-end:var(--spacing-2); top:50%; transform:translateY(-50%); display:flex; align-items:center; }
+.apply:not(:disabled) { color:rgb(var(--color-green)) !important; }
+.clear:not(:disabled) { color:rgb(var(--color-red)) !important; }
+.actions button:disabled { color:var(--primary-muted) !important; opacity:.4; cursor:not-allowed; transform:none; background:transparent; }
+

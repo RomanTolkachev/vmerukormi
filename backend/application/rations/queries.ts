@@ -16,6 +16,7 @@ import type {
 const productInclude = {
   measures: { orderBy: { name: "asc" as const } },
   nutrients: {
+    where: { nutrient: { isReferenceOnly: false } },
     include: { nutrient: true },
     orderBy: { nutrient: { category: "asc" as const } },
   },
@@ -194,7 +195,7 @@ export async function getRationEditorData(id: string) {
       orderBy: { createdAt: "desc" },
       take: 100,
     }),
-    prisma.nutrient.findMany({ where: readableCatalog(userId), orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    prisma.nutrient.findMany({ where: { ...readableCatalog(userId), isReferenceOnly: false }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
   ]);
 
   const value: RationEditorValue = {

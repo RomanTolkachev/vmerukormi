@@ -1,0 +1,3 @@
+.content { display:flex; flex-direction:column; align-items:flex-start; gap:var(--spacing-2); }
+.dismiss { pointer-events:auto; }
+

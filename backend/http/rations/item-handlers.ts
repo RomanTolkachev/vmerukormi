@@ -55,7 +55,7 @@ export async function POST(
       include: {
         measure: true,
         product: {
-          include: { measures: true, nutrients: { include: { nutrient: true } } },
+          include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } },
         },
       },
     });

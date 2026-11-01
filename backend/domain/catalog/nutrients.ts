@@ -10,7 +10,7 @@ export function uniqueCatalogNutrients<T extends NutrientIdentity>(nutrients: T[
   return [...result.values()];
 }
 
-const defaultUnits: Record<string, string> = { CP: "г", CFa: "г", Ca: "мг", P: "мг", Fe: "мг", Cu: "мг", Zn: "мг", Mn: "мг", J: "мг", A: "МЕ", D3: "МЕ", B1: "мг", LA: "г" };
+const defaultUnits: Record<string, string> = { CP: "г", CFa: "г", Ca: "мг", P: "мг", Fe: "мг", Cu: "мг", Zn: "мг", Mn: "мг", J: "мкг", A: "МЕ", D: "МЕ", B1: "мг", LA: "г" };
 
 export function catalogDefault(nutrient: { code: string; unit: string }, defaults: Record<string, number>) {
   return defaultUnits[nutrient.code] === nutrient.unit ? defaults[nutrient.code] : undefined;

@@ -12,8 +12,8 @@ export async function getBreedStandards(breedId: string): Promise<BreedStandards
   if (!userId) return null;
   const [breed, nutrients, stored] = await Promise.all([
     prisma.breed.findUnique({ where: { id: breedId } }),
-    prisma.nutrient.findMany({ where: readableCatalog(userId), orderBy: [{ category: "asc" }, { name: "asc" }] }),
-    prisma.breedStandard.findMany({ where: { userId, breedId }, include: { nutrients: true } }),
+    prisma.nutrient.findMany({ where: { ...readableCatalog(userId), isReferenceOnly: false }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    prisma.breedStandard.findMany({ where: { userId, breedId }, include: { nutrients: { where: { nutrient: { isReferenceOnly: false } } } } }),
   ]);
   if (!breed) return null;
   const macros = DEFAULT_MACROS_PER_1000_KCAL[breed.species];

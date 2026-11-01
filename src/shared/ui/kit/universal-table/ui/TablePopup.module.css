@@ -1,0 +1,8 @@
+.popup { display:flex; flex-direction:column; min-height:0; padding:var(--spacing-3); gap:var(--spacing-2); border:1px solid var(--ui-input-border, var(--input-control-border)); border-radius:var(--ui-panel-radius, var(--spacing-3)); color:var(--ui-text, var(--primary-contrastText)); box-sizing:border-box; }
+.header { display:flex; align-items:center; justify-content:space-between; gap:var(--spacing-3); flex-shrink:0; }
+.body { flex:1 1 auto; overflow:auto; overscroll-behavior:contain; min-height:0; padding:var(--spacing-1); scrollbar-gutter:stable; }
+.footer { flex-shrink:0; padding:var(--spacing-1); border-top:1px solid var(--ui-input-border, var(--input-control-border)); }
+:global([data-touch="true"]) .close,
+:global([data-touch="true"]) .close > button { width:2.75rem; height:2.75rem; max-height:none; }
+:global([data-touch="true"]) .popup { --workspace-control-height:max(2.75rem, var(--control-min-height)); }
+

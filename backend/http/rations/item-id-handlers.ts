@@ -65,7 +65,7 @@ export async function PATCH(request: Request, { params }: Context) {
       include: {
         measure: true,
         product: {
-          include: { measures: true, nutrients: { include: { nutrient: true } } },
+          include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } },
         },
       },
     });

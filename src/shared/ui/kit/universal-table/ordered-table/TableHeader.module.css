@@ -1,0 +1,98 @@
+.header {
+	--table-sort-button-size: var(--button-sm-height);
+	touch-action: none;
+	user-select: none;
+	position: relative;
+	white-space: nowrap;
+	cursor: default;
+}
+
+.headerContent {
+	min-height: var(--table-sort-button-size);
+	display: flex;
+	align-items: center;
+	width: 100%;
+	max-width: 100%;
+}
+
+.headerContentSortable {
+	padding-right: calc(var(--table-sort-button-size) + var(--table-spacing-2, var(--spacing-2)));
+}
+
+@media (pointer: coarse) {
+	.header {
+		--table-sort-button-size: max(var(--button-sm-height), var(--button-touch-min-height));
+	}
+}
+
+.headerLabel {
+	display: inline-flex;
+	align-items: center;
+	cursor: default;
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.header .headerLabel > * {
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sortButton {
+	position: absolute;
+	top: 50%;
+	right: var(--table-spacing-4, var(--spacing-4));
+	transform: translateY(-50%);
+	cursor: pointer;
+	z-index: 1;
+}
+
+.sortIndicators {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	width: var(--spacing-4);
+	height: var(--spacing-5);
+	line-height: 0;
+}
+
+.sortArrow {
+	width: 13px;
+	height: 13px;
+	flex-shrink: 0;
+}
+
+.sortIndicators > :last-child {
+	margin-top: -4px;
+}
+
+.sortArrowMuted {
+	color: rgb(var(--color-vhite));
+}
+
+.sortArrowActive {
+	color: var(--focus);
+}
+
+.resizeHandle {
+	position: absolute;
+	top: 0;
+	height: 90%;
+	right: 0;
+	width: 1.5px;
+	background: var(--table-resize-handle);
+	cursor: col-resize;
+	user-select: none;
+	touch-action: none;
+}
+
+.dragging {
+	opacity: 0.8;
+	z-index: 1;
+}
+

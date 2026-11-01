@@ -1,0 +1,92 @@
+/* Native controls own their spacing; text still beats browser/Bootstrap margins. */
+.root:where(:not(button):not(a)) {
+  margin: 0;
+  padding: 0;
+}
+
+.header1 {
+  font-size: var(--typography-header1-font-size);
+  line-height: var(--typography-header1-line-height);
+  font-weight: var(--typography-header1-font-weight);
+  text-transform: uppercase;
+}
+
+.header2 {
+  font-size: var(--typography-header2-font-size);
+  line-height: var(--typography-header2-line-height);
+  font-weight: var(--typography-header2-font-weight);
+}
+
+.header3 {
+  font-size: var(--typography-header3-font-size);
+  line-height: var(--typography-header3-line-height);
+  font-weight: var(--typography-header3-font-weight);
+}
+
+.header4 {
+  font-size: var(--typography-header4-font-size);
+  line-height: var(--typography-header4-line-height);
+  font-weight: var(--typography-header4-font-weight);
+}
+
+.body1 {
+  font-size: var(--typography-body1-font-size);
+  line-height: var(--typography-body1-line-height);
+  font-weight: var(--typography-body1-font-weight);
+}
+
+.body2 {
+  font-size: var(--typography-body2-font-size);
+  line-height: var(--typography-body2-line-height);
+  font-weight: var(--typography-body2-font-weight);
+}
+
+.body3 {
+  font-size: var(--typography-body3-font-size);
+  line-height: var(--typography-body3-line-height);
+  font-weight: var(--typography-body3-font-weight);
+}
+
+/* Code is HTML semantics, not another size in the designers' scale. */
+.root:where(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.colorNormal {
+  color: var(--ui-text, var(--primary-contrastText));
+}
+
+.colorMuted {
+  color: var(--ui-muted, var(--primary-muted));
+}
+
+.colorDanger {
+  color: rgb(var(--color-red));
+}
+
+.colorAccent {
+  color: var(--ui-accent, var(--primary-accent, rgb(var(--color-blue-dark))));
+}
+
+.alignLeft {
+  text-align: left;
+}
+
+.alignCenter {
+  text-align: center;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.noWrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gutterBottom {
+  margin-bottom: var(--spacing-2);
+}
+

@@ -23,7 +23,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ bree
     const breed = await prisma.breed.findUnique({ where: { id: breedId }, select: { id: true } });
     if (!breed) return Response.json({ error: "Порода не найдена" }, { status: 404 });
     const nutrientIds = [...new Set(parsed.data.standards.flatMap((item) => item.nutrients.map((value) => value.nutrientId)))];
-    const ownedNutrients = await prisma.nutrient.count({ where: { ...readableCatalog(user.id), id: { in: nutrientIds } } });
+    const ownedNutrients = await prisma.nutrient.count({ where: { ...readableCatalog(user.id), isReferenceOnly: false, id: { in: nutrientIds } } });
     if (ownedNutrients !== nutrientIds.length) return Response.json({ error: "Часть нутриентов не найдена" }, { status: 400 });
 
     await prisma.$transaction(async (tx) => {
@@ -33,7 +33,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ bree
           update: { idealWeight: input.idealWeight, proteinPer1000Kcal: input.proteinPer1000Kcal, fatPer1000Kcal: input.fatPer1000Kcal, carbsPer1000Kcal: input.carbsPer1000Kcal, source: input.source || null },
           create: { userId: user.id, breedId, sex: input.sex, idealWeight: input.idealWeight, proteinPer1000Kcal: input.proteinPer1000Kcal, fatPer1000Kcal: input.fatPer1000Kcal, carbsPer1000Kcal: input.carbsPer1000Kcal, source: input.source || null },
         });
-        await tx.breedStandardNutrient.deleteMany({ where: { standardId: standard.id } });
+        await tx.breedStandardNutrient.deleteMany({ where: { standardId: standard.id, nutrient: { isReferenceOnly: false } } });
         if (input.nutrients.length) await tx.breedStandardNutrient.createMany({ data: input.nutrients.map((value) => ({ standardId: standard.id, nutrientId: value.nutrientId, amountPer1000Kcal: value.amountPer1000Kcal })) });
       }
     });

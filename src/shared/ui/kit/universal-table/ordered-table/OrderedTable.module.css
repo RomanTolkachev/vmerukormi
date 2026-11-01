@@ -1,0 +1,210 @@
+/* Тут разделены скролл-контейнеры для осей x и y, чтобы скроллбар по оси y был всегда статично справа.
+Нет другого паттерна, чтобы был вертикальный и горизонтальный скролл, чтобы при этом полоска скролла не заходила не хедер
+и была внутри body (а не справа).
+При этом, фактически thead и tbody живут в раздных table, и по оси x синхронизирутся через event listener на onscroll.
+Ширина колонок и синхронизация ширины колонок в thead и tbody задается через объект таблицы tanstack table. */
+
+.outer {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	min-height: 0;
+}
+
+.headerWrapper {
+	flex: 0 0 auto;
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+	position: sticky;
+	top: 0;
+	z-index: 2;
+	background: var(--universal-table-header-background, var(--table-header-bg));
+	border-bottom: 1.5px solid var(--table-resize-handle);
+	border-radius: 0;
+}
+
+.headerXScroll {
+	flex: 1;
+	min-width: 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+}
+
+/* Резервирует в header ширину vertical scrollbar body, чтобы колонки thead/tbody
+ * совпадали по X (важно для pinned-right колонки). Ширина измеряется в JS как
+ * `offsetWidth - clientWidth` body: 0 для overlay-скроллбаров (macOS) — заглушка
+ * не рендерится; ширина скроллбара для классических (Windows/Linux).
+ * Фон прозрачный (как у header), чтобы зона не выглядела отдельной ячейкой. */
+.headerGutter {
+	flex-shrink: 0;
+	background: transparent;
+}
+
+.header {
+	color: var(--table-header-text);
+}
+
+.headerXScroll::-webkit-scrollbar {
+	display: none;
+}
+
+.bodyWrapper {
+	flex: 1;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow-y: hidden;
+	overflow-x: hidden;
+	background: var(--universal-table-body-background, transparent);
+	min-height: 0;
+}
+
+.bodyXScroll {
+	overflow-x: auto;
+	/* Резервируем вертикальный скроллбар до загрузки шрифта/изменения высоты строк:
+	 * его появление не должно менять ширину резиновой колонки после первого кадра. */
+	overflow-y: scroll;
+	width: 100%;
+	height: 100%;
+	flex: 1;
+	min-height: 0;
+}
+
+.table {
+	border-collapse: collapse;
+	table-layout: fixed;
+	width: 100%;
+	height: 100%;
+	font-size: var(--table-text-xs, var(--typography-body2-font-size));
+	line-height: var(--table-text-xs-line-height, var(--typography-body2-line-height));
+}
+
+.table .headerText {
+	font-size: inherit;
+	line-height: inherit;
+}
+
+.row {
+	display: flex;
+	flex-shrink: 0;
+}
+
+.cell {
+	padding: var(--table-spacing-2, var(--spacing-2)) var(--table-spacing-4, var(--spacing-4));
+	word-break: break-word;
+	text-align: center;
+}
+
+.table tbody tr:not(:last-child) {
+	border-bottom: 1.5px solid var(--table-resize-handle);
+	transition: background-color 0.1s ease-in;
+}
+
+.table tbody tr:hover:not(.fillerRow) {
+	background-color: var(--table-row-hover);
+}
+
+.body {
+	color: var(--ui-text, var(--table-body-text, #111827));
+	font-weight: var(--typography-body2-font-weight);
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.table td {
+	color: inherit;
+	min-width: 0;
+}
+
+.fillerRow {
+	background: transparent;
+	flex: 1 1 auto;
+}
+
+.fillerRow:hover {
+	background: transparent;
+}
+
+.fillerCell {
+	padding: 0;
+}
+
+/* Только раскладка: занимает остаток перед правой закреплённой группой,
+ * не меняя реальные размеры колонок и схлопываясь при переполнении. */
+.widthSpacer {
+	flex: 1 0 0;
+	width: 0;
+	min-width: 0;
+	padding: 0;
+	border: 0;
+}
+
+/* Непрозрачный фон закреплённых ячеек: токен дизайна или ближайшая поверхность. */
+.pinned {
+	position: sticky;
+	z-index: 2;
+	background: var(
+		--universal-table-pinned-background,
+		var(
+			--table-surface-background,
+			var(
+				--app-surface-background,
+				linear-gradient(to bottom left, var(--primary-main), var(--primary-light))
+			)
+		)
+	);
+	background-attachment: fixed;
+}
+
+.pinnedLeft {
+	box-shadow: var(--universal-table-pinned-left-shadow);
+}
+
+.pinnedRight {
+	box-shadow: var(--universal-table-pinned-right-shadow);
+}
+
+/* hover row → подсвечиваем pinned через overlay-псевдоэлемент с opacity-переходом.
+ * Нельзя использовать background-color (слетает background-attachment: fixed) или
+ * inset box-shadow с большим spread (заливает мгновенно, не синхронно с фоном строки).
+ * z-index: -1 кладёт overlay над фоном ячейки, но под её контентом. */
+.pinned::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: var(--table-row-hover);
+	opacity: 0;
+	transition: opacity 0.1s ease-in;
+	pointer-events: none;
+}
+
+.body .row:hover:not(.fillerRow) > .pinned::after {
+	opacity: 1;
+}
+
+:global([data-theme="light"]) {
+	--table-header-bg: transparent;
+	--table-header-text: rgb(var(--color-white, 255 255 255));
+	--table-body-from: rgb(var(--color-white, 255 255 255));
+	--table-body-to: #e2f1ff;
+	--table-body-text: rgb(var(--color-black, 17 24 39));
+	--table-row-hover: rgba(var(--color-blue-light, 147 197 253) / 0.3);
+	--table-resize-handle: rgba(var(--color-black, 17 24 39) / 0.05);
+}
+
+:global([data-theme="dark"]) {
+	--table-header-bg: transparent;
+	--table-header-text: rgb(var(--color-white, 255 255 255));
+	--table-body-from: rgb(var(--color-blue-dark, 30 58 95));
+	--table-body-to: rgb(var(--color-blue-darkest, 15 23 42));
+	--table-body-text: rgb(var(--color-white, 255 255 255));
+	--table-row-hover: rgba(var(--color-blue-medium, 59 130 246) / 0.22);
+	--table-resize-handle: rgba(var(--color-white, 255 255 255) / 0.2);
+}
+

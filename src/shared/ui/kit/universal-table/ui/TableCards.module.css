@@ -1,0 +1,8 @@
+.scroll { flex: 1; min-height: 0; overflow: auto; container-type: size; }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--table-card-min-width, 320px)), 1fr));
+  align-content: start;
+  gap: var(--spacing-3);
+}
+

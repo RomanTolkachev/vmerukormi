@@ -1,0 +1,79 @@
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	min-width: 0;
+	width: 100%;
+}
+
+.fieldAndError {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	gap: 0;
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	gap: 6px;
+	min-width: 0;
+}
+
+.contentHorizontal {
+	display: grid;
+	align-items: center;
+	gap: var(--spacing-2);
+}
+
+.label {
+	min-width: 0;
+}
+
+.wrapper .labelTop {
+	margin-bottom: var(--spacing-2);
+}
+
+.wrapper .labelBottom {
+	margin-top: var(--spacing-2);
+}
+
+.wrapper .requiredMark {
+	position: absolute;
+	top: -6px;
+	left: 3px;
+	font-weight: inherit;
+	line-height: 1;
+	pointer-events: none;
+}
+
+/* Звёздочка обязательного поля в одной строке с подписью. */
+.wrapper .requiredMarkInline {
+	margin-left: 0.25em;
+	font-weight: inherit;
+	line-height: inherit;
+	white-space: nowrap;
+}
+
+.inputContainer {
+	width: 100%;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	position: relative;
+}
+
+.errorContainer {
+	min-height: var(--spacing-5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.wrapper .errorMessage {
+	font-weight: inherit;
+	word-wrap: break-word;
+	width: 100%;
+}
+

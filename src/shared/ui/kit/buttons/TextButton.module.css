@@ -1,0 +1,220 @@
+.button {
+    --button-translate-y: 0;
+    --button-scale: 1;
+    --button-motion-fast: var(--motion-fast, 140ms);
+    --button-motion-base: var(--motion-base, 200ms);
+    --button-ease-out: var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    min-height: var(--control-min-height, var(--spacing-12));
+    padding: var(--button-padding);
+    border: 1px solid var(--button-border);
+    border-radius: var(--ui-control-radius, var(--control-radius, var(--spacing-6)));
+    box-sizing: border-box;
+    background: var(--button-background);
+    box-shadow: var(--button-shadow);
+    color: var(--button-text);
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    outline: none;
+    transform: translateY(var(--button-translate-y)) scale(var(--button-scale));
+    transition:
+        transform var(--button-motion-fast) var(--button-ease-out),
+        box-shadow var(--button-motion-base) ease,
+        background-color 160ms ease,
+        border-color 160ms ease,
+        color 160ms ease,
+        opacity 160ms ease;
+}
+
+.button:focus {
+    outline: inherit;
+}
+
+.button:disabled {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.button:disabled:hover {
+    box-shadow: var(--button-shadow);
+    transform: translateY(0) scale(1);
+}
+
+.warning {
+    background: var(--button-warning-background);
+    color: rgb(var(--color-white));
+}
+
+.ghost {
+    border-color: var(--button-ghost-border);
+    background: var(--button-ghost-background);
+    box-shadow: var(--button-ghost-shadow);
+    color: var(--button-ghost-text);
+}
+
+.ghost:focus-visible {
+    border-color: var(--button-ghost-hover-border);
+    background: var(--button-ghost-hover-background);
+    box-shadow: var(--button-ghost-hover-shadow);
+}
+
+.ghost:disabled:hover {
+    border-color: var(--button-ghost-border);
+    background: var(--button-ghost-background);
+    box-shadow: var(--button-ghost-shadow);
+}
+
+.compact {
+    --button-scale: 1;
+    --button-translate-y: 0;
+
+    gap: var(--spacing-2);
+    min-height: var(--button-compact-height, var(--workspace-control-height, var(--composable-table-compact-control-height, 2.25rem)));
+    padding: 0 var(--spacing-3);
+    border-color: var(--button-compact-border, var(--workspace-control-border, var(--composable-table-compact-control-border, rgba(var(--color-white) / 0.18))));
+    border-radius: var(--button-compact-radius, var(--workspace-control-radius, var(--composable-table-compact-control-radius, 0.375rem)));
+    background: var(--button-compact-background, var(--workspace-control-background, var(--composable-table-compact-control-background, rgba(var(--color-white) / 0.06))));
+    box-shadow: var(--button-compact-shadow, var(--workspace-control-shadow, var(--composable-table-compact-control-shadow, none)));
+    color: var(--button-compact-text, var(--composable-table-text, var(--primary-contrastText)));
+    transform: translateY(var(--button-translate-y)) scale(var(--button-scale));
+    transition:
+        transform var(--button-motion-fast) var(--button-ease-out),
+        background-color 160ms ease,
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        color 160ms ease,
+        opacity 160ms ease;
+    white-space: nowrap;
+}
+
+.compact:not(:disabled):focus-visible {
+    border-color: var(--button-compact-border-active, var(--workspace-control-border-active, var(--composable-table-compact-control-border-active, rgba(var(--color-blue-light) / 0.64))));
+    background: var(--button-compact-background-hover, var(--workspace-control-background-hover, var(--composable-table-compact-control-background-hover, rgba(var(--color-blue-light) / 0.14))));
+    box-shadow: var(--button-compact-shadow-hover, var(--workspace-control-shadow-hover, var(--composable-table-compact-control-shadow-hover, 0 0 0 1px rgba(var(--color-blue-light) / 0.2), 0 0.375rem 0.875rem rgba(var(--color-blue-light) / 0.14))));
+    color: var(--button-compact-text, var(--composable-table-text, var(--primary-contrastText)));
+}
+
+.compact:not(:disabled):active {
+    border-color: var(--button-compact-border-active, var(--workspace-control-border-active, var(--composable-table-compact-control-border-active, rgba(var(--color-blue-light) / 0.64))));
+    background: var(--button-compact-background-active, var(--workspace-control-background-active, var(--composable-table-compact-control-background-active, rgba(var(--color-blue-light) / 0.18))));
+    box-shadow: var(--button-compact-shadow-active, var(--workspace-control-shadow-active, var(--composable-table-compact-control-shadow-active, 0 0 0 1px rgba(var(--color-blue-light) / 0.28), 0 0.5rem 1rem rgba(var(--color-blue-light) / 0.18))));
+}
+
+.compact:disabled:hover {
+    border-color: var(--button-compact-border, var(--workspace-control-border, var(--composable-table-compact-control-border, rgba(var(--color-white) / 0.18))));
+    background: var(--button-compact-background, var(--workspace-control-background, var(--composable-table-compact-control-background, rgba(var(--color-white) / 0.06))));
+    box-shadow: var(--button-compact-shadow, var(--workspace-control-shadow, var(--composable-table-compact-control-shadow, none)));
+    transform: translateY(0) scale(1);
+}
+
+/* Typography chooses the text scale; size classes only control geometry. */
+.button.sm {
+    min-height: var(--button-sm-height);
+    padding: var(--button-sm-padding);
+}
+
+.button.md {
+    min-height: var(--control-min-height, var(--spacing-12));
+    padding: var(--button-padding);
+}
+
+.button.lg {
+    min-height: var(--button-lg-height);
+    padding: var(--button-lg-padding);
+}
+
+@media (pointer: coarse) {
+    .button.sm {
+        min-height: max(var(--button-sm-height), var(--button-touch-min-height));
+    }
+}
+
+:global([data-theme="light"]) .ghost {
+    border-color: var(--button-ghost-border);
+    background: var(--button-ghost-background);
+    box-shadow: var(--button-ghost-shadow);
+    color: var(--button-ghost-text);
+}
+
+:global([data-theme="light"]) .ghost:focus-visible {
+    border-color: var(--button-ghost-hover-border);
+    background: var(--button-ghost-hover-background);
+    box-shadow: var(--button-ghost-hover-shadow);
+}
+
+:global([data-theme="light"]) .ghost:disabled:hover {
+    border-color: var(--button-ghost-border);
+    background: var(--button-ghost-background);
+    box-shadow: var(--button-ghost-shadow);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .button:hover {
+        background: var(--button-hover-background);
+        box-shadow: var(--button-hover-shadow);
+    }
+
+    .howerEffect:hover {
+        --button-translate-y: -2px;
+    }
+
+    .warning:hover {
+        background: var(--button-warning-background);
+        box-shadow: var(--button-warning-hover-shadow);
+    }
+
+    .ghost:hover {
+        border-color: var(--button-ghost-hover-border);
+        background: var(--button-ghost-hover-background);
+        box-shadow: var(--button-ghost-hover-shadow);
+    }
+
+    .compact:not(:disabled):hover {
+        border-color: var(--button-compact-border-active, var(--workspace-control-border-active, var(--composable-table-compact-control-border-active, rgba(var(--color-blue-light) / 0.64))));
+        background: var(--button-compact-background-hover, var(--workspace-control-background-hover, var(--composable-table-compact-control-background-hover, rgba(var(--color-blue-light) / 0.14))));
+        box-shadow: var(--button-compact-shadow-hover, var(--workspace-control-shadow-hover, var(--composable-table-compact-control-shadow-hover, 0 0 0 1px rgba(var(--color-blue-light) / 0.2), 0 0.375rem 0.875rem rgba(var(--color-blue-light) / 0.14))));
+        color: var(--button-compact-text, var(--composable-table-text, var(--primary-contrastText)));
+    }
+
+    .compact.howerEffect:hover {
+        --button-translate-y: 0;
+    }
+
+    :global([data-theme="light"]) .ghost:hover {
+        border-color: var(--button-ghost-hover-border);
+        background: var(--button-ghost-hover-background);
+        box-shadow: var(--button-ghost-hover-shadow);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button,
+    .compact,
+    .button:disabled:hover,
+    .compact:disabled:hover {
+        --button-translate-y: 0;
+        --button-scale: 1;
+        transform: none;
+    }
+
+    .button,
+    .compact {
+        transition:
+            box-shadow 120ms ease,
+            background-color 120ms ease,
+            border-color 120ms ease,
+            color 120ms ease,
+            opacity 120ms ease;
+    }
+}
+
+.button:focus-visible {
+    outline: var(--ui-button-focus-outline, inherit);
+    outline-offset: 2px;
+}
+

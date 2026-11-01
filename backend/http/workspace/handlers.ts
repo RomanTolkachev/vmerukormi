@@ -85,8 +85,10 @@ function page<T extends Record<string, unknown>>(
     : rows;
   if (sort)
     result = [...result].sort(
-      (a, b) =>
-        String(a[sort] ?? "").localeCompare(String(b[sort] ?? "")) * dir,
+      (first, second) => {
+        const left = first[sort], right = second[sort];
+        return (typeof left === "number" && typeof right === "number" ? left - right : String(left ?? "").localeCompare(String(right ?? ""), "ru", { numeric: true })) * dir;
+      },
     );
   return Response.json({
     rows: result.slice((p - 1) * per, p * per),
@@ -143,7 +145,7 @@ export async function listWorkspace(
   if (resource === "nutrients")
     return page(
       await prisma.nutrient.findMany({
-        where: readableCatalog(user.id),
+        where: { ...readableCatalog(user.id), isReferenceOnly: false },
         orderBy: [{ category: "asc" }, { name: "asc" }],
       }),
       request,

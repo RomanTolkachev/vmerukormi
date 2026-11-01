@@ -34,6 +34,7 @@ function findRation(userId: string, id: string) {
           product: {
             include: {
               nutrients: {
+                where: { nutrient: { isReferenceOnly: false } },
                 include: { nutrient: true },
                 orderBy: { nutrient: { category: "asc" } },
               },
@@ -362,7 +363,7 @@ export async function exportRationXlsx(userId: string, rationId: string) {
   const ration = await findRation(userId, rationId);
   if (!ration) return null;
 
-  const nutrients = await prisma.nutrient.findMany({ where: readableCatalog(userId) });
+  const nutrients = await prisma.nutrient.findMany({ where: { ...readableCatalog(userId), isReferenceOnly: false } });
   const workbook = buildWorkbook(ration, nutrients);
   const buffer = await workbook.xlsx.writeBuffer();
   return {

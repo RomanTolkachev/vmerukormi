@@ -21,10 +21,10 @@ export async function getCalculationStandards(input: {
     input.breedId && input.sex
       ? prisma.breedStandard.findUnique({
           where: { userId_breedId_sex: { userId: input.userId, breedId: input.breedId, sex: input.sex } },
-          include: { nutrients: { include: { nutrient: true } } },
+          include: { nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } },
         })
       : null,
-    prisma.nutrient.findMany({ where: readableCatalog(input.userId), orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    prisma.nutrient.findMany({ where: { ...readableCatalog(input.userId), isReferenceOnly: false }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
   ]);
 
   const baseMacros = DEFAULT_MACROS_PER_1000_KCAL[input.species];

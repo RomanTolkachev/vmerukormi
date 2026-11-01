@@ -14,6 +14,7 @@ export async function getProductEditorData(id: string) {
     include: {
       group: { select: { id: true, name: true } },
       nutrients: {
+        where: { nutrient: { isReferenceOnly: false } },
         include: { nutrient: true },
         orderBy: { nutrient: { name: "asc" } },
       },
@@ -25,7 +26,7 @@ export async function getProductEditorData(id: string) {
   const references = catalogReferences(userId, product.isShared);
   const [nutrients, groups, tags] = await Promise.all([
     prisma.nutrient.findMany({
-      where: references,
+      where: { ...references, isReferenceOnly: false },
       orderBy: [{ category: "asc" }, { name: "asc" }],
     }),
     prisma.productGroup.findMany({

@@ -1,0 +1,228 @@
+.buttonWrapper {
+    border-radius: var(--ui-control-radius, var(--control-radius, var(--spacing-6)));
+    background: none !important;
+    cursor: pointer;
+    aspect-ratio: 1;
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    transition: opacity 160ms ease;
+	height: var(--iconbutton-max-size, 100%);
+	width: var(--iconbutton-max-size, auto);
+	max-height: var(--iconbutton-max-size, 55px);
+}
+
+.sm,
+.md,
+.lg {
+    flex-shrink: 0;
+}
+
+.sm {
+    --iconbutton-max-size: var(--button-sm-height);
+    --iconbutton-icon-size: var(--button-sm-icon-size);
+}
+
+.md {
+    --iconbutton-max-size: var(--control-min-height, var(--spacing-12));
+    --iconbutton-icon-size: var(--button-md-icon-size);
+}
+
+.lg {
+    --iconbutton-max-size: var(--button-lg-height);
+    --iconbutton-icon-size: var(--button-lg-icon-size);
+}
+
+@media (pointer: coarse) {
+    .sm {
+        --iconbutton-max-size: max(var(--button-sm-height), var(--button-touch-min-height));
+    }
+}
+
+.button:focus {
+    outline: none;
+}
+
+.button {
+    --button-translate-y: 0;
+    --button-scale: 1;
+    --button-motion-fast: var(--motion-fast, 140ms);
+    --button-motion-base: var(--motion-base, 200ms);
+    --button-ease-out: var(--ease-out-strong, cubic-bezier(0.23, 1, 0.32, 1));
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid var(--button-border);
+    border-radius: var(--ui-control-radius, var(--control-radius, var(--spacing-6)));
+    box-sizing: border-box;
+    /* padding: 10px; */
+    background: var(--button-background);
+    box-shadow: var(--button-shadow);
+    cursor: pointer;
+    margin-bottom: 0 !important;
+    outline: none;
+    transform: translateY(var(--button-translate-y)) scale(var(--button-scale));
+    transition:
+        transform var(--button-motion-fast) var(--button-ease-out),
+        box-shadow var(--button-motion-base) ease,
+        background-color 160ms ease,
+        border-color 160ms ease,
+        opacity 160ms ease;
+	max-height: var(--iconbutton-max-size, 55px);
+}
+
+.icon {
+    width: var(--iconbutton-icon-size, 80%);
+    height: var(--iconbutton-icon-size, 80%);
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.ghost {
+	border-color: var(--button-ghost-border);
+	background: var(--button-ghost-background)!important;
+	box-shadow: var(--button-ghost-shadow)!important;
+	color: var(--button-ghost-text) !important;
+}
+
+.ghost:focus-visible {
+	border-color: var(--button-ghost-hover-border);
+	background: var(--button-ghost-hover-background)!important;
+	box-shadow: var(--button-ghost-hover-shadow)!important;
+}
+
+:global([data-theme="light"]) .ghost {
+	border-color: var(--button-ghost-border);
+	background: var(--button-ghost-background)!important;
+	box-shadow: var(--button-ghost-shadow)!important;
+	color: var(--button-ghost-text) !important;
+}
+
+:global([data-theme="light"]) .ghost:focus-visible {
+	border-color: var(--button-ghost-hover-border);
+	background: var(--button-ghost-hover-background)!important;
+	box-shadow: var(--button-ghost-hover-shadow)!important;
+}
+
+.transparent {
+	border-color: transparent;
+	background: transparent !important;
+	box-shadow: none !important;
+	color: var(--ui-text, var(--primary-contrastText)) !important;
+}
+
+/* Halve the visual inset without shrinking the button or its touch target.
+   Legacy maxSize-only buttons keep their percentage-based icon sizing. */
+.transparent:is(.sm, .md, .lg) {
+    padding: 0;
+}
+
+.transparent:is(.sm, .md, .lg) .icon {
+    width: calc((var(--iconbutton-max-size) + var(--iconbutton-icon-size)) / 2);
+    height: calc((var(--iconbutton-max-size) + var(--iconbutton-icon-size)) / 2);
+}
+
+.transparent:focus-visible {
+	border-color: transparent;
+	background: transparent !important;
+	box-shadow: none !important;
+	opacity: 0.7;
+}
+
+.button:disabled,
+.buttonWrapper:has(.button:disabled) {
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .howerEffect:hover {
+        --button-translate-y: -2px;
+    }
+
+    .buttonWrapper:hover .button {
+        background: var(--button-hover-background);
+        box-shadow: var(--button-hover-shadow);
+    }
+
+    .buttonWrapper:hover .ghost {
+        border-color: var(--button-ghost-hover-border);
+        background: var(--button-ghost-hover-background)!important;
+        box-shadow: var(--button-ghost-hover-shadow)!important;
+    }
+
+    :global([data-theme="light"]) .buttonWrapper:hover .ghost {
+        border-color: var(--button-ghost-hover-border);
+        background: var(--button-ghost-hover-background)!important;
+        box-shadow: var(--button-ghost-hover-shadow)!important;
+    }
+
+    .buttonWrapper:hover .transparent {
+        border-color: transparent;
+        background: transparent !important;
+        box-shadow: none !important;
+        opacity: 0.7;
+    }
+
+    .buttonWrapper:has(.button:disabled):hover .button {
+        box-shadow: var(--button-shadow);
+        transform: translateY(0) scale(1);
+    }
+
+    .buttonWrapper:has(.ghost:disabled):hover .ghost {
+        border-color: var(--button-ghost-border);
+        background: var(--button-ghost-background)!important;
+        box-shadow: var(--button-ghost-shadow)!important;
+    }
+
+    :global([data-theme="light"]) .buttonWrapper:has(.ghost:disabled):hover .ghost {
+        border-color: var(--button-ghost-border);
+        background: var(--button-ghost-background)!important;
+        box-shadow: var(--button-ghost-shadow)!important;
+    }
+
+    .buttonWrapper:has(.transparent:disabled):hover .transparent {
+        border-color: transparent;
+        background: transparent !important;
+        box-shadow: none !important;
+        opacity: 0.7;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .button,
+    .buttonWrapper:has(.button:disabled):hover .button {
+        --button-translate-y: 0;
+        --button-scale: 1;
+        transform: none;
+    }
+
+    .button {
+        transition:
+            box-shadow 120ms ease,
+            background-color 120ms ease,
+            border-color 120ms ease,
+            opacity 120ms ease;
+    }
+}
+
+.button:focus-visible {
+    outline: var(--ui-button-focus-outline, none);
+    outline-offset: 2px;
+}
+

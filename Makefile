@@ -1,6 +1,11 @@
 COMPOSE := docker compose -f backend/docker-compose.yml
+DEPLOY_HOST ?= vmerukormi
+DEPLOY_DIR ?= /var/www/vmerukormi
 
-.PHONY: seed db-up db-stop db-deploy db-setup prod-build prod-up prod-down prod-logs prod-migrate prod-seed
+.PHONY: seed db-up db-stop db-deploy db-setup prod-build prod-up prod-down prod-logs prod-migrate prod-seed deploy
+
+deploy:
+	DEPLOY_HOST="$(DEPLOY_HOST)" DEPLOY_DIR="$(DEPLOY_DIR)" bash deploy/deploy.sh
 
 seed:
 	npm run db:seed
