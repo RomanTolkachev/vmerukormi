@@ -3,16 +3,17 @@
 import { useEffect, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { UniversalTable, type UniversalTableColumnMeta, type UniversalTableProps } from "../universal-table";
+import { ui } from "../styles";
 
 export function LocalRegistry<Row extends Record<string, unknown>>({ rows, columns, tableName, createButton, ...props }: {
   rows: Row[]; columns: UniversalTableColumnMeta[]; tableName: string; createButton?: ReactNode;
 } & Pick<UniversalTableProps<Row>, "actionCell" | "actionCellWidth" | "columnSizeData" | "formatCellValue" | "customColumns">) {
   const client = useQueryClient();
   useEffect(() => { void client.invalidateQueries({ queryKey: [tableName] }); }, [client, rows, tableName]);
-  return <UniversalTable<Row> {...props} tableName={tableName} getRowId={row => String(row.id)}
-    sortable={columns.map(column => column.name)} rowSelection={{ enabled: true }}
+  return <UniversalTable<Row> {...props} formatCellValue={props.formatCellValue ?? ((_column, value) => typeof value === "number" ? <span className={ui("numericCell")}>{value.toLocaleString("ru-RU", { maximumSignificantDigits: 8 })}</span> : String(value ?? "—"))} tableName={tableName} getRowId={row => String(row.id)}
+    sortable={columns.map(column => column.name)}
     toolbar={{ search: { enabled: true }, settingsButton: { enabled: true }, extraButtons: createButton ? [{ key: "create", render: () => createButton }] : [] }}
-    cardsView={{ render: (context, row) => <article style={{ padding: 16, border: "1px solid #dbe3eb", borderRadius: 12 }}>{columns.map(column => <p key={column.name}><b>{column.label}: </b>{props.formatCellValue?.(column.name, row[column.name]) ?? String(row[column.name] ?? "—")}</p>)}{props.actionCell?.(context, row)}</article> }}
+    cardsView={{ render: (context, row) => <article className={ui("registryCard")}>{columns.map(column => <p key={column.name}><b>{column.label}: </b>{props.formatCellValue?.(column.name, row[column.name]) ?? String(row[column.name] ?? "—")}</p>)}{props.actionCell?.(context, row)}</article> }}
     queryFn={async query => {
       const search = query.search?.trim().toLocaleLowerCase("ru") ?? "";
       let result = rows.filter(row => !search || columns.some(column => String(row[column.name] ?? "").toLocaleLowerCase("ru").includes(search)));

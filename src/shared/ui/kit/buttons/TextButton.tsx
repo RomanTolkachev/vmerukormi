@@ -1,4 +1,5 @@
 import React from "react";
+import { buttonMotionClassName } from "@/shared/ui/button-motion";
 import { Typography } from "@/shared/ui/kit/typography/Typography";
 import { textButtonTypography } from "@/shared/ui/kit/buttons/textButtonTypography";
 import styles from "@/shared/ui/kit/buttons/TextButton.module.css" with { type: "css" };
@@ -9,7 +10,6 @@ export type DeprecatedCompactButtonVariant = "compact";
 export type TextButtonVariant = "warning" | "ghost" | DeprecatedCompactButtonVariant;
 
 export interface TextButtonProps extends Omit<React.ComponentPropsWithRef<"button">, "color"> {
-	howerEffect?: boolean;
 	touchEffect?: boolean;
 	/** "compact" is deprecated; its legacy surface/geometry remain, with body3 typography. */
 	variant?: TextButtonVariant;
@@ -27,7 +27,6 @@ export const TextButton = ({
 	onMouseLeave,
 	onTouchStart,
 	onTouchEnd,
-	howerEffect,
 	touchEffect = false,
 	variant,
 	size,
@@ -55,7 +54,7 @@ export const TextButton = ({
 			color="inherit"
 			ref={ref}
 			type={type ?? "button"}
-			className={`${styles.button} ${variantClassName} ${sizeClassName} ${howerEffect ? styles.howerEffect : ""} ${className}`.trim()}
+			className={`${buttonMotionClassName} ${styles.button} ${variantClassName} ${sizeClassName} ${className}`.trim()}
 			style={{ ...style, ...variableStyle }}
 			onClick={onClick}
 			onMouseEnter={onMouseEnter}

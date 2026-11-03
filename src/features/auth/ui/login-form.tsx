@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/shared/api";
 import { ui } from "@/shared/ui/styles";
+import { Button, Input } from "@/shared/ui/controls";
 
 export function LoginForm() {
   const router = useRouter();
@@ -42,13 +43,13 @@ export function LoginForm() {
   return <form onSubmit={submit} className={ui("loginForm")}>
     <div className={ui("field")}>
       <label htmlFor="username">Имя пользователя</label>
-      <input className={ui("input")} id="username" name="username" autoComplete="username" autoFocus required />
+      <Input className={ui("input")} id="username" name="username" autoComplete="username" autoFocus required />
     </div>
     <div className={ui("field")}>
       <label htmlFor="password">Пароль</label>
-      <input className={ui("input")} id="password" name="password" type="password" autoComplete="current-password" required />
+      <Input className={ui("input")} id="password" name="password" type="password" autoComplete="current-password" required />
     </div>
-    <button className={ui("primary", "loginButton")} type="submit" disabled={pending}>{pending ? "Вход…" : "Войти"}</button>
+    <Button className={ui("primary", "loginButton")} type="submit" disabled={pending}>{pending ? "Вход…" : "Войти"}</Button>
     {error && <div className={ui("error")} role="alert">{error}</div>}
   </form>;
 }

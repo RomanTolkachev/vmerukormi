@@ -267,9 +267,10 @@ export function SelectInput({
 						buttonClassName={isSmall ? styles.smBtnInner : undefined}
 						icon={<RiArrowDownSLine />}
 						iconClassName={styles.icon}
+						aria-disabled={disabled || undefined}
 						tabIndex={popupIndicatorProps.tabIndex}
 						onMouseDown={event => event.preventDefault()}
-						onClick={popupIndicatorProps.onClick}
+						onClick={disabled ? undefined : popupIndicatorProps.onClick}
 					/>
 				</div>
 			</div>

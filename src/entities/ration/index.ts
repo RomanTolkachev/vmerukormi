@@ -15,3 +15,4 @@ export type { RationProductNutrient } from "./model/ration";
 export type { RationProduct } from "./model/ration";
 export type { RationItem } from "./model/ration";
 export type { RationEditorValue } from "./model/ration";
+export type { RationDetails } from "./model/ration";

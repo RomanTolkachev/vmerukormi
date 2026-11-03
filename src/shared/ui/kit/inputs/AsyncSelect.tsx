@@ -7,6 +7,8 @@ import { useFloatingPortalRect } from "@/shared/ui/kit/floating-portal/useFloati
 import { ASYNC_SELECT_REQUEST_DEBOUNCE_MS } from "@/shared/ui/kit/config/asyncSelect";
 import { TextInput } from "@/shared/ui/kit/inputs/TextInput";
 import { TextButton } from "@/shared/ui/kit/buttons/TextButton";
+import { buttonMotionClassName } from "@/shared/ui/button-motion";
+import { RequiredMark } from "@/shared/ui/required-mark";
 import { getDropdownPlacement } from "@/shared/ui/kit/inputs/dropdownPlacement";
 import styles from "@/shared/ui/kit/inputs/AsyncSelect.module.css"
 import selectStyles from "@/shared/ui/kit/inputs/SelectInput.module.css"
@@ -35,6 +37,7 @@ export type AsyncSelectProps<TOption extends AsyncSelectOption = AsyncSelectOpti
   errorLabel?: ReactNode
   minimumSearchLabel?: ReactNode
   disabled?: boolean
+  required?: boolean
   isError?: boolean
   clearable?: boolean
   minSearchLength?: number
@@ -68,6 +71,7 @@ export function AsyncSelect<TOption extends AsyncSelectOption = AsyncSelectOptio
   errorLabel = 'Не удалось загрузить варианты',
   minimumSearchLabel,
   disabled = false,
+  required = false,
   isError = false,
   clearable = true,
   minSearchLength = 0,
@@ -209,7 +213,7 @@ export function AsyncSelect<TOption extends AsyncSelectOption = AsyncSelectOptio
               ? visibleOptions.map((option, index) => (
                 <button
                   id={`${inputId}Option${index}`}
-                  className={`${selectStyles.option} ${styles.option} ${option.value === value || activeIndex === index ? selectStyles.optionSelected : ''}`}
+                  className={`${buttonMotionClassName} ${selectStyles.option} ${styles.option} ${option.value === value || activeIndex === index ? selectStyles.optionSelected : ''}`}
                   type="button"
                   role="option"
                   aria-selected={option.value === value}
@@ -231,7 +235,7 @@ export function AsyncSelect<TOption extends AsyncSelectOption = AsyncSelectOptio
 
   return (
     <div className={className ? `${styles.root} ${className}` : styles.root}>
-      <label className={styles.label} htmlFor={inputId}>{label}</label>
+      <label className={styles.label} htmlFor={inputId}>{label}{required && <RequiredMark />}</label>
       <div className={`${styles.field} ${clearable && value !== '' ? styles.fieldWithClear : ''}`} ref={rootRef}>
         <TextInput
           id={inputId}
@@ -240,6 +244,7 @@ export function AsyncSelect<TOption extends AsyncSelectOption = AsyncSelectOptio
           type="text"
           autoComplete="off"
           role="combobox"
+          aria-required={required || undefined}
           aria-expanded={isOpen}
           aria-controls={`${inputId}Options`}
           aria-activedescendant={isOpen && activeIndex >= 0 && activeIndex < visibleOptions.length ? `${inputId}Option${activeIndex}` : undefined}
@@ -282,7 +287,7 @@ export function AsyncSelect<TOption extends AsyncSelectOption = AsyncSelectOptio
         />
         {clearable && value !== '' ? (
           <button
-            className={styles.clearButton}
+            className={`${buttonMotionClassName} ${styles.clearButton}`}
             type="button"
             disabled={disabled}
             aria-label="Очистить"

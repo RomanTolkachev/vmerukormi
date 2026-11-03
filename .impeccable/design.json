@@ -1,0 +1,529 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T14:01:25Z",
+  "title": "Design System: VetEnergy",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Лесной зелёный",
+        "canonical": "#225b42",
+        "tonalRamp": [
+          "oklch(15% 0.0275 161.83)",
+          "oklch(27% 0.0495 161.83)",
+          "oklch(38% 0.0697 161.83)",
+          "oklch(50% 0.0734 161.83)",
+          "oklch(61% 0.0734 161.83)",
+          "oklch(73% 0.0660 161.83)",
+          "oklch(84% 0.0391 161.83)",
+          "oklch(95% 0.0122 161.83)"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Тёмный лесной зелёный",
+        "canonical": "#184632",
+        "tonalRamp": [
+          "oklch(15% 0.0231 161.96)",
+          "oklch(27% 0.0416 161.96)",
+          "oklch(38% 0.0585 161.96)",
+          "oklch(50% 0.0616 161.96)",
+          "oklch(61% 0.0616 161.96)",
+          "oklch(73% 0.0554 161.96)",
+          "oklch(84% 0.0329 161.96)",
+          "oklch(95% 0.0103 161.96)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Зелёные чернила",
+        "canonical": "#203c2f",
+        "tonalRamp": [
+          "oklch(15% 0.0156 162.89)",
+          "oklch(27% 0.0280 162.89)",
+          "oklch(38% 0.0395 162.89)",
+          "oklch(50% 0.0416 162.89)",
+          "oklch(61% 0.0416 162.89)",
+          "oklch(73% 0.0374 162.89)",
+          "oklch(84% 0.0222 162.89)",
+          "oklch(95% 0.0069 162.89)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Приглушённый зелёно-серый",
+        "canonical": "#596d61",
+        "tonalRamp": [
+          "oklch(15% 0.0114 158.80)",
+          "oklch(27% 0.0205 158.80)",
+          "oklch(38% 0.0289 158.80)",
+          "oklch(50% 0.0304 158.80)",
+          "oklch(61% 0.0304 158.80)",
+          "oklch(73% 0.0274 158.80)",
+          "oklch(84% 0.0162 158.80)",
+          "oklch(95% 0.0051 158.80)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Светлый фон",
+        "canonical": "#f7f9f7",
+        "tonalRamp": [
+          "oklch(15% 0.0013 145.55)",
+          "oklch(27% 0.0023 145.55)",
+          "oklch(38% 0.0032 145.55)",
+          "oklch(50% 0.0034 145.55)",
+          "oklch(61% 0.0034 145.55)",
+          "oklch(73% 0.0030 145.55)",
+          "oklch(84% 0.0018 145.55)",
+          "oklch(95% 0.0006 145.55)"
+        ]
+      },
+      "rail": {
+        "role": "neutral",
+        "displayName": "Шалфейная подложка",
+        "canonical": "#eef4f1",
+        "tonalRamp": [
+          "oklch(15% 0.0028 164.94)",
+          "oklch(27% 0.0051 164.94)",
+          "oklch(38% 0.0071 164.94)",
+          "oklch(50% 0.0075 164.94)",
+          "oklch(61% 0.0075 164.94)",
+          "oklch(73% 0.0067 164.94)",
+          "oklch(84% 0.0040 164.94)",
+          "oklch(95% 0.0012 164.94)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Тонкий разделитель",
+        "canonical": "#dbe5df",
+        "tonalRamp": [
+          "oklch(15% 0.0050 159.89)",
+          "oklch(27% 0.0090 159.89)",
+          "oklch(38% 0.0127 159.89)",
+          "oklch(50% 0.0134 159.89)",
+          "oklch(61% 0.0134 159.89)",
+          "oklch(73% 0.0120 159.89)",
+          "oklch(84% 0.0071 159.89)",
+          "oklch(95% 0.0022 159.89)"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Граница поля",
+        "canonical": "#a7b9ad",
+        "tonalRamp": [
+          "oklch(15% 0.0098 156.56)",
+          "oklch(27% 0.0176 156.56)",
+          "oklch(38% 0.0248 156.56)",
+          "oklch(50% 0.0261 156.56)",
+          "oklch(61% 0.0261 156.56)",
+          "oklch(73% 0.0235 156.56)",
+          "oklch(84% 0.0139 156.56)",
+          "oklch(95% 0.0043 156.56)"
+        ]
+      },
+      "selection": {
+        "role": "neutral",
+        "displayName": "Выбранная область",
+        "canonical": "#d6e5dc",
+        "tonalRamp": [
+          "oklch(15% 0.0075 159.72)",
+          "oklch(27% 0.0135 159.72)",
+          "oklch(38% 0.0191 159.72)",
+          "oklch(50% 0.0201 159.72)",
+          "oklch(61% 0.0201 159.72)",
+          "oklch(73% 0.0180 159.72)",
+          "oklch(84% 0.0107 159.72)",
+          "oklch(95% 0.0033 159.72)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "Белая рабочая поверхность",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.0000 0.00)",
+          "oklch(27% 0.0000 0.00)",
+          "oklch(38% 0.0000 0.00)",
+          "oklch(50% 0.0000 0.00)",
+          "oklch(61% 0.0000 0.00)",
+          "oklch(73% 0.0000 0.00)",
+          "oklch(84% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
+        ]
+      },
+      "green": {
+        "role": "primary",
+        "displayName": "Мягкая зелень",
+        "canonical": "#e8f3eb",
+        "tonalRamp": [
+          "oklch(15% 0.0059 154.47)",
+          "oklch(27% 0.0106 154.47)",
+          "oklch(38% 0.0150 154.47)",
+          "oklch(50% 0.0157 154.47)",
+          "oklch(61% 0.0157 154.47)",
+          "oklch(73% 0.0142 154.47)",
+          "oklch(84% 0.0084 154.47)",
+          "oklch(95% 0.0026 154.47)"
+        ]
+      },
+      "blue-soft": {
+        "role": "primary",
+        "displayName": "Мягкая зелень формул",
+        "canonical": "#e8f3eb",
+        "tonalRamp": [
+          "oklch(15% 0.0059 154.47)",
+          "oklch(27% 0.0106 154.47)",
+          "oklch(38% 0.0150 154.47)",
+          "oklch(50% 0.0157 154.47)",
+          "oklch(61% 0.0157 154.47)",
+          "oklch(73% 0.0142 154.47)",
+          "oklch(84% 0.0084 154.47)",
+          "oklch(95% 0.0026 154.47)"
+        ]
+      },
+      "cream": {
+        "role": "semantic",
+        "displayName": "Кремовая заметка",
+        "canonical": "#fcf5e7",
+        "tonalRamp": [
+          "oklch(15% 0.0075 84.59)",
+          "oklch(27% 0.0135 84.59)",
+          "oklch(38% 0.0189 84.59)",
+          "oklch(50% 0.0199 84.59)",
+          "oklch(61% 0.0199 84.59)",
+          "oklch(73% 0.0179 84.59)",
+          "oklch(84% 0.0106 84.59)",
+          "oklch(95% 0.0033 84.59)"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Приглушённый красный",
+        "canonical": "#a23535",
+        "tonalRamp": [
+          "oklch(15% 0.0541 24.17)",
+          "oklch(27% 0.0974 24.17)",
+          "oklch(38% 0.1371 24.17)",
+          "oklch(50% 0.1443 24.17)",
+          "oklch(61% 0.1443 24.17)",
+          "oklch(73% 0.1299 24.17)",
+          "oklch(84% 0.0770 24.17)",
+          "oklch(95% 0.0241 24.17)"
+        ]
+      },
+      "danger-soft": {
+        "role": "semantic",
+        "displayName": "Мягкий фон удаления",
+        "canonical": "#fcf0ee",
+        "tonalRamp": [
+          "oklch(15% 0.0050 28.87)",
+          "oklch(27% 0.0090 28.87)",
+          "oklch(38% 0.0126 28.87)",
+          "oklch(50% 0.0133 28.87)",
+          "oklch(61% 0.0133 28.87)",
+          "oklch(73% 0.0120 28.87)",
+          "oklch(84% 0.0071 28.87)",
+          "oklch(95% 0.0022 28.87)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Числовой результат",
+        "purpose": "Крупный результат расчёта, не маркетинговый заголовок."
+      },
+      "headline": {
+        "displayName": "Заголовок экрана",
+        "purpose": "Основной рабочий заголовок; fluid-размер из исходного CSS."
+      },
+      "headline-mobile": {
+        "displayName": "Мобильный заголовок",
+        "purpose": "Вариант основного заголовка при ширине до 780px, не универсальная замена всех h1."
+      },
+      "dialog": {
+        "displayName": "Заголовок формы",
+        "purpose": "FormDialog: 22px, вес 600."
+      },
+      "title": {
+        "displayName": "Заголовок панели",
+        "purpose": "Секции рабочих панелей."
+      },
+      "body": {
+        "displayName": "Основной текст",
+        "purpose": "Текст интерфейса; фактический наследуемый шрифт нативных контролов App."
+      },
+      "label": {
+        "displayName": "Подпись поля",
+        "purpose": "Название поля над контролом."
+      },
+      "caption": {
+        "displayName": "Вторичная подпись",
+        "purpose": "Метки каталога и вспомогательные сведения."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ui-panel-shadow",
+        "value": "none",
+        "purpose": "Плоские рабочие панели."
+      },
+      {
+        "name": "ui-popup-shadow",
+        "value": "0 8px 28px rgb(32 60 47 / 0.16)",
+        "purpose": "Всплывающий слой."
+      },
+      {
+        "name": "modal-shadow",
+        "value": "0 24px 72px rgb(32 60 47 / 0.2)",
+        "purpose": "Модальное окно."
+      },
+      {
+        "name": "universal-table-pinned-left-shadow",
+        "value": "4px 0 8px -6px rgb(32 60 47 / 0.2)",
+        "purpose": "Левая закреплённая колонка; отключается до 600px включительно."
+      },
+      {
+        "name": "universal-table-pinned-right-shadow",
+        "value": "-4px 0 8px -6px rgb(32 60 47 / 0.2)",
+        "purpose": "Правая закреплённая колонка; отключается до 600px включительно."
+      },
+      {
+        "name": "ui-focus-shadow",
+        "value": "0 0 0 2px var(--selection)",
+        "purpose": "Фокус контролов kit, не outline обычного Input."
+      }
+    ],
+    "motion": [
+      {
+        "name": "field-border",
+        "value": "border-color 140ms ease",
+        "purpose": "Граница поля; transition:none при reduced motion."
+      },
+      {
+        "name": "navigation-background",
+        "value": "background-color 140ms ease",
+        "purpose": "Фон навигации; transition:none при reduced motion."
+      },
+      {
+        "name": "modal-overlay-enter",
+        "value": "220ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Overlay: opacity 0 → 1."
+      },
+      {
+        "name": "modal-content-enter",
+        "value": "240ms cubic-bezier(0.23, 1, 0.32, 1)",
+        "purpose": "Окно: opacity 0 → 1, scale 0.96 → 1."
+      },
+      {
+        "name": "modal-reduced-motion",
+        "value": "140ms ease",
+        "purpose": "Overlay и окно: только opacity, без масштабирования."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-desktop",
+        "value": "1200px",
+        "purpose": "max-width: rail 200px, content 24px, редакторы продукта/рациона в одну колонку."
+      },
+      {
+        "name": "formula-stack",
+        "value": "980px",
+        "purpose": "max-width: версии формул в одну колонку; более ранние правила других редакторов перекрываются блоком 1200px."
+      },
+      {
+        "name": "mobile-shell",
+        "value": "900px",
+        "purpose": "max-width: скрыть sidebar и крошки, показать мобильное меню."
+      },
+      {
+        "name": "single-column-forms",
+        "value": "780px",
+        "purpose": "max-width: одноимённые рабочие сетки/формы в одну колонку, контент 20px 14px 14px."
+      },
+      {
+        "name": "fullscreen-modal",
+        "value": "767px",
+        "purpose": "max-width: окно 100dvh, без радиуса, safe-area, внутренняя прокрутка."
+      },
+      {
+        "name": "relative-table-cells",
+        "value": "600px",
+        "purpose": "max-width: заголовки и тело закреплённых колонок position:relative, box-shadow:none."
+      }
+    ],
+    "overlays": [
+      {
+        "name": "modal-overlay-background",
+        "value": "rgb(20 38 30 / 0.38)",
+        "purpose": "Затемнение фона модального стека."
+      }
+    ],
+    "focus": [
+      {
+        "name": "global-focus-visible",
+        "value": "outline: 2px solid var(--accent); outline-offset: 3px"
+      },
+      {
+        "name": "input-focus",
+        "value": "border-color: var(--accent); outline: 2px solid var(--selection); outline-offset: 1px"
+      }
+    ],
+    "provenance": {
+      "mode": "scan",
+      "direction": "clinical / code-led own pick",
+      "contract": ".impeccable/surfaces/src-app-ui-app-shell-tsx.md",
+      "sketch": ".impeccable/mocks/decision/clinical.html",
+      "catalogQualityCard": null,
+      "sources": [
+        "src/shared/ui/styles/tokens.css",
+        "src/shared/ui/styles/ui.module.css",
+        "src/app/styles/globals.css",
+        "src/app/styles/base.module.css",
+        "src/shared/ui/controls/index.tsx",
+        "src/app/ui/app-navigation.tsx",
+        "src/shared/ui/form-dialog/index.tsx",
+        "src/shared/ui/kit/modal/Modal.module.css",
+        "src/shared/ui/kit/universal-table/ordered-table/OrderedTable.module.css",
+        "src/shared/ui/kit/universal-table/ordered-table/lib/pinning.ts"
+      ],
+      "font": "src/app/styles/fonts/GolosText.ttf",
+      "fontLicense": "src/app/styles/fonts/OFL.txt",
+      "productionRasterAssets": [],
+      "visualEvidence": [
+        ".impeccable/review/desktop.jpg",
+        ".impeccable/review/mobile-form.jpg"
+      ],
+      "computedStyleEvidence": "Локальный /login: body и нативные поля/кнопка — Golos Text 14px/21px, 400; поле min-height 40px, фактически 41px, радиус 8px.",
+      "tonalRampPolicy": "Шкалы синтезированы в OKLCH только для предпросмотра: 8 шагов от 15% до 95%, исходный hue, снижение chroma у краёв. Не производственные токены.",
+      "snippetLimitations": "Статические HTML/CSS-образцы без React, обработчиков и данных API. Шрифт использует установленный/загруженный Golos Text или sans-serif; внешняя загрузка шрифта не включена. Modal-образец намеренно не разворачивает весь экран, table-образец не реализует UniversalTable. Scoped box-sizing поля/окна сохраняет геометрию внутри отдельного shadow root.",
+      "notCanonized": "Локальные несовпадения радиусов, каскад типографики нативных контролов и перекрывающиеся media-правила не исправлялись и не становятся новыми системными правилами."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Button variant=primary: основное действие. Шрифт отражает наследование App (400 / 1.5), высота — минимум, не фиксированное значение.",
+      "html": "<button type=\"button\" class=\"ds-primary\">Создать продукт</button>",
+      "css": ".ds-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid transparent;border-radius:var(--control-radius,8px);padding:9px 14px;font:400 14px/1.5 'Golos Text',sans-serif;cursor:pointer;background:var(--accent,#225b42);color:var(--white,#ffffff)}.ds-primary:hover:not(:disabled){background:var(--accent-hover,#184632)}.ds-primary:focus-visible{outline:2px solid var(--accent,#225b42);outline-offset:3px}.ds-primary:disabled{color:var(--muted,#596d61);background:var(--rail,#eef4f1);border-color:var(--line,#dbe5df);cursor:not-allowed}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Button variant=secondary: вторичное действие с видимой границей; тот же внешний вид доступен ссылкам.",
+      "html": "<button type=\"button\" class=\"ds-secondary\">Отмена</button>",
+      "css": ".ds-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid transparent;border-radius:var(--control-radius,8px);padding:9px 14px;font:400 14px/1.5 'Golos Text',sans-serif;cursor:pointer;background:var(--white,#ffffff);color:var(--ink,#203c2f);border-color:var(--control-border,#a7b9ad)}.ds-secondary:hover:not(:disabled){background:var(--rail,#eef4f1);border-color:var(--accent,#225b42)}.ds-secondary:focus-visible{outline:2px solid var(--accent,#225b42);outline-offset:3px}.ds-secondary:disabled{color:var(--muted,#596d61);background:var(--rail,#eef4f1);border-color:var(--line,#dbe5df);cursor:not-allowed}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Button variant=danger: мягкий красный вариант удаления/отмены создания, не залитая warning-кнопка kit.",
+      "html": "<button type=\"button\" class=\"ds-danger\">Отменить создание</button>",
+      "css": ".ds-danger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid transparent;border-radius:var(--control-radius,8px);padding:9px 14px;font:400 14px/1.5 'Golos Text',sans-serif;cursor:pointer;background:var(--danger-soft,#fcf0ee);color:var(--danger,#a23535)}.ds-danger:hover:not(:disabled){background:#f6ded9}.ds-danger:focus-visible{outline:2px solid var(--accent,#225b42);outline-offset:3px}.ds-danger:disabled{color:var(--muted,#596d61);background:var(--rail,#eef4f1);border-color:var(--line,#dbe5df);cursor:not-allowed}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Button variant=ghost: кнопка открытия меню с реальным SVG RiMenuLine; отдельной disabled-заливки у этого варианта нет.",
+      "html": "<button type=\"button\" class=\"ds-ghost\" aria-label=\"Открыть меню\"><svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"22\" height=\"22\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z\"></path></svg></button>",
+      "css": ".ds-ghost{display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;border:1px solid transparent;border-radius:var(--control-radius,8px);padding:8px;background:transparent;color:var(--ink,#203c2f);font:400 14px/1.5 'Golos Text',sans-serif;cursor:pointer}.ds-ghost:hover:not(:disabled){background:var(--rail,#eef4f1);border-color:var(--accent,#225b42)}.ds-ghost:focus-visible{outline:2px solid var(--accent,#225b42);outline-offset:3px}.ds-ghost:disabled{cursor:not-allowed}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Подпись и Input из Shared: focus-outline, placeholder и disabled; автоматическая предметная валидация не добавляется.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">Название</span><input class=\"ds-input\" type=\"text\" placeholder=\"Название продукта\"></label>",
+      "css": ".ds-field{display:block;font:400 14px/1.5 'Golos Text',sans-serif;color:var(--ink,#203c2f)}.ds-label{display:block;margin-bottom:7px;font-size:13px;font-weight:500}.ds-input{box-sizing:border-box;width:100%;min-width:0;min-height:40px;border:1px solid var(--control-border,#a7b9ad);background:var(--white,#ffffff);border-radius:var(--control-radius,8px);padding:9px 12px;color:var(--ink,#203c2f);outline:none;font:400 14px/1.5 'Golos Text',sans-serif;caret-color:var(--accent,#225b42);transition:border-color 140ms ease}.ds-input::placeholder{color:var(--muted,#596d61);opacity:1}.ds-input:focus,.ds-input:focus-visible{border-color:var(--accent,#225b42);outline:2px solid var(--selection,#d6e5dc);outline-offset:1px}.ds-input:disabled{color:var(--muted,#596d61);background:var(--rail,#eef4f1)}@media(prefers-reduced-motion:reduce){.ds-input{transition:none}}"
+    },
+    {
+      "name": "App Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Фрагмент реальной группы навигации; SVG RiLeafLine, текущий маршрут и hover. Состав маршрутов принадлежит App.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Разделы приложения\"><div class=\"ds-nav-label\">Справочники</div><a class=\"ds-nav-link\" href=\"/products\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"19\" height=\"19\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M20.998 3V5C20.998 14.6274 15.6255 19 8.99805 19L5.24077 18.9999C5.0786 19.912 4.99805 20.907 4.99805 22H2.99805C2.99805 20.6373 3.11376 19.3997 3.34381 18.2682C3.1133 16.9741 2.99805 15.2176 2.99805 13C2.99805 7.47715 7.4752 3 12.998 3C14.998 3 16.998 4 20.998 3ZM12.998 5C8.57977 5 4.99805 8.58172 4.99805 13C4.99805 13.3624 5.00125 13.7111 5.00759 14.0459C6.26198 12.0684 8.09902 10.5048 10.5019 9.13176L11.4942 10.8682C8.6393 12.4996 6.74554 14.3535 5.77329 16.9998L8.99805 17C15.0132 17 18.8692 13.0269 18.9949 5.38766C17.6229 5.52113 16.3481 5.436 14.7754 5.20009C13.6243 5.02742 13.3988 5 12.998 5Z\"></path></svg><span>Продукты</span></a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:3px;background:var(--rail,#eef4f1);font:400 14px/1.5 'Golos Text',sans-serif}.ds-nav-label{padding:0 12px;margin-bottom:6px;color:var(--muted,#596d61);font-size:12px;font-weight:500}.ds-nav-link{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:7px;color:var(--ink,#203c2f);text-decoration:none;font-weight:400;transition:background-color 140ms ease}.ds-nav-link:hover{background:var(--green,#e8f3eb)}.ds-nav-link[aria-current=page]{background:var(--selection,#d6e5dc);font-weight:600}.ds-nav-link svg{flex:0 0 auto;color:var(--accent,#225b42)}.ds-nav-link:focus-visible{outline:2px solid var(--accent,#225b42);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-nav-link{transition:none}}"
+    },
+    {
+      "name": "Catalog Badges",
+      "kind": "chip",
+      "refersTo": "catalog-badge",
+      "description": "Информационные метки общего/личного каталога. Это не интерактивный фильтр, поэтому hover и focus не добавлены.",
+      "html": "<span class=\"ds-badge\">Общий</span> <span class=\"ds-badge ds-badge-personal\">Личный</span>",
+      "css": ".ds-badge{display:inline-block;padding:3px 7px;border-radius:4px;background:var(--green,#e8f3eb);color:var(--accent,#225b42);font:400 12px/1.5 'Golos Text',sans-serif}.ds-badge-personal{color:var(--muted,#596d61);background:var(--surface,#f7f9f7)}"
+    },
+    {
+      "name": "Working Panel",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Общий паттерн панели из ui.module.css, а не экспорт Card; реальный заголовок и пояснение формы продукта.",
+      "html": "<section class=\"ds-card\"><header class=\"ds-card-head\"><h2 class=\"ds-card-title\">Нутриенты</h2></header><div class=\"ds-card-body\">Нутриентный состав можно заполнить после создания в карточке продукта.</div></section>",
+      "css": ".ds-card{background:var(--white,#ffffff);color:var(--ink,#203c2f);border:1px solid var(--line,#dbe5df);border-radius:var(--panel-radius,12px);overflow:hidden;font:400 14px/1.5 'Golos Text',sans-serif}.ds-card-head{padding:16px 20px;border-bottom:1px solid var(--line,#dbe5df);display:flex;align-items:center;justify-content:space-between;gap:12px}.ds-card-title{margin:0;font-size:16px;font-weight:600}.ds-card-body{padding:20px}@media(max-width:780px){.ds-card-head,.ds-card-body{padding:16px}}"
+    },
+    {
+      "name": "Form Dialog Surface",
+      "kind": "custom",
+      "refersTo": "form-dialog",
+      "description": "Сокращённый статический образец поверхности FormDialog без overlay, портала, focus trap и сохранения. Fullscreen-правило и стек описаны в DESIGN.md; сам образец не открывает рабочую форму.",
+      "html": "<section class=\"ds-dialog\" aria-labelledby=\"ds-dialog-title\"><h2 class=\"ds-dialog-title\" id=\"ds-dialog-title\">Создать продукт</h2><label class=\"ds-dialog-label\">Название<input class=\"ds-dialog-input\" type=\"text\"></label><div class=\"ds-dialog-actions\"><button class=\"ds-dialog-cancel\" type=\"button\">Отмена</button></div></section>",
+      "css": ".ds-dialog{box-sizing:border-box;background:var(--white,#ffffff);color:var(--ink,#203c2f);border-radius:var(--panel-radius,12px);padding:var(--spacing-6,24px);width:90%;max-width:760px;max-height:90vh;overflow-y:auto;overscroll-behavior:contain;box-shadow:var(--modal-shadow,0 24px 72px rgb(32 60 47 / 0.2));position:relative;font:400 14px/1.5 'Golos Text',sans-serif}.ds-dialog-title{margin:0 40px 24px 0;font-size:22px;font-weight:600;letter-spacing:-.02em}.ds-dialog-label{display:block;font-size:13px;font-weight:500}.ds-dialog-input{box-sizing:border-box;display:block;width:100%;min-width:0;min-height:40px;margin-top:7px;border:1px solid var(--control-border,#a7b9ad);border-radius:var(--control-radius,8px);padding:9px 12px;background:var(--white,#ffffff);color:var(--ink,#203c2f);font:400 14px/1.5 'Golos Text',sans-serif;transition:border-color 140ms ease}.ds-dialog-input:focus,.ds-dialog-input:focus-visible{border-color:var(--accent,#225b42);outline:2px solid var(--selection,#d6e5dc);outline-offset:1px}.ds-dialog-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:20px}.ds-dialog-cancel{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1px solid transparent;border-radius:var(--control-radius,8px);padding:9px 14px;font:400 14px/1.5 'Golos Text',sans-serif;cursor:pointer;background:var(--white,#ffffff);color:var(--ink,#203c2f);border-color:var(--control-border,#a7b9ad)}.ds-dialog-cancel:hover:not(:disabled){background:var(--rail,#eef4f1);border-color:var(--accent,#225b42)}.ds-dialog-cancel:focus-visible{outline:2px solid var(--accent,#225b42);outline-offset:3px}.ds-dialog-cancel:disabled{color:var(--muted,#596d61);background:var(--rail,#eef4f1);border-color:var(--line,#dbe5df);cursor:not-allowed}@media(prefers-reduced-motion:reduce){.ds-dialog-input{transition:none}}"
+    },
+    {
+      "name": "Registry Table",
+      "kind": "custom",
+      "refersTo": "table",
+      "description": "Визуальная миниатюра UniversalTable: заголовок, строка, числовое выравнивание и закреплённые края. Данные взяты из desktop.jpg. Поиск, сортировка, настройки, измерение ширин и синхронизация прокрутки не эмулируются.",
+      "html": "<div class=\"ds-table-scroll\"><table class=\"ds-table\"><thead><tr><th class=\"ds-table-cell ds-table-pinned ds-table-left\" scope=\"col\">Продукт</th><th class=\"ds-table-cell\" scope=\"col\">Каталог</th><th class=\"ds-table-cell ds-table-pinned ds-table-right\" scope=\"col\">ккал / 100 г</th></tr></thead><tbody><tr class=\"ds-table-row\"><td class=\"ds-table-cell ds-table-pinned ds-table-left\">PEDIGREE Adult Mixed Selection, соус</td><td class=\"ds-table-cell\">Личный</td><td class=\"ds-table-cell ds-table-number ds-table-pinned ds-table-right\">75</td></tr></tbody></table></div>",
+      "css": ".ds-table-scroll{overflow:auto}.ds-table{width:100%;border-collapse:collapse;font:400 14px/1.5 'Golos Text',sans-serif;font-variant-numeric:tabular-nums;color:var(--ink,#203c2f);background:var(--white,#ffffff)}.ds-table-cell{padding:var(--spacing-2,8px) var(--spacing-4,16px);word-break:break-word;text-align:left}.ds-table thead{color:var(--muted,#596d61);background:var(--surface,#f7f9f7);border-bottom:1.5px solid var(--line,#dbe5df)}.ds-table-number{text-align:right}.ds-table-pinned{position:sticky;z-index:2;background:var(--white,#ffffff)}.ds-table-left{left:0;box-shadow:var(--universal-table-pinned-left-shadow,4px 0 8px -6px rgb(32 60 47 / 0.2))}.ds-table-right{right:0;box-shadow:var(--universal-table-pinned-right-shadow,-4px 0 8px -6px rgb(32 60 47 / 0.2))}.ds-table-row:hover,.ds-table-row:hover .ds-table-pinned{background:var(--rail,#eef4f1)}@media(max-width:600px){.ds-table-pinned{position:relative;box-shadow:none}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Клиническая ясность",
+    "overview": "VetEnergy — спокойное рабочее пространство ветеринарного диетолога. Белые поверхности, шалфейная навигация и лесной зелёный акцент поддерживают чтение плотных таблиц и заполнение связанных форм. Выразительность строится на порядке, а не на декоративных карточках.\n\nОдин локальный кириллический шрифт объединяет навигацию, данные и действия. Название VetEnergy, русский профессиональный язык, нутриенты, единицы и результаты расчётов сохраняются. Внешний вид не подменяет предметные правила.",
+    "keyCharacteristics": [
+      "Светлые рабочие поверхности и тонкие зелёно-серые границы.",
+      "Плотные таблицы с выровненными числовыми значениями.",
+      "Единые общие контролы и сохранение контекста вложенных форм.",
+      "SVG-иконки и типографический бренд без растровых производственных ассетов."
+    ],
+    "rules": [
+      {
+        "name": "The Functional Accent Rule",
+        "body": "Зелёный акцент обозначает действие, выбор или результат; красный сохраняет отдельный смысл ошибки и удаления.",
+        "section": "colors"
+      },
+      {
+        "name": "The Numeric Alignment Rule",
+        "body": "Названия читаются слева, сравниваемые числовые значения — справа; таблицы и числовые поля используют табличные цифры.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Панель не получает тень по умолчанию; подъём нужен модальному или всплывающему слою, а краевая тень — закреплённой колонке.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** использовать общие контролы через публичные API Shared, оставляя предметную логику в её слоях.",
+      "**Do** сохранять VetEnergy, русский язык, единицы измерения и результаты расчётов при изменении оформления.",
+      "**Do** различать минимум высоты контрола (40px) и его фактическую высоту с текстом и отступами.",
+      "**Do** сохранять клавиатурный фокус, вложенные формы и синхронную прокрутку таблицы.",
+      "**Do** проверять каскад на границах 1200, 980, 900, 780, 767 и 600px, а не заменять их одной мобильной шириной."
+    ],
+    "donts": [
+      "**Don't** копировать кнопки, поля и реализацию UniversalTable в страницы ради нового оформления.",
+      "**Don't** переносить расчёты, валидацию сущностей и предметные сценарии в Shared.",
+      "**Don't** превращать белые панели в декоративные карточки с обязательной тенью.",
+      "**Don't** подменять отсутствующие данные подтверждённым нулём или менять единицы ради компактности.",
+      "**Don't** считать синтезированные tonalRamp из sidecar производственными цветами: это только шкалы предпросмотра."
+    ]
+  }
+}

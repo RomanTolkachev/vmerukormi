@@ -1,0 +1,21 @@
+:global(:root) .motion {
+  translate: 0 0;
+  transition:
+    translate var(--button-motion-duration) var(--button-motion-easing),
+    transform var(--button-motion-duration) var(--button-motion-easing),
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    color 140ms ease,
+    opacity 140ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :global(:root) .motion:not(:disabled):not([aria-disabled="true"]):hover {
+    translate: 0 var(--button-hover-offset);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(:root) .motion { transition: none; }
+}

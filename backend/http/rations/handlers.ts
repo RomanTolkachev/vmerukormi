@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
+import { rationDetailsInclude, serializeRationDetails } from "@backend/application/rations/ration-details";
 
 const rationSchema = z.object({
   name: z.string().trim().min(1).max(160),
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
       const calculation = await prisma.calculation.findFirst({ where: { id: input.calculationId, userId: user.id }, select: { id: true, petId: true, adjustedEnergy: true } });
       if (!calculation) return Response.json({ error: "Расчёт не найден" }, { status: 404 });
       petId = calculation.petId;
-      targetEnergy = calculation.adjustedEnergy;
+      targetEnergy = input.targetEnergy ?? calculation.adjustedEnergy;
     } else if (input.petId) {
       const pet = await prisma.pet.findFirst({
         where: { id: input.petId, userId: user.id },
@@ -74,8 +75,9 @@ export async function POST(request: Request) {
         note: input.note || null,
         userId: user.id,
       },
+      include: rationDetailsInclude,
     });
-    return Response.json(ration, { status: 201 });
+    return Response.json(serializeRationDetails(ration), { status: 201 });
   } catch (error) {
     return authErrorResponse(error);
   }

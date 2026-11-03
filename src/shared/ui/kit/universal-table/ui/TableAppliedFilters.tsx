@@ -27,6 +27,8 @@ export function TableAppliedFilters<TQuery extends TableBaseQuery>({
     resetForm(next)
   }
 
+  if (chips.length === 0) return null
+
   return (
     <div className={styles.chipRow} aria-label="Применённые фильтры">
       <div className={styles.chips}>

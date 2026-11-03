@@ -4,6 +4,7 @@ import styles from "./styles/base.module.css";
 import "@/shared/ui/kit/theme/desktop/tokens.css";
 import "@/shared/ui/kit/theme/desktop/theme.css";
 import "@/shared/ui/kit/theme/desktop/designs/uup.css";
+import "@/shared/ui/styles/tokens.css";
 import { QueryProvider } from "@/app/providers/query-provider";
 
 export const metadata: Metadata = {

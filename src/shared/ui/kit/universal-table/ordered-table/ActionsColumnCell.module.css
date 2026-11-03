@@ -1,7 +1,21 @@
 /* Pinning, фон и hover — общие, через классы .pinned/.pinnedRight в OrderedTable.module.css. */
 .cell {
 	display: flex;
+	flex-wrap: nowrap;
+	gap: 7px;
 	justify-content: center;
 	align-items: center;
+	white-space: nowrap;
+}
+
+.cell > * {
+	flex-shrink: 0;
+}
+
+.cell :is(button, a) {
+	flex-shrink: 0;
+	white-space: nowrap;
+	word-break: normal;
+	overflow-wrap: normal;
 }
 

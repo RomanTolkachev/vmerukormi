@@ -3,8 +3,7 @@ import { createPortal } from 'react-dom'
 import { IconButton } from "@/shared/ui/kit/buttons/IconButton";
 import { TextButton } from "@/shared/ui/kit/buttons/TextButton";
 import { RiMenuLine } from '@remixicon/react'
-import { notify } from "@/shared/ui/kit/AppToast/notify";
-import { useDesign } from "@/shared/ui/kit/theme/desktop/useDesign";
+import { notify } from "@/shared/ui/notifications";
 import { useTableQuery } from "@/shared/ui/kit/universal-table/api/TableQueryFormProvider";
 import { TableSearchBarField } from "@/shared/ui/kit/universal-table/TableSearchBarField";
 import { TablePopup } from "@/shared/ui/kit/universal-table/ui/TablePopup";
@@ -32,8 +31,7 @@ type Props<TQuery extends TableBaseQuery> = {
 }
 
 export function TableToolbar<TQuery extends TableBaseQuery>({ config, disabled, settings, sortableColumns, inlineSlot, bottomSlot, extraButtons, cardsAvailable, resizeColumns }: Props<TQuery>) {
-  const design = useDesign()
-  const buttonVariant = design === 'uup' ? undefined : 'ghost'
+  const buttonVariant = 'ghost'
   const { committed, defaults, resetForm, revertToCommitted, replaceDraft, getValues } = useTableQuery<TQuery>()
   const [open, setOpen] = useState<'settings' | 'filters' | 'overflow' | null>(null)
   const [saving, setSaving] = useState(false)
@@ -123,16 +121,16 @@ export function TableToolbar<TQuery extends TableBaseQuery>({ config, disabled, 
           {hasSlot && overflowing && <IconButton ref={burger} disabled={controlsDisabled} size="md" variant="ghost" icon={<RiMenuLine />} aria-label="Дополнительные действия" aria-haspopup="dialog" aria-expanded={open === 'overflow'} onClick={() => setOpen(open === 'overflow' ? null : 'overflow')} />}
           <div ref={actions} className={styles.fixedActions}>
             {extraButtons}
-            <span ref={filtersAnchor} className={styles.popupAnchor}>
-              <TextButton ref={filtersButton} className={styles.filtersButton} variant={buttonVariant} touchEffect howerEffect disabled={controlsDisabled}
+            {filtersPanel && <span ref={filtersAnchor} className={styles.popupAnchor}>
+              <TextButton ref={filtersButton} className={styles.filtersButton} variant={buttonVariant} touchEffect disabled={controlsDisabled}
                 aria-label="Фильтры" aria-describedby={filtersChanged ? filtersHintId : undefined} aria-haspopup="dialog" aria-expanded={open === 'filters'} onClick={openFilters}>
                 Фильтры
                 {filtersChanged && <Typography component="span" variant="body3" className={styles.filtersBadge}
                   id={filtersHintId} role="img" aria-label={FILTERS_HINT} title={FILTERS_HINT}>!</Typography>}
               </TextButton>
-            </span>
+            </span>}
             {config.settingsButton?.enabled && settings && <span ref={settingsAnchor} className={styles.popupAnchor}>
-              <TextButton ref={settingsButton} variant={buttonVariant} touchEffect howerEffect disabled={controlsDisabled} aria-haspopup="dialog" aria-expanded={open === 'settings'} onClick={() => { revertToCommitted(); setOpen(open === 'settings' ? null : 'settings') }}>Настройки</TextButton>
+              <TextButton ref={settingsButton} variant={buttonVariant} touchEffect disabled={controlsDisabled} aria-haspopup="dialog" aria-expanded={open === 'settings'} onClick={() => { revertToCommitted(); setOpen(open === 'settings' ? null : 'settings') }}>Настройки</TextButton>
             </span>}
           </div>
         </div>

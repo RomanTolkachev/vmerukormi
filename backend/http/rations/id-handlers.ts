@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
+import { rationDetailsInclude, serializeRationDetails } from "@backend/application/rations/ration-details";
 
 const updateSchema = z
   .object({
@@ -55,9 +56,12 @@ export async function PATCH(request: Request, { params }: Context) {
     } else if (parsed.data.petId) {
       const pet = await prisma.pet.findFirst({
         where: { id: parsed.data.petId, userId: user.id },
-        select: { id: true },
+        select: { id: true, calculations: { orderBy: { createdAt: "desc" }, take: 1, select: { adjustedEnergy: true } } },
       });
       if (!pet) return Response.json({ error: "Питомец не найден" }, { status: 404 });
+      calculationEnergy = pet.calculations[0]?.adjustedEnergy ?? 0;
+    } else if (parsed.data.petId === null) {
+      calculationEnergy = 0;
     }
 
     const ration = await prisma.$transaction(async (tx) => {
@@ -67,16 +71,17 @@ export async function PATCH(request: Request, { params }: Context) {
           ...parsed.data,
           petId: calculationPetId !== undefined ? calculationPetId : parsed.data.petId === undefined ? undefined : parsed.data.petId || null,
           calculationId: parsed.data.calculationId === undefined ? undefined : parsed.data.calculationId || null,
-          targetEnergy: calculationEnergy ?? parsed.data.targetEnergy,
+          targetEnergy: parsed.data.targetEnergy ?? calculationEnergy,
           note: parsed.data.note === undefined ? undefined : parsed.data.note || null,
         },
+        include: rationDetailsInclude,
       });
       if (parsed.data.mode === "DAILY") {
         await tx.rationItem.updateMany({ where: { rationId: id }, data: { day: 1 } });
       }
       return updated;
     });
-    return Response.json(ration);
+    return Response.json(serializeRationDetails(ration));
   } catch (error) {
     return authErrorResponse(error);
   }

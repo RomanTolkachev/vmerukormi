@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test:ui": "node --import tsx --test tooling/ui-patterns.test.ts",
+    "test:pets": "node --import tsx --test src/_pages/pets/model/*.test.ts",
+    "test:rations": "node --import tsx --test src/features/edit-ration/model/*.test.ts backend/application/rations/*.test.ts",
     "test:catalog": "node --test backend/database/prisma/catalog/health-diet/parser.test.mjs && node --import tsx --test backend/domain/catalog/*.test.ts src/entities/ration/model/nutrient-summary.test.ts && node --import tsx backend/database/prisma/catalog/reference/generate.ts --check",
     "test:reference-migration": "node --import tsx --test tooling/reference-migration.test.ts",
     "db:generate": "prisma generate --schema backend/database/prisma/schema.prisma",

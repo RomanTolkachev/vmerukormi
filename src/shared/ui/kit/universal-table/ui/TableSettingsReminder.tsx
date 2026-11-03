@@ -1,7 +1,6 @@
-import { notify } from "@/shared/ui/kit/AppToast/notify";
+import { notify } from "@/shared/ui/notifications";
 import { TextButton } from "@/shared/ui/kit/buttons/TextButton";
 import { Typography } from "@/shared/ui/kit/typography/Typography";
-import { toast } from 'sonner'
 import { cancelSettingsReminder, shouldShowSettingsReminder, type TableSettingsReminderKind } from "@/shared/ui/kit/universal-table/lib/settingsReminderPreferences";
 import styles from "@/shared/ui/kit/universal-table/ui/TableSettingsReminder.module.css"
 
@@ -15,10 +14,10 @@ export function showTableSettingsReminder(kind: TableSettingsReminderKind): void
   // Повторные изменения обновляют одно уведомление, а не накапливают одинаковые.
   const id = `table-settings-reminder:${kind}`
   notify.info(<div className={styles.content}>
-    <Typography variant="body3" component="p">{MESSAGES[kind]}</Typography>
+    <Typography variant="body2" component="p">{MESSAGES[kind]}</Typography>
     <TextButton variant="compact" className={styles.dismiss} onClick={() => {
       cancelSettingsReminder(kind)
-      toast.dismiss(id)
+      notify.dismiss(id)
     }}>Больше не показывать</TextButton>
   </div>, {id})
 }

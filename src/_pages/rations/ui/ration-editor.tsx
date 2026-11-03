@@ -1,28 +1,29 @@
 "use client";
 
+import { RequiredMark } from "@/shared/ui/required-mark";
+
 import { EntitySelect } from "@/features/create-entity";
 import { ui } from "@/shared/ui/styles";
 
 import Link from "next/link";
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   addRationItem,
   deleteRation,
   deleteRationItem,
-  updateRation,
   updateRationItem,
 } from "@/features/rations";
 import type {
   RationEditorValue,
   RationItem,
-  RationMode,
-  RationPetOption,
   RationProduct,
-  RationCalculationOption,
-  RationCustomerOption,
 } from "@/entities/ration";
 import { summarizeNutrients, targetStatus, targetStatusClass, targetStatusLabel } from "@/entities/ration";
+import { AnchorButton, Button, Input, Select } from "@/shared/ui/controls";
+import { FormDialog } from "@/shared/ui/form-dialog";
+import { Modal } from "@/shared/ui/modal";
+import { RationDetailsDialog } from "@/features/edit-ration";
 
 const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
@@ -57,46 +58,43 @@ function itemValues(item: RationItem) {
 export function RationEditor({
   initialRation,
   products: initialProducts,
-  pets,
   nutrients,
 }: {
   initialRation: RationEditorValue;
   products: RationProduct[];
-  customers: RationCustomerOption[];
-  pets: RationPetOption[];
-  calculations: RationCalculationOption[];
   nutrients: { id: string; code: string; name: string; category: string; unit: string }[];
 }) {
   const router = useRouter();
   const [products, setProducts] = useState(initialProducts);
-  const initialCustomerId = pets.find((pet) => pet.id === initialRation.petId)?.customerId ?? "";
   const [ration, setRation] = useState(initialRation);
-  const [customerId, setCustomerId] = useState(initialCustomerId);
-  const [productId, setProductId] = useState(products[0]?.id ?? "");
+  const [productId, setProductId] = useState("");
   const [measureId, setMeasureId] = useState("");
-  const [productSearch, setProductSearch] = useState("");
   const [productFocus, setProductFocus] = useState<ProductFocus | null>(null);
   const [quantity, setQuantity] = useState("100");
   const [day, setDay] = useState("1");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-  const productPickerRef = useRef<HTMLElement>(null);
-  const availableProducts = useMemo(() => {
-    const query = productSearch.trim().toLocaleLowerCase("ru");
-    return products
-      .filter((product) => !query || product.name.toLocaleLowerCase("ru").includes(query))
-      .sort((a, b) => productFocus ? scoreProduct(b, productFocus) - scoreProduct(a, productFocus) || a.name.localeCompare(b.name, "ru") : a.name.localeCompare(b.name, "ru"));
-  }, [productFocus, productSearch, products]);
-  const effectiveProductId = availableProducts.some((product) => product.id === productId) ? productId : availableProducts[0]?.id ?? "";
-  const selectedProduct = products.find((product) => product.id === effectiveProductId);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [nutrientsDialogOpen, setNutrientsDialogOpen] = useState(false);
+  const [itemPending, setItemPending] = useState(false);
+  const [itemError, setItemError] = useState("");
+  const [itemDirty, setItemDirty] = useState(false);
+  const availableProducts = useMemo(() => [...products]
+    .sort((first, second) => productFocus ? scoreProduct(second, productFocus) - scoreProduct(first, productFocus) || first.name.localeCompare(second.name, "ru") : first.name.localeCompare(second.name, "ru")), [productFocus, products]);
+  const selectedProduct = products.find((product) => product.id === productId);
   const selectedMeasure = selectedProduct?.measures.find((measure) => measure.id === measureId);
 
-  function focusProductPicker(focus: ProductFocus) {
+  function openProductPicker(focus: ProductFocus | null = null) {
     setProductFocus(focus);
-    setProductId("");
+    const rankedProducts = focus ? [...products].sort((first, second) => scoreProduct(second, focus) - scoreProduct(first, focus) || first.name.localeCompare(second.name, "ru")) : [];
+    setProductId(rankedProducts[0]?.id ?? "");
     setMeasureId("");
-    requestAnimationFrame(() => productPickerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    setQuantity("100");
+    setDay("1");
+    setItemError("");
+    setItemDirty(false);
+    setProductDialogOpen(true);
   }
 
   const totals = useMemo(() => {
@@ -139,69 +137,25 @@ export function RationEditor({
   const fatComparison = targetStatus(totals.fat, ration.calculation?.fat ?? 0, ration.tolerancePercent);
   const carbsComparison = targetStatus(totals.carbs, ration.calculation?.carbs ?? 0, ration.tolerancePercent);
 
-  function chooseCustomer(value: string) {
-    setCustomerId(value);
-    setRation((current) => ({ ...current, petId: null, pet: null, calculationId: null, calculation: null, targetEnergy: 0 }));
-  }
-
-  function choosePet(value: string, chosen?: RationPetOption | null) {
-    const pet = chosen ?? pets.find((item) => item.id === value) ?? null;
-    setRation((current) => ({
-      ...current,
-      petId: pet?.id ?? null,
-      pet: pet ? { id: pet.id, name: pet.name, customerName: pet.customerName } : null,
-      calculationId: null,
-      calculation: null,
-      targetEnergy: 0,
-    }));
-  }
-
-  async function saveHeader(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPending(true);
-    setError("");
-    try {
-      await updateRation(ration.id, {
-        name: ration.name,
-        petId: ration.petId,
-        calculationId: ration.calculationId,
-        mode: ration.mode,
-        targetEnergy: ration.targetEnergy,
-        tolerancePercent: ration.tolerancePercent,
-        note: ration.note,
-      });
-      if (ration.mode === "DAILY") {
-        setRation((current) => ({
-          ...current,
-          items: current.items.map((item) => ({ ...item, day: 1 })),
-        }));
-      }
-      setMessage("Параметры сохранены");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Не удалось сохранить рацион");
-    } finally {
-      setPending(false);
-    }
-  }
-
   async function addItem(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!effectiveProductId) return;
-    setPending(true);
-    setError("");
+    if (!productId || itemPending) return;
+    setItemPending(true);
+    setItemError("");
     try {
       const item = await addRationItem(ration.id, {
-        productId: effectiveProductId,
+        productId,
         measureId: measureId || null,
         quantity: Number(quantity),
         day: Number(day),
       });
       setRation((current) => ({ ...current, items: [...current.items, item] }));
       setMessage("Продукт добавлен");
+      setProductDialogOpen(false);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Не удалось добавить продукт");
+      setItemError(caught instanceof Error ? caught.message : "Не удалось добавить продукт");
     } finally {
-      setPending(false);
+      setItemPending(false);
     }
   }
 
@@ -249,12 +203,13 @@ export function RationEditor({
           <h1>{ration.name}</h1>
           <div className={ui("meta")}>
             {ration.mode === "DAILY" ? "Суточный рацион" : "Недельный рацион"}
-            {ration.petId ? ` · ${pets.find((pet) => pet.id === ration.petId)?.name ?? "Питомец"}` : " · Без питомца"}
+            {ration.pet ? ` · ${ration.pet.name}` : " · Без питомца"}
           </div>
         </div>
         <div className={ui("rationEditorActions")}>
-          <a className={ui("secondary", "linkButton")} href={`/api/rations/${ration.id}/export`}>Выгрузить в Excel</a>
-          <button className={ui("danger")} type="button" onClick={() => void removeRation()}>Удалить рацион</button>
+          <Button type="button" onClick={() => setDetailsDialogOpen(true)}>Параметры рациона</Button>
+          <AnchorButton href={`/api/rations/${ration.id}/export`}>Выгрузить в Excel</AnchorButton>
+          <Button className={ui("danger")} type="button" onClick={() => void removeRation()}>Удалить рацион</Button>
         </div>
       </div>
 
@@ -266,19 +221,25 @@ export function RationEditor({
           <small>{ration.targetEnergy ? `цель ${formatNumber(ration.targetEnergy, 0)} ккал · ${formatNumber(energyPercent, 0)}% от цели` : "Целевая норма не задана"} · {targetStatusLabel(energyComparison, ration.tolerancePercent)}</small>
         </div>
         <div className={ui("rationMetric")}><span>Вес</span><strong>{formatNumber(totals.grams)} г</strong><small>{ration.mode === "WEEKLY" ? `${formatNumber(totals.totalGrams)} г за неделю` : "в сутки"}</small></div>
-        <button type="button" className={ui("rationMetric", proteinComparison === "low" && "rationMetricAction", targetStatusClass(proteinComparison))} onClick={() => proteinComparison === "low" && focusProductPicker({ kind: "macro", code: "protein", name: "Белок", unit: "г" })}><span>Белок</span><strong>{formatNumber(totals.protein)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.protein)} г · ${targetStatusLabel(proteinComparison, ration.tolerancePercent)}` : "в сутки"}</small></button>
-        <button type="button" className={ui("rationMetric", fatComparison === "low" && "rationMetricAction", targetStatusClass(fatComparison))} onClick={() => fatComparison === "low" && focusProductPicker({ kind: "macro", code: "fat", name: "Жир", unit: "г" })}><span>Жир</span><strong>{formatNumber(totals.fat)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.fat)} г · ${targetStatusLabel(fatComparison, ration.tolerancePercent)}` : "в сутки"}</small></button>
-        <button type="button" className={ui("rationMetric", carbsComparison === "low" && "rationMetricAction", targetStatusClass(carbsComparison))} onClick={() => carbsComparison === "low" && focusProductPicker({ kind: "macro", code: "carbs", name: "Углеводы", unit: "г" })}><span>Углеводы</span><strong>{formatNumber(totals.carbs)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.carbs)} г · ${targetStatusLabel(carbsComparison, ration.tolerancePercent)}` : "в сутки"}</small></button>
+        <Button type="button" className={ui("rationMetric", proteinComparison === "low" && "rationMetricAction", targetStatusClass(proteinComparison))} onClick={() => proteinComparison === "low" && openProductPicker({ kind: "macro", code: "protein", name: "Белок", unit: "г" })}><span>Белок</span><strong>{formatNumber(totals.protein)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.protein)} г · ${targetStatusLabel(proteinComparison, ration.tolerancePercent)}` : "в сутки"}</small></Button>
+        <Button type="button" className={ui("rationMetric", fatComparison === "low" && "rationMetricAction", targetStatusClass(fatComparison))} onClick={() => fatComparison === "low" && openProductPicker({ kind: "macro", code: "fat", name: "Жир", unit: "г" })}><span>Жир</span><strong>{formatNumber(totals.fat)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.fat)} г · ${targetStatusLabel(fatComparison, ration.tolerancePercent)}` : "в сутки"}</small></Button>
+        <Button type="button" className={ui("rationMetric", carbsComparison === "low" && "rationMetricAction", targetStatusClass(carbsComparison))} onClick={() => carbsComparison === "low" && openProductPicker({ kind: "macro", code: "carbs", name: "Углеводы", unit: "г" })}><span>Углеводы</span><strong>{formatNumber(totals.carbs)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.carbs)} г · ${targetStatusLabel(carbsComparison, ration.tolerancePercent)}` : "в сутки"}</small></Button>
         <div className={ui("rationMetric")}><span>Влага</span><strong>{formatNumber(moisture)} г</strong><small>{moistureSummary?.complete ? "в сутки" : "в сутки · неполные данные"}</small></div>
       </section>
 
       <div className={ui("rationEditorGrid")}>
         <div className={ui("rationEditorMain")}>
-          <section className={ui("card")}>
-            <div className={ui("cardHead")}>
-              <div><h2>Состав рациона</h2><div className={ui("meta")}>Количество пересчитывается сразу после изменения</div></div>
+          <div className={ui("cardHead", "rationCompositionHead")}>
+            <div><h2>Состав рациона</h2><div className={ui("meta")}>Количество пересчитывается сразу после изменения</div></div>
+            <div className={ui("rationCompositionActions")}>
+              <Button type="button" className={ui("secondary")} onClick={() => setNutrientsDialogOpen(true)}>Нутриенты</Button>
+              <Button type="button" className={ui("primary")} onClick={() => openProductPicker()}>Добавить продукт</Button>
             </div>
+          </div>
+          <section className={ui("card")} aria-label="Продукты рациона">
             <div className={ui("cardBody")}>
+              {message && <div className={ui("rationMessage")} role="status">{message}</div>}
+              {error && <div className={ui("error")} role="alert">{error}</div>}
               {ration.items.length ? (
                 <div className={ui("rationItemsWrap")}>
                   <table className={ui("rationItemsTable")}>
@@ -288,7 +249,7 @@ export function RationEditor({
                         const value = itemValues(item);
                         return (
                           <tr key={item.id} className={ui(!item.enabled && "rationItemDisabled")}>
-                            <td><input aria-label={`Включить ${item.product.name}`} type="checkbox" checked={item.enabled} onChange={(event) => void patchItem(item.id, { enabled: event.target.checked })} /></td>
+                            <td><Input aria-label={`Включить ${item.product.name}`} type="checkbox" checked={item.enabled} onChange={(event) => void patchItem(item.id, { enabled: event.target.checked })} /></td>
                             <td>
                               <div className={ui("rationProductCell")}>
                                 <b>{item.product.name}</b>
@@ -296,12 +257,12 @@ export function RationEditor({
                               </div>
                               <small>{formatNumber(value.protein)} Б · {formatNumber(value.fat)} Ж · {formatNumber(value.carbs)} У</small>
                             </td>
-                            {ration.mode === "WEEKLY" && <td><select className={ui("input", "compactInput")} aria-label={`День для ${item.product.name}`} value={item.day} onChange={(event) => void patchItem(item.id, { day: Number(event.target.value) })}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</select></td>}
-                            <td><select className={ui("input", "compactInput")} aria-label={`Мера для ${item.product.name}`} value={item.measureId ?? ""} onChange={(event) => void patchItem(item.id, { measureId: event.target.value || null })}><option value="">Граммы</option>{item.product.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name}</option>)}</select></td>
-                            <td><input className={ui("input", "compactInput", "quantityInput")} aria-label={`Количество ${item.product.name}`} type="number" min="0.000001" step="any" defaultValue={item.quantity} onBlur={(event) => void patchItem(item.id, { quantity: Number(event.target.value) })} /></td>
+                            {ration.mode === "WEEKLY" && <td><Select className={ui("input", "compactInput")} aria-label={`День для ${item.product.name}`} value={item.day} onChange={(event) => void patchItem(item.id, { day: Number(event.target.value) })}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</Select></td>}
+                            <td><Select className={ui("input", "compactInput")} aria-label={`Мера для ${item.product.name}`} value={item.measureId ?? ""} onChange={(event) => void patchItem(item.id, { measureId: event.target.value || null })}><option value="">Граммы</option>{item.product.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name}</option>)}</Select></td>
+                            <td><Input className={ui("input", "compactInput", "quantityInput")} aria-label={`Количество ${item.product.name}`} type="number" min="0.000001" step="any" defaultValue={item.quantity} onBlur={(event) => void patchItem(item.id, { quantity: Number(event.target.value) })} /></td>
                             <td>{formatNumber(item.grams)} г</td>
                             <td><b>{formatNumber(value.calories, 0)}</b> ккал</td>
-                            <td><button className={ui("danger")} type="button" onClick={() => void removeItem(item.id)}>Удалить</button></td>
+                            <td><Button className={ui("danger")} type="button" onClick={() => void removeItem(item.id)}>Удалить</Button></td>
                           </tr>
                         );
                       })}
@@ -312,59 +273,42 @@ export function RationEditor({
             </div>
           </section>
 
-          <section className={ui("card")}>
-            <div className={ui("cardHead")}><div><h2>Нутриенты</h2><div className={ui("meta")}>Среднее значение в сутки по включённым продуктам</div></div></div>
-            <div className={ui("cardBody")}>
-              <p className={ui("fieldHint")}>Показатели выбранных продуктов и обязательные показатели калькулятора. Если данных нет, показан 0 — это не подтверждённое отсутствие нутриента.</p>
-              {nutrientSummary.length ? <div className={ui("nutrientSummaryGrid")}>{nutrientSummary.map(({ nutrient, amount, target, complete, missingItems }) => {
-                const status = target && complete ? targetStatus(amount, target.targetAmount, ration.tolerancePercent) : null;
-                return <div className={ui("nutrientSummaryCard", status && targetStatusClass(status))} key={`${nutrient.code}|${nutrient.unit}`}><span>{nutrient.name}</span><b>{target ? `${formatNumber(amount)} / ${formatNumber(target.targetAmount)}` : formatNumber(amount)} {nutrient.unit}</b><small>{!complete ? (missingItems ? `Нет данных у ${missingItems} позиций` : "Нет данных") : (status ? targetStatusLabel(status, ration.tolerancePercent) : "в сутки")}</small></div>;
-              })}</div> : <div className={ui("empty")}>Нутриенты пока не заполнены</div>}
-            </div>
-          </section>
         </div>
-
-        <aside className={ui("rationEditorSide")}>
-          <section className={ui("card")} ref={productPickerRef}>
-            <form onSubmit={addItem}>
-              <div className={ui("cardHead")}><h2>Добавить продукт</h2></div>
-              <div className={ui("cardBody")}>
-                {products.length ? <div className={ui("formGrid", "single")}>
-                  {productFocus && <div className={ui("productFocus")}><span>Сортировка по содержанию на 100 ккал</span><b>{productFocus.name}</b><button type="button" onClick={() => setProductFocus(null)}>Сбросить</button></div>}
-                  <label className={ui("field")}><span>Поиск по названию</span><input className={ui("input")} type="search" value={productSearch} onChange={(event) => setProductSearch(event.target.value)} placeholder="Начните вводить название" /></label>
-                  <EntitySelect entity="products" label="Продукт" value={effectiveProductId} onChange={(value, option) => { if (option) setProducts(current => current.some(product => product.id === value) ? current : [...current, { ...option.data, measures: option.data.measures ?? [], nutrients: option.data.nutrients ?? [], tags: [] } as unknown as RationProduct]); setProductId(value); setProductSearch(""); setMeasureId(""); }} />
-                  {productFocus && <label className={ui("field")}><span>Рейтинг по выбранному нутриенту</span><select className={ui("input")} value={effectiveProductId} onChange={event => { setProductId(event.target.value); setMeasureId(""); }}>{availableProducts.map(product => <option key={product.id} value={product.id}>{product.name} · {formatNumber(scoreProduct(product, productFocus), 2)} {productFocus.unit}/100 ккал</option>)}</select></label>}
-                  <label className={ui("field")}><span>Мера</span><select className={ui("input")} value={measureId} onChange={(event) => setMeasureId(event.target.value)}><option value="">Граммы</option>{selectedProduct?.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name} ({measure.grams} г)</option>)}</select></label>
-                  <label className={ui("field")}><span>Количество{selectedMeasure ? `, ${selectedMeasure.name}` : ", г"}</span><input className={ui("input")} type="number" min="0.000001" step="any" value={quantity} onChange={(event) => setQuantity(event.target.value)} required />{selectedMeasure && <div className={ui("fieldHint")}>{formatNumber(Number(quantity) * selectedMeasure.grams)} г продукта</div>}</label>
-                  {ration.mode === "WEEKLY" && <label className={ui("field")}><span>День</span><select className={ui("input")} value={day} onChange={(event) => setDay(event.target.value)}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</select></label>}
-                  <button className={ui("primary")} disabled={pending}>Добавить в рацион</button>
-                </div> : <div className={ui("empty")}>Сначала создайте продукт в разделе «Продукты»<div className={ui("actions", "centeredActions")}><Link className={ui("secondary", "linkButton")} href="/products">Перейти к продуктам</Link></div></div>}
-              </div>
-            </form>
-          </section>
-
-          <section className={ui("card")}>
-            <form onSubmit={saveHeader}>
-              <div className={ui("cardHead")}><h2>Параметры</h2></div>
-              <div className={ui("cardBody")}>
-                <div className={ui("formGrid", "single")}>
-                  <label className={ui("field")}><span>Название</span><input className={ui("input")} value={ration.name} onChange={(event) => setRation({ ...ration, name: event.target.value })} required /></label>
-                  <EntitySelect entity="customers" label="Хозяин" value={customerId} onChange={chooseCustomer} />
-                  <EntitySelect entity="pets" label="Питомец" value={ration.petId ?? ""} filters={{ customerId }} initial={{ customerId }} onChange={(value, option) => choosePet(value, option ? { id: value, name: option.label, customerId, customerName: null, latestEnergy: null } : null)} />
-                  <EntitySelect entity="calculations" label="Расчёт нормы" value={ration.calculationId ?? ""} filters={{ petId: ration.petId ?? "" }} initial={{ petId: ration.petId }} disabled={!ration.petId} onChange={(value, option) => { const calculation = option ? option.data as unknown as RationCalculationOption : null; setRation({ ...ration, calculationId: value || null, calculation, targetEnergy: calculation?.adjustedEnergy ?? 0 }); }} />
-                  <label className={ui("field")}><span>Режим</span><select className={ui("input")} value={ration.mode} onChange={(event) => setRation({ ...ration, mode: event.target.value as RationMode })}><option value="DAILY">На день</option><option value="WEEKLY">На неделю</option></select></label>
-                  <label className={ui("field")}><span>Цель, ккал/сут</span><input className={ui("input", "highlight")} type="number" min="0" value={ration.targetEnergy} onChange={(event) => setRation({ ...ration, targetEnergy: Number(event.target.value) })} /></label>
-                  <label className={ui("field")}><span>Допустимое превышение, %</span><input className={ui("input")} type="number" min="0" max="100" step="1" value={ration.tolerancePercent} onChange={(event) => setRation({ ...ration, tolerancePercent: Number(event.target.value) })} /><div className={ui("fieldHint")}>По умолчанию 10%. Недобор и превышение диапазона подсвечиваются красным.</div></label>
-                  <label className={ui("field")}><span>Заметка</span><textarea className={ui("input")} rows={4} value={ration.note ?? ""} onChange={(event) => setRation({ ...ration, note: event.target.value || null })} /></label>
-                  <button className={ui("secondary")} disabled={pending}>Сохранить параметры</button>
-                </div>
-                {message && <div className={ui("rationMessage")}>{message}</div>}
-                {error && <div className={ui("error")}>{error}</div>}
-              </div>
-            </form>
-          </section>
-        </aside>
       </div>
+      {detailsDialogOpen && <RationDetailsDialog ration={ration} onClose={() => setDetailsDialogOpen(false)} onSaved={saved => {
+        setRation(current => ({ ...current, ...saved, items: saved.mode === "DAILY" ? current.items.map(item => ({ ...item, day: 1 })) : current.items }));
+        setMessage("Параметры рациона сохранены");
+        setError("");
+      }} />}
+      <Modal isOpen={nutrientsDialogOpen} onClose={() => setNutrientsDialogOpen(false)} title="Нутриенты рациона" showCloseButton>
+        <h2 className={ui("formDialogHeading")}>Нутриенты рациона</h2>
+        <p className={ui("meta")}>Среднее значение в сутки по включённым продуктам</p>
+        <p className={ui("fieldHint")}>Показатели выбранных продуктов и обязательные показатели калькулятора. Если данных нет, показан 0 — это не подтверждённое отсутствие нутриента.</p>
+        {nutrientSummary.length ? <div className={ui("nutrientSummaryGrid", "nutrientDialogGrid")}>{nutrientSummary.map(({ nutrient, amount, target, complete, missingItems }) => {
+          const status = target && complete ? targetStatus(amount, target.targetAmount, ration.tolerancePercent) : null;
+          return <div className={ui("nutrientSummaryCard", status && targetStatusClass(status))} key={`${nutrient.code}|${nutrient.unit}`}><span>{nutrient.name}</span><b>{target ? `${formatNumber(amount)} / ${formatNumber(target.targetAmount)}` : formatNumber(amount)} {nutrient.unit}</b><small>{!complete ? (missingItems ? `Нет данных у ${missingItems} позиций` : "Нет данных") : (status ? targetStatusLabel(status, ration.tolerancePercent) : "в сутки")}</small></div>;
+        })}</div> : <div className={ui("empty")}>Нутриенты пока не заполнены</div>}
+        <div className={ui("actions")}><Button type="button" className={ui("secondary")} onClick={() => setNutrientsDialogOpen(false)}>Закрыть</Button></div>
+      </Modal>
+      {productDialogOpen && <FormDialog title="Добавить продукт в рацион" onClose={() => setProductDialogOpen(false)} dirty={itemDirty} busy={itemPending}>
+        <form onSubmit={addItem}>
+          <div className={ui("formGrid", "single")}>
+            {productFocus && <div className={ui("productFocus")}><span>Сортировка по содержанию на 100 ккал</span><b>{productFocus.name}</b><Button type="button" disabled={itemPending} onClick={() => setProductFocus(null)}>Сбросить</Button></div>}
+            <EntitySelect entity="products" label="Продукт" value={productId} disabled={itemPending} required onChange={(value, option) => {
+              if (option) setProducts(current => current.some(product => product.id === value) ? current : [...current, { ...option.data, measures: option.data.measures ?? [], nutrients: option.data.nutrients ?? [], tags: [] } as unknown as RationProduct]);
+              setProductId(value);
+              setMeasureId("");
+              setItemDirty(true);
+            }} />
+            {productFocus && <label className={ui("field")}><span>Рейтинг по выбранному нутриенту<RequiredMark /></span><Select className={ui("input")} required value={productId} disabled={itemPending} onChange={event => { setProductId(event.target.value); setMeasureId(""); setItemDirty(true); }}><option value="">Выберите продукт</option>{availableProducts.map(product => <option key={product.id} value={product.id}>{product.name} · {formatNumber(scoreProduct(product, productFocus), 2)} {productFocus.unit}/100 ккал</option>)}</Select></label>}
+            <label className={ui("field")}><span>Мера</span><Select className={ui("input")} value={measureId} disabled={itemPending || !selectedProduct} onChange={(event) => { setMeasureId(event.target.value); setItemDirty(true); }}><option value="">Граммы</option>{selectedProduct?.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name} ({measure.grams} г)</option>)}</Select></label>
+            <label className={ui("field")}><span>Количество{selectedMeasure ? `, ${selectedMeasure.name}` : ", г"}</span><Input className={ui("input")} type="number" min="0.000001" step="any" value={quantity} disabled={itemPending} onChange={(event) => { setQuantity(event.target.value); setItemDirty(true); }} required />{selectedMeasure && <div className={ui("fieldHint")}>{formatNumber(Number(quantity) * selectedMeasure.grams)} г продукта</div>}</label>
+            {ration.mode === "WEEKLY" && <label className={ui("field")}><span>День<RequiredMark /></span><Select className={ui("input")} required value={day} disabled={itemPending} onChange={(event) => { setDay(event.target.value); setItemDirty(true); }}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</Select></label>}
+          </div>
+          {itemError && <div className={ui("error")} role="alert">{itemError}</div>}
+          <div className={ui("actions")}><Button type="submit" className={ui("primary")} disabled={itemPending || !productId}>{itemPending ? "Добавляем…" : "Добавить в рацион"}</Button></div>
+        </form>
+      </FormDialog>}
     </div>
   );
 }

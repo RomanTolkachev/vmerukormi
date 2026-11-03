@@ -1,18 +1,20 @@
 import type { ReactNode } from "react";
 import { AccountMenu } from "@/features/auth";
-import { AppNavigation } from "@/app/ui/app-navigation";
+import Link from "next/link";
+import { AppNavigation, AppBreadcrumb, MobileNavigation } from "@/app/ui/app-navigation";
+import { Brand } from "@/shared/ui/brand";
 import { ui } from "@/shared/ui/styles";
 
 export function AppShell({ children, username }: { children: ReactNode; username: string }) {
   return <main className={ui("shell")}>
-    <header className={ui("topbar")}>
-      <div className={ui("brandMark")}>✦</div>
-      <div className={ui("brand")}>VetEnergy<small>локальный расчёт рационов</small></div>
-      <AccountMenu username={username} />
-    </header>
-    <div className={ui("content")}>
+    <a className={ui("skipLink")} href="#main-content">Перейти к содержимому</a>
+    <aside className={ui("sidebar")}>
+      <Link href="/" className={ui("brandLink")} aria-label="VetEnergy — расчёт рациона"><Brand /></Link>
       <AppNavigation />
-      <div className={ui("pageViewport")}>{children}</div>
+    </aside>
+    <div className={ui("shellWorkspace")}>
+      <header className={ui("topbar")}><MobileNavigation /><AppBreadcrumb /><AccountMenu username={username} /></header>
+      <div className={ui("content")} id="main-content" tabIndex={-1}><div className={ui("pageViewport")}>{children}</div></div>
     </div>
   </main>;
 }

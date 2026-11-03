@@ -1,4 +1,5 @@
 import React from "react";
+import { buttonMotionClassName } from "@/shared/ui/button-motion";
 import styles from "@/shared/ui/kit/buttons/IconButton.module.css";
 
 interface IconButtonOwnProps {
@@ -11,7 +12,6 @@ interface IconButtonOwnProps {
 	wrapperClassName?: string;
 	buttonClassName?: string;
 	iconClassName?: string;
-	howerEffect?: boolean;
 	touchEffect?: boolean;
 }
 
@@ -37,7 +37,6 @@ export const IconButton = ({
 	onMouseLeave,
 	onTouchStart,
 	onTouchEnd,
-	howerEffect,
 	asSpan = false,
 	touchEffect = false,
 	ref,
@@ -99,7 +98,7 @@ export const IconButton = ({
 
 	const commonProps = {
 		id,
-		className: `${styles.button} ${sizeClassName} ${variant === "ghost" ? styles.ghost : variant === "transparent" ? styles.transparent : ""} ${buttonClassName} ${howerEffect ? styles.howerEffect : ""} ${className || ""}`.trim(),
+		className: `${buttonMotionClassName} ${styles.button} ${sizeClassName} ${variant === "ghost" ? styles.ghost : variant === "transparent" ? styles.transparent : ""} ${buttonClassName} ${className || ""}`.trim(),
 		style: buttonStyles,
 		onClick,
 		...pressHandlers,

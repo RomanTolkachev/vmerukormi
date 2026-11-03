@@ -151,10 +151,6 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .howerEffect:hover {
-        --button-translate-y: -2px;
-    }
-
     .buttonWrapper:hover .button {
         background: var(--button-hover-background);
         box-shadow: var(--button-hover-shadow);

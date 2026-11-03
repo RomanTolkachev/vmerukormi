@@ -5,6 +5,7 @@ import { requestJson } from "@/shared/api";
 import { AsyncSelect } from "../kit/inputs/AsyncSelect";
 import { ui } from "../styles";
 import type { ChoiceKind, CreationRequest, EntityChoice } from "@/shared/api/entity-choice";
+import { Button } from "@/shared/ui/controls";
 export const CreationContext = createContext<{ open: (request: CreationRequest) => void; isAdmin: boolean; labels: Partial<Record<ChoiceKind, string>> } | null>(null);
 export function useEntityCreation() {
  const context = useContext(CreationContext);
@@ -22,9 +23,8 @@ export function EntitySelect({ entity, label, value, onChange, filters = {}, dis
   const shared = filters.shared === "true";
   return <div className={ui("field")}>
     <AsyncSelect<EntityChoice> label={label} value={value} selectedOption={selectedOption ?? (created?.value === value ? created : lookup.data?.[0] ?? null)}
-      onChange={choose} disabled={disabled} queryKey={["entity-options", entity, filterKey]} wrapOptions
+      onChange={choose} disabled={disabled} required={required} queryKey={["entity-options", entity, filterKey]} wrapOptions
       loadOptions={({ search, signal }) => requestJson<EntityChoice[]>(`/api/options/${entity}?${new URLSearchParams({ ...filters, search })}`, { signal })} />
-    {required && !value && <small>Обязательное поле</small>}
-    {allowCreate && Boolean(labels[entity]) && (!shared || isAdmin) && (entity !== "modules" || isAdmin) && <button type="button" className={ui("secondary")} disabled={disabled} onClick={() => open({ entity: entity as CreationRequest["entity"], shared, initial: { ...(filters.species ? { species: filters.species } : {}), ...initial }, onCreated: option => choose(option.value, option) })}>{labels[entity]}</button>}
+    {allowCreate && Boolean(labels[entity]) && (!shared || isAdmin) && (entity !== "modules" || isAdmin) && <Button type="button" className={ui("secondary")} disabled={disabled} onClick={() => open({ entity: entity as CreationRequest["entity"], shared, initial: { ...(filters.species ? { species: filters.species } : {}), ...initial }, onCreated: option => choose(option.value, option) })}>{labels[entity]}</Button>}
   </div>;
 }

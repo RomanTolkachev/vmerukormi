@@ -48,14 +48,6 @@
 	pointer-events: none;
 }
 
-/* Звёздочка обязательного поля в одной строке с подписью. */
-.wrapper .requiredMarkInline {
-	margin-left: 0.25em;
-	font-weight: inherit;
-	line-height: inherit;
-	white-space: nowrap;
-}
-
 .inputContainer {
 	width: 100%;
 	min-width: 0;

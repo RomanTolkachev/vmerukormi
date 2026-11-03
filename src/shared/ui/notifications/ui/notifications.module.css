@@ -1,0 +1,81 @@
+.toaster[data-sonner-toaster][data-sonner-theme] {
+  --normal-bg: var(--white);
+  --normal-border: var(--line);
+  --normal-text: var(--ink);
+  --success-bg: var(--green);
+  --success-border: var(--control-border);
+  --success-text: var(--accent);
+  --info-bg: var(--rail);
+  --info-border: var(--line);
+  --info-text: var(--ink);
+  --warning-bg: var(--cream);
+  --warning-border: var(--control-border);
+  --warning-text: var(--ink);
+  --error-bg: var(--danger-soft);
+  --error-border: var(--danger);
+  --error-text: var(--danger);
+  --border-radius: var(--panel-radius);
+  font-family: inherit;
+}
+
+.toaster .toast[data-styled="true"] {
+  padding: 16px 48px 16px 16px;
+  gap: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: none;
+  overflow-wrap: anywhere;
+}
+
+.toaster .toast :global([data-content]) { min-width: 0; }
+
+.toaster .toast[data-styled="true"] .closeButton {
+  inset: 8px 8px auto auto;
+  width: 28px;
+  height: 28px;
+  transform: none;
+  border: 0;
+  border-radius: var(--control-radius);
+  color: inherit;
+  background: transparent;
+}
+
+.toaster .toast[data-styled="true"] :is(.actionButton, .cancelButton) {
+  min-height: 32px;
+  height: auto;
+  padding: 5px 8px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+  background: var(--white);
+}
+
+.toaster .toast[data-styled="true"] .actionButton {
+  color: var(--white);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toaster .toast[data-styled="true"] :is(.closeButton, .actionButton, .cancelButton) {
+  transition: translate var(--button-motion-duration) var(--button-motion-easing), background-color 140ms ease;
+}
+
+.toaster .toast[data-styled="true"]:hover .closeButton:hover,
+.toaster .toast[data-styled="true"] .cancelButton:hover { background: var(--selection); }
+.toaster .toast[data-styled="true"] .actionButton:hover { background: var(--accent-hover); }
+
+.toaster .toast:focus-visible,
+.toaster .toast[data-styled="true"] :is(.closeButton, .actionButton, .cancelButton):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toaster .toast[data-styled="true"] :is(.closeButton, .actionButton, .cancelButton) { transition: none; }
+}

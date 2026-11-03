@@ -3,6 +3,7 @@ import { readableCatalog } from "@backend/domain/catalog/access";
 
 import { getCurrentUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
+import { serializeRationDetails } from "./ration-details";
 import type {
   RationEditorValue,
   RationListEntry,
@@ -170,53 +171,17 @@ export async function getRationEditorData(id: string) {
   });
   if (!ration) return null;
 
-  const [products, customers, pets, calculations, nutrients] = await Promise.all([
+  const [products, nutrients] = await Promise.all([
     prisma.product.findMany({
       where: { ...readableCatalog(userId), archived: false },
       include: productInclude,
       orderBy: { name: "asc" },
     }),
-    prisma.customer.findMany({ where: { userId }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.pet.findMany({
-      where: { userId },
-      include: {
-        customer: { select: { name: true } },
-        calculations: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
-          select: { adjustedEnergy: true },
-        },
-      },
-      orderBy: { name: "asc" },
-    }),
-    prisma.calculation.findMany({
-      where: { userId },
-      include: { pet: { select: { name: true } }, module: { select: { name: true } }, nutrients: { include: { nutrient: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    }),
     prisma.nutrient.findMany({ where: { ...readableCatalog(userId), isReferenceOnly: false }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
   ]);
 
   const value: RationEditorValue = {
-    id: ration.id,
-    name: ration.name,
-    petId: ration.petId,
-    calculationId: ration.calculationId,
-    mode: ration.mode,
-    targetEnergy: ration.targetEnergy,
-    tolerancePercent: ration.tolerancePercent,
-    note: ration.note,
-    createdAt: ration.createdAt.toISOString(),
-    updatedAt: ration.updatedAt.toISOString(),
-    pet: ration.pet
-      ? {
-          id: ration.pet.id,
-          name: ration.pet.name,
-          customerName: ration.pet.customer?.name ?? null,
-        }
-      : null,
-    calculation: ration.calculation ? calculationOption(ration.calculation) : null,
+    ...serializeRationDetails(ration),
     items: ration.items.map(
       (item): RationItem => ({
         id: item.id,
@@ -235,9 +200,6 @@ export async function getRationEditorData(id: string) {
   return {
     ration: value,
     products: products.map(serializeProduct),
-    customers,
-    pets: pets.map(petOption),
-    calculations: calculations.map(calculationOption),
     nutrients,
   };
 }

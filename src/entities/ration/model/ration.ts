@@ -90,11 +90,12 @@ export type RationItem = {
   measure: RationProductMeasure | null;
 };
 
-export type RationEditorValue = {
+export type RationDetails = {
   id: string;
   name: string;
   petId: string | null;
   calculationId: string | null;
+  customerId: string | null;
   mode: RationMode;
   targetEnergy: number;
   tolerancePercent: number;
@@ -103,5 +104,6 @@ export type RationEditorValue = {
   updatedAt: string;
   pet: { id: string; name: string; customerName: string | null } | null;
   calculation: RationCalculationOption | null;
-  items: RationItem[];
 };
+
+export type RationEditorValue = RationDetails & { items: RationItem[] };

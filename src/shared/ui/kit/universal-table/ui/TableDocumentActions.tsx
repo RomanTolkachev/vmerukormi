@@ -3,7 +3,7 @@ import { RiFileWord2Line } from '@remixicon/react'
 import { IconButton } from "@/shared/ui/kit/buttons/IconButton";
 import { ExcelIcon } from "@/shared/ui/kit/Icons/ExcelIcon";
 import { PrintIcon } from "@/shared/ui/kit/Icons/PrintIcon";
-import { notify } from "@/shared/ui/kit/AppToast/notify";
+import { notify } from "@/shared/ui/notifications";
 import { useDesign } from "@/shared/ui/kit/theme/desktop/useDesign";
 import { useSelectedIds } from "@/shared/ui/kit/universal-table/api/TableSelectionProvider";
 import type { UniversalTableActionContext, UniversalTableDocumentSlot, UniversalTableListResponse } from "@/shared/ui/kit/universal-table/types";
@@ -78,7 +78,7 @@ function DocumentAction<TResponse extends UniversalTableListResponse>({ slot, ct
     finally { setPending(false) }
   }
 
-  return <IconButton size="md" variant={design === 'uup' ? 'default' : 'ghost'} icon={icon} touchEffect howerEffect
+  return <IconButton size="md" variant={design === 'uup' ? 'default' : 'ghost'} icon={icon} touchEffect
     aria-label={label} title={disabledReason ?? label} aria-busy={pending || undefined}
     disabled={disabled || pending} onClick={() => void run()} />
 }

@@ -1,0 +1,6 @@
+.mark {
+  margin-inline-start: 0.25em;
+  color: var(--danger);
+  font: inherit;
+  white-space: nowrap;
+}

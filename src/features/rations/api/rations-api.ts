@@ -1,31 +1,5 @@
 import { apiFetch, requestJson } from "@/shared/api";
-import type { RationItem, RationMode } from "@/entities/ration";
-
-export type RationInput = {
-  name: string;
-  petId: string | null;
-  calculationId: string | null;
-  mode: RationMode;
-  targetEnergy?: number;
-  tolerancePercent: number;
-  note: string | null;
-};
-
-export function createRation(input: RationInput) {
-  return requestJson<{ id: string }>("/api/rations", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(input),
-  });
-}
-
-export function updateRation(id: string, input: Partial<RationInput>) {
-  return requestJson<{ id: string }>(`/api/rations/${id}`, {
-    method: "PATCH",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(input),
-  });
-}
+import type { RationItem } from "@/entities/ration";
 
 export async function deleteRation(id: string) {
   const response = await apiFetch(`/api/rations/${id}`, { method: "DELETE" });

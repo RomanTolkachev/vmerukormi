@@ -1,5 +1,6 @@
 import { createContext, useId, type CSSProperties, type FC, type ReactNode } from "react";
 import { Typography, type TypographyVariant } from "@/shared/ui/kit/typography/Typography";
+import { RequiredMark } from "@/shared/ui/required-mark";
 import styles from "@/shared/ui/kit/inputs/FieldLayout.module.css";
 
 /** `id` контрола внутри `FieldLayout` (например, для `<input id>`). */
@@ -95,11 +96,7 @@ export const FieldLayout: FC<FieldLayoutProps> = ({
 			].filter(Boolean).join(" ")}
 		>
 			{labelConfig.value}
-			{requiredMark ? (
-				<Typography component="span" variant={labelVariants[labelFontSize]} color="danger" className={styles.requiredMarkInline} aria-hidden>
-					*
-				</Typography>
-			) : null}
+			{requiredMark && <RequiredMark />}
 		</Typography>
 	) : null;
 

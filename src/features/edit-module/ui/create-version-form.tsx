@@ -6,11 +6,12 @@ import { createFormulaVersion } from "../api/update-module";
 import { FormulaInput } from "./formula-input";
 import { FormDialog } from "@/shared/ui/form-dialog";
 import { ui } from "@/shared/ui/styles";
+import { Button, Input, Textarea } from "@/shared/ui/controls";
 
 type VersionProps = { moduleId: string; moduleName: string; latestFormula: string; latestDescription: string | null };
 export function CreateVersionForm(props: VersionProps) {
   const [open, setOpen] = useState(false);
-  return <><button type="button" className={ui("primary")} onClick={() => setOpen(true)}>Новая версия</button>{open && <VersionDialog {...props} onClose={() => setOpen(false)} />}</>;
+  return <><Button type="button" className={ui("primary")} onClick={() => setOpen(true)}>Новая версия</Button>{open && <VersionDialog {...props} onClose={() => setOpen(false)} />}</>;
 }
 function VersionDialog({ moduleId, moduleName, latestFormula, latestDescription, onClose }: VersionProps & { onClose: () => void }) {
   const router = useRouter();
@@ -45,10 +46,10 @@ function VersionDialog({ moduleId, moduleName, latestFormula, latestDescription,
 
   return <FormDialog title="Новая версия формулы" onClose={onClose} busy={pending} dirty={name !== moduleName || formula !== latestFormula || description !== (latestDescription ?? "")}><form onSubmit={submit} className={ui("formulaCreateForm")}>
     <div className={ui("formGrid", "single")}>
-      <label className={ui("field")}><span>Название методики</span><input className={ui("input")} value={name} onChange={(event) => setName(event.target.value)} required /></label>
+      <label className={ui("field")}><span>Название методики</span><Input className={ui("input")} value={name} onChange={(event) => setName(event.target.value)} required /></label>
       <FormulaInput value={formula} onChange={setFormula} onValidityChange={setFormulaValid} />
-      <label className={ui("field")}><span>Описание изменений</span><textarea className={ui("input")} rows={4} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
-      <button className={ui("primary")} disabled={pending || !formulaValid}>{pending ? "Публикуем…" : "Опубликовать новую версию"}</button>
+      <label className={ui("field")}><span>Описание изменений</span><Textarea className={ui("input")} rows={4} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
+      <Button className={ui("primary")} disabled={pending || !formulaValid}>{pending ? "Публикуем…" : "Опубликовать новую версию"}</Button>
       {message && <div className={ui("success")}>{message}</div>}
       {error && <div className={ui("error")}>{error}</div>}
     </div>

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { validateFormula } from "../api/update-module";
 import { ui } from "@/shared/ui/styles";
+import { Textarea } from "@/shared/ui/controls";
 
 export function FormulaInput({ value, onChange, onValidityChange }: { value: string; onChange: (value: string) => void; onValidityChange: (valid: boolean) => void }) {
   const [checking, setChecking] = useState(false);
@@ -44,7 +45,7 @@ export function FormulaInput({ value, onChange, onValidityChange }: { value: str
 
   return <label className={ui("field")}>
     <span>Расчётное выражение</span>
-    <textarea className={ui("input", "formulaTextarea", error && "inputError")} rows={3} value={value} onChange={(event) => change(event.target.value)} onBlur={() => void check(value)} required />
+    <Textarea className={ui("input", "formulaTextarea", error && "inputError")} rows={3} value={value} onChange={(event) => change(event.target.value)} onBlur={() => void check(value)} required />
     {checking ? <small className={ui("fieldHint")}>Проверяем выражение…</small> : error ? <small className={ui("formulaError")}>{error}</small> : result !== null ? <small className={ui("formulaValid")}>Формула корректна · тестовый результат {result.toLocaleString("ru-RU", { maximumFractionDigits: 2 })}</small> : null}
   </label>;
 }

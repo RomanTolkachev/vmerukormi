@@ -96,11 +96,11 @@
 .cell {
 	padding: var(--table-spacing-2, var(--spacing-2)) var(--table-spacing-4, var(--spacing-4));
 	word-break: break-word;
-	text-align: center;
+	text-align: left;
 }
 
 .table tbody tr:not(:last-child) {
-	border-bottom: 1.5px solid var(--table-resize-handle);
+	border-bottom: 1px solid var(--table-resize-handle);
 	transition: background-color 0.1s ease-in;
 }
 
@@ -145,7 +145,7 @@
 }
 
 /* Непрозрачный фон закреплённых ячеек: токен дизайна или ближайшая поверхность. */
-.pinned {
+.cell.pinned {
 	position: sticky;
 	z-index: 2;
 	background: var(
@@ -167,6 +167,10 @@
 
 .pinnedRight {
 	box-shadow: var(--universal-table-pinned-right-shadow);
+}
+
+@media (max-width: 600px) {
+  .cell.pinned { position: relative; box-shadow: none; }
 }
 
 /* hover row → подсвечиваем pinned через overlay-псевдоэлемент с opacity-переходом.

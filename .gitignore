@@ -6,3 +6,7 @@ node_modules
 src/generated
 *.log
 *.tsbuildinfo
+.impeccable/questions/
+.impeccable/review/
+.impeccable/decision-options.json
+.impeccable/workspace-brief.md

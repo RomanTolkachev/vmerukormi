@@ -1,7 +1,7 @@
 .root { display:flex; flex-direction:column; gap:var(--spacing-1); flex-shrink:0; width:100%; min-width:0; }
 .topScroll { overflow-x:auto; overscroll-behavior-x:contain; padding:var(--spacing-2) 0 var(--spacing-1); }
 .topRow { display:flex; align-items:center; gap:var(--spacing-3); min-width:0; position:relative; }
-.search { flex:0 1 600px; min-width:400px; max-width:600px; }
+.search { flex:1 1 300px; min-width:180px; max-width:450px; }
 .inlineSlot { flex:1 0 auto; min-width:max-content; }
 .slotContent { display:flex; align-items:center; gap:var(--spacing-3); width:max-content; white-space:nowrap; }
 .hiddenSlot { position:absolute; visibility:hidden; pointer-events:none; width:0; height:0; overflow:hidden; }
@@ -22,4 +22,11 @@
 .popupSlot { display:flex; flex-wrap:wrap; align-items:center; gap:var(--spacing-3); padding:var(--spacing-2); }
 .filters { display:flex; flex-direction:column; gap:var(--spacing-4); min-height:0; min-width:0; border:0; padding:0; margin:0; }
 .popupActions { display:flex; flex-wrap:wrap; gap:var(--spacing-2); padding-top:var(--spacing-3); }
+@media (max-width: 600px) {
+  .topRow { flex-wrap:wrap; }
+  .search { flex:1 0 100%; min-width:0; max-width:none; }
+  .actions { margin-left:0; width:100%; }
+  .fixedActions { gap:8px; flex-wrap:wrap; }
+  .inlineSlot { flex:0 1 auto; }
+}
 

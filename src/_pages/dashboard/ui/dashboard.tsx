@@ -18,9 +18,9 @@ import { calculateEnergy } from "@/features/calculate-energy";
 import { EntitySelect, useEntityCreation } from "@/features/create-entity";
 import { LocalRegistry } from "@/shared/ui/local-registry";
 import { deletePet } from "@/features/delete-pet";
-import { updatePetCustomer } from "@/features/update-pet-customer";
 import { NumberField } from "@/shared/ui";
 import { InfoPage } from "./info-page";
+import { Button, ButtonLink, Input, Select } from "@/shared/ui/controls";
 
 type Form = { petId: string; moduleId: string; breedId: string; sex: Sex | ""; actualWeight: number; idealWeight: number; bcs: number; energyFactor: number; lactationWeek: number; childrenCount: number };
 export type DashboardTab = "calc" | "pets" | "history" | "info";
@@ -151,15 +151,6 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
 
 
   async function removePet(id: string) { if (!window.confirm("Удалить питомца?")) return; try { await deletePet(id); await loadData(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Не удалось удалить питомца"); } }
-  async function assignCustomer(petId: string, customerId: string) {
-    setError("");
-    try {
-      await updatePetCustomer(petId, customerId || null);
-      await loadData();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Не удалось изменить клиента");
-    }
-  }
 
   return <div className={ui("pageLayout", "dashboardPage")}>
       <section className={ui("hero")}><div><h1>Питание без чёрного ящика</h1><p>Рассчитывайте суточную обменную энергию кошек и собак по восстановленным формулам. Все коэффициенты доступны в справочнике.</p></div><span className={ui("badge")}>Защищённая сессия</span></section>
@@ -168,7 +159,7 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
         <section className={ui("card")}><form onSubmit={calculate}><div className={ui("cardHead")}><h2>Параметры расчёта</h2><span className={ui("meta")}>ОЭ, ккал/сут</span></div><div className={ui("cardBody")}>
           <div className={ui("formGrid")}>
             <div className={ui("field", "full")}><EntitySelect entity="pets" label="Питомец" value={chosenPetId} onChange={(value, option) => { if (option) { const pet = option.data as unknown as Pet; setPets(current => current.some(item => item.id === pet.id) ? current : [...current, pet]); choosePet(pet); } else calculationForm.setValue("petId", value); }} /></div>
-            <EntitySelect entity="modules" label="Модуль" value={moduleId} onChange={(value, option) => {
+            <EntitySelect entity="modules" label="Модуль" value={moduleId} required onChange={(value, option) => {
               if (!option) return;
               const version = (option.data.versions as Record<string, unknown>[] | undefined)?.[0];
               const chosen = { ...option.data, ...version, id: value } as CalculationModule;
@@ -177,7 +168,7 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
               setResult(null);
             }} />
             <EntitySelect entity="breeds" label="Порода" value={calcBreedId} filters={{ species: selectedModule.species }} onChange={value => calculationForm.setValue("breedId", value, { shouldDirty: true })} />
-            <div className={ui("field")}><label>Пол</label><select className={ui("input")} {...calculationForm.register("sex")}><option value="">Не выбран</option><option value="MALE">Самец</option><option value="FEMALE">Самка</option></select></div>
+            <div className={ui("field")}><label>Пол</label><Select className={ui("input")} {...calculationForm.register("sex")}><option value="">Не выбран</option><option value="MALE">Самец</option><option value="FEMALE">Самка</option></Select></div>
             <NumberField label="Фактическая масса, кг" registration={calculationForm.register("actualWeight", { valueAsNumber: true, min: 0.1, max: 150 })}/>
             <NumberField label="Идеальная / взрослая масса, кг" registration={calculationForm.register("idealWeight", { valueAsNumber: true, min: 0.1, max: 150 })} hint={calcBreedId && calcSex ? "Предзаполнено по породе и полу; значение можно изменить" : undefined}/>
             <NumberField label="BCS, 1–9" registration={calculationForm.register("bcs", { valueAsNumber: true })} min={1} max={9} step={1} readOnly hint="Автоматически рассчитан из фактической и идеальной массы"/>
@@ -185,18 +176,18 @@ export function Dashboard({ initialModules, initialTab = "calc", selectedPetId, 
             {isLactation && <><NumberField label="Неделя лактации" registration={calculationForm.register("lactationWeek", { valueAsNumber: true })} min={1} max={12} step={1}/><NumberField label="Количество детёнышей" registration={calculationForm.register("childrenCount", { valueAsNumber: true })} min={0} max={20} step={1}/></>}
           </div>
           <div className={ui("formulaBox")}><strong>Формула модуля</strong><code>{selectedModule.formula}</code></div>
-          <div className={ui("actions")}><button className={ui("primary")} type="submit">Рассчитать стандартные нормы</button><button className={ui("secondary")} type="button" onClick={()=>setResult(null)}>Сбросить результат</button></div>
+          <div className={ui("actions")}><Button className={ui("primary")} type="submit">Рассчитать стандартные нормы</Button><Button className={ui("secondary")} type="button" onClick={()=>setResult(null)}>Сбросить результат</Button></div>
           {error && <div className={ui("error")}>{error}</div>}
         </div></form></section>
-        <aside className={ui("calculationTargetEditor")}>{result ? <><div className={ui("card")}><div className={ui("cardBody")}><div className={ui("resultLabel")}>Суточная норма</div><label className={ui("field")}><span>Калорийность, ккал/сут</span><input className={ui("input", "highlight")} type="number" min="1" value={result.adjustedEnergy} onChange={(event)=>setResult({ ...result, adjustedEnergy: Number(event.target.value) })}/></label><div className={ui("formGrid")}><label className={ui("field")}><span>Белок, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={result.protein} onChange={(event)=>updateMacro("protein", Number(event.target.value))}/></label><label className={ui("field")}><span>Жир, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={result.fat} onChange={(event)=>updateMacro("fat", Number(event.target.value))}/></label><label className={ui("field", "full")}><span>Углеводы, г</span><input className={ui("input")} type="number" min="0" step="0.01" value={result.carbs} onChange={(event)=>updateMacro("carbs", Number(event.target.value))}/></label></div><div className={ui("fieldHint")}>Изменение БЖУ пересчитывает калорийность по модифицированным коэффициентам Atwater. Ручное изменение калорийности не меняет БЖУ.</div><div className={ui("resultSub")}><span>Норма калорий</span><b>{result.baseEnergy} ккал</b></div></div></div><div className={ui("card", "calculationNutrientsCard")}><div className={ui("cardHead")}><div><h2>Нутриенты</h2><div className={ui("meta")}>{result.standardSource}</div></div></div><div className={ui("cardBody", "calculationNutrientsBody")}><div className={ui("nutrientTargetList")}>{result.standardNutrients.map((nutrient)=><label className={ui("nutrientTargetRow")} key={nutrient.nutrientId}><span><b>{nutrient.code}</b>{nutrient.name}</span><input className={ui("input")} type="number" min="0" step="any" placeholder="Не задано" value={nutrient.targetAmount ?? ""} onChange={(event)=>setResult({ ...result, standardNutrients: result.standardNutrients.map((item)=>item.nutrientId===nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) })}/><small>{nutrient.unit}/сут</small></label>)}</div><div className={ui("actions")}><button className={ui("primary")} type="button" onClick={()=>void saveCalculation()}>Сохранить расчёт</button></div></div></div></> : <><div className={ui("card")}><div className={ui("result")}><div className={ui("resultLabel")}>Результат</div><div className={ui("resultValue")}>—</div><div className={ui("resultUnit")}>заполните параметры и выполните расчёт</div></div></div><div className={ui("tip")}><b>Как читать результат:</b> это стартовая оценка. После расчёта врач сможет изменить калорийность, БЖУ и каждый нутриент перед сохранением.</div></>}</aside>
+        <aside className={ui("calculationTargetEditor")}>{result ? <><div className={ui("card")}><div className={ui("cardBody")}><div className={ui("resultLabel")}>Суточная норма</div><label className={ui("field")}><span>Калорийность, ккал/сут</span><Input className={ui("input", "highlight")} type="number" min="1" value={result.adjustedEnergy} onChange={(event)=>setResult({ ...result, adjustedEnergy: Number(event.target.value) })}/></label><div className={ui("formGrid")}><label className={ui("field")}><span>Белок, г</span><Input className={ui("input")} type="number" min="0" step="0.01" value={result.protein} onChange={(event)=>updateMacro("protein", Number(event.target.value))}/></label><label className={ui("field")}><span>Жир, г</span><Input className={ui("input")} type="number" min="0" step="0.01" value={result.fat} onChange={(event)=>updateMacro("fat", Number(event.target.value))}/></label><label className={ui("field", "full")}><span>Углеводы, г</span><Input className={ui("input")} type="number" min="0" step="0.01" value={result.carbs} onChange={(event)=>updateMacro("carbs", Number(event.target.value))}/></label></div><div className={ui("fieldHint")}>Изменение БЖУ пересчитывает калорийность по модифицированным коэффициентам Atwater. Ручное изменение калорийности не меняет БЖУ.</div><div className={ui("resultSub")}><span>Норма калорий</span><b>{result.baseEnergy} ккал</b></div></div></div><div className={ui("card", "calculationNutrientsCard")}><div className={ui("cardHead")}><div><h2>Нутриенты</h2><div className={ui("meta")}>{result.standardSource}</div></div></div><div className={ui("cardBody", "calculationNutrientsBody")}><div className={ui("nutrientTargetList")}>{result.standardNutrients.map((nutrient)=><label className={ui("nutrientTargetRow")} key={nutrient.nutrientId}><span><b>{nutrient.code}</b>{nutrient.name}</span><Input className={ui("input")} type="number" min="0" step="any" placeholder="Не задано" value={nutrient.targetAmount ?? ""} onChange={(event)=>setResult({ ...result, standardNutrients: result.standardNutrients.map((item)=>item.nutrientId===nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) })}/><small>{nutrient.unit}/сут</small></label>)}</div><div className={ui("actions")}><Button className={ui("primary")} type="button" onClick={()=>void saveCalculation()}>Сохранить расчёт</Button></div></div></div></> : <><div className={ui("card")}><div className={ui("result")}><div className={ui("resultLabel")}>Результат</div><div className={ui("resultValue")}>—</div><div className={ui("resultUnit")}>заполните параметры и выполните расчёт</div></div></div><div className={ui("tip")}><b>Как читать результат:</b> это стартовая оценка. После расчёта врач сможет изменить калорийность, БЖУ и каждый нутриент перед сохранением.</div></>}</aside>
       </div>}
 
       {tab === "pets" && <section className={ui("card")}><div className={ui("cardBody", "tableBody")}>
         <LocalRegistry tableName="pets-list" rows={pets.map(pet => ({ ...pet, speciesLabel: pet.species === "CAT" ? "Кошка" : "Собака", customerName: pet.customer?.name ?? "Без клиента" }))}
           columns={[{ name: "name", label: "Питомец" }, { name: "speciesLabel", label: "Вид" }, { name: "customerName", label: "Клиент" }, { name: "actualWeight", label: "Вес, кг" }, { name: "idealWeight", label: "Идеальный вес" }, { name: "bcs", label: "BCS" }]}
-          createButton={<button className={ui("primary")} onClick={() => open({ entity: "pets", initial: { customerId: selectedCustomerId ?? "" }, onCreated: () => void loadData() })}>Создать питомца</button>}
-          actionCell={(_, pet) => <div className={ui("actions")}><button className={ui("secondary")} onClick={() => choosePet(pet)}>Рассчитать</button><button className={ui("danger")} onClick={() => void removePet(pet.id)}>Удалить</button></div>}
-          customColumns={[{ id: "assignCustomer", header: "Привязка к клиенту", width: 260, render: (_, pet) => <EntitySelect entity="customers" label="Клиент" value={pet.customerId ?? ""} onChange={value => void assignCustomer(pet.id, value)} /> }]} />
+          createButton={<Button className={ui("primary")} onClick={() => open({ entity: "pets", initial: { customerId: selectedCustomerId ?? "" }, onCreated: () => void loadData() })}>Создать питомца</Button>}
+          actionCellWidth={320}
+          actionCell={(_, pet) => <div className={ui("tableActions")}><ButtonLink href={`/pets/${pet.id}`}>Карточка</ButtonLink><Button className={ui("secondary")} onClick={() => choosePet(pet)}>Рассчитать</Button><Button className={ui("danger")} onClick={() => void removePet(pet.id)}>Удалить</Button></div>} />
         {error && <p role="alert" className={ui("error")}>{error}</p>}
       </div></section>}
 

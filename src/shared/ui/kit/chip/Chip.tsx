@@ -1,4 +1,5 @@
 import React, { type PropsWithChildren } from "react";
+import { buttonMotionClassName } from "@/shared/ui/button-motion";
 import styles from "@/shared/ui/kit/chip/Chip.module.css";
 import { CloseIcon } from "@/shared/ui/kit/Icons/CloseIcon";
 export interface ChipProps extends PropsWithChildren {
@@ -61,7 +62,7 @@ export const Chip = ({
                     type="button"
                     aria-label={removeLabel}
                     disabled={removeDisabled}
-                    className={styles.removeButton}
+                    className={`${buttonMotionClassName} ${styles.removeButton}`}
                     onClick={(e) => {
                         e.stopPropagation();
                         onRemove();

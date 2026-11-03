@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { logout as logoutRequest } from "../api/logout";
 import { ui } from "@/shared/ui/styles";
+import { Button } from "@/shared/ui/controls";
 
 export function AccountMenu({ username }: { username: string }) {
   const router = useRouter();
@@ -21,7 +22,8 @@ export function AccountMenu({ username }: { username: string }) {
   }
 
   return <div className={ui("accountMenu")}>
+    <span className={ui("accountAvatar")} aria-hidden="true">{username.slice(0, 1).toLocaleUpperCase("ru")}</span>
     <span>{username}</span>
-    <button type="button" onClick={logout} disabled={pending}>{pending ? "Выходим…" : "Выйти"}</button>
+    <Button type="button" onClick={logout} disabled={pending}>{pending ? "Выходим…" : "Выйти"}</Button>
   </div>;
 }

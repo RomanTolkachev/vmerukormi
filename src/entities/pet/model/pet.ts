@@ -15,6 +15,7 @@ export type Pet = {
   actualWeight: number;
   idealWeight: number;
   bcs: number;
+  note?: string | null;
 };
 
 export type PetDraft = {

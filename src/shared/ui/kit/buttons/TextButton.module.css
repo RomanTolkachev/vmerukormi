@@ -17,6 +17,7 @@
     box-shadow: var(--button-shadow);
     color: var(--button-text);
     font-family: inherit;
+    font-weight: 500;
     text-decoration: none;
     cursor: pointer;
     outline: none;
@@ -159,10 +160,6 @@
         box-shadow: var(--button-hover-shadow);
     }
 
-    .howerEffect:hover {
-        --button-translate-y: -2px;
-    }
-
     .warning:hover {
         background: var(--button-warning-background);
         box-shadow: var(--button-warning-hover-shadow);
@@ -179,10 +176,6 @@
         background: var(--button-compact-background-hover, var(--workspace-control-background-hover, var(--composable-table-compact-control-background-hover, rgba(var(--color-blue-light) / 0.14))));
         box-shadow: var(--button-compact-shadow-hover, var(--workspace-control-shadow-hover, var(--composable-table-compact-control-shadow-hover, 0 0 0 1px rgba(var(--color-blue-light) / 0.2), 0 0.375rem 0.875rem rgba(var(--color-blue-light) / 0.14))));
         color: var(--button-compact-text, var(--composable-table-text, var(--primary-contrastText)));
-    }
-
-    .compact.howerEffect:hover {
-        --button-translate-y: 0;
     }
 
     :global([data-theme="light"]) .ghost:hover {

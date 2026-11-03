@@ -1,4 +1,5 @@
 import React from "react";
+import { buttonMotionClassName } from "@/shared/ui/button-motion";
 import { createPortal } from "react-dom";
 import { FloatingPortalContainerProvider } from "@/shared/ui/kit/floating-portal/FloatingPortalContext";
 import { CloseIcon } from "@/shared/ui/kit/Icons/CloseIcon";
@@ -130,7 +131,7 @@ export const Modal = ({
 				className={[styles.modalContent, contentClassName].filter(Boolean).join(" ")}
 				style={innerStyle}>
 				{showClose ? (
-					<button type="button" aria-label="Закрыть" className={styles.closeButton} onClick={handleClose}>
+					<button type="button" aria-label="Закрыть" className={`${buttonMotionClassName} ${styles.closeButton}`} onClick={handleClose}>
 						<CloseIcon className={styles.closeButtonIcon} aria-hidden />
 					</button>
 				) : null}

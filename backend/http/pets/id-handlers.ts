@@ -8,7 +8,7 @@ const updateSchema = z.object({
   species: z.enum(["CAT", "DOG"]).optional(),
   sex: z.enum(["MALE", "FEMALE"]).optional().nullable(),
   breedId: z.string().uuid().optional().nullable(),
-  customerId: z.string().cuid().optional().nullable(),
+  customerId: z.string().trim().min(1).max(191).optional().nullable(),
   actualWeight: z.coerce.number().positive().max(150).optional(),
   idealWeight: z.coerce.number().positive().max(150).optional(),
   bcs: z.coerce.number().int().min(1).max(9).optional(),
@@ -21,6 +21,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params;
     const parsed = updateSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: "Некорректные данные" }, { status: 400 });
+    const pet = await prisma.pet.findFirst({ where: { id, userId: user.id }, select: { species: true } });
+    if (!pet) return NextResponse.json({ error: "Питомец не найден" }, { status: 404 });
+    if (parsed.data.species && parsed.data.species !== pet.species && parsed.data.breedId === undefined) {
+      parsed.data.breedId = null;
+    }
+    if (parsed.data.breedId) {
+      const breed = await prisma.breed.findUnique({ where: { id: parsed.data.breedId }, select: { species: true } });
+      if (!breed || breed.species !== (parsed.data.species ?? pet.species)) {
+        return NextResponse.json({ error: "Выберите породу, соответствующую виду питомца" }, { status: 400 });
+      }
+    }
     if (parsed.data.customerId) {
       const customer = await prisma.customer.findFirst({ where: { id: parsed.data.customerId, userId: user.id }, select: { id: true } });
       if (!customer) return NextResponse.json({ error: "Клиент не найден" }, { status: 404 });

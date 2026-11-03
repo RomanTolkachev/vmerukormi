@@ -4,6 +4,38 @@ import { getModalStackSnapshot, getModalZIndex, pushModalStack, popModalStack, s
 import { createUniversalTableSavedQuery, readUniversalTableSavedQuery, mergeUniversalTableSavedQuery } from "../src/shared/ui/kit/universal-table/table-settings/savedState";
 import { mergeColumnsConfig } from "../src/shared/ui/kit/universal-table/lib/mergeColumnsConfig";
 import { getTableOptions } from "../src/shared/ui/kit/universal-table/table-settings/api/getTableOptions";
+import { textButtonTypography } from "../src/shared/ui/kit/buttons/textButtonTypography";
+import { toast } from "sonner";
+import { notify } from "../src/shared/ui/notifications/api/notify";
+
+test("shared notifications retain message deduplication and explicit identifiers", context => {
+  const success = context.mock.method(toast, "success", () => "test");
+  const info = context.mock.method(toast, "info", () => "test");
+  notify.success("Сохранено");
+  notify.success("Сохранено");
+  notify.info("Подсказка", { id: "table-reminder" });
+  assert.deepEqual(success.mock.calls.map(call => call.arguments), [
+    ["Сохранено", { id: "success:Сохранено" }],
+    ["Сохранено", { id: "success:Сохранено" }],
+  ]);
+  assert.deepEqual(info.mock.calls[0].arguments, ["Подсказка", { id: "table-reminder" }]);
+});
+
+test("shared notifications map warning/error types and support dismissal", context => {
+  const warning = context.mock.method(toast, "warning", () => "test");
+  const error = context.mock.method(toast, "error", () => "test");
+  const dismiss = context.mock.method(toast, "dismiss", () => "test");
+  notify.alert("Проверьте данные");
+  notify.error("Не удалось сохранить");
+  notify.dismiss("table-reminder");
+  assert.deepEqual(warning.mock.calls[0].arguments, ["Проверьте данные", { id: "alert:Проверьте данные" }]);
+  assert.deepEqual(error.mock.calls[0].arguments, ["Не удалось сохранить", { id: "error:Не удалось сохранить" }]);
+  assert.deepEqual(dismiss.mock.calls[0].arguments, ["table-reminder"]);
+});
+
+test("regular buttons use body text instead of heading typography", () => {
+  assert.deepEqual(textButtonTypography, { sm: "body3", md: "body2", lg: "body2" });
+});
 
 test("modal stack keeps nested dialogs ordered and tolerates repeated cleanup", () => {
   let changes = 0;

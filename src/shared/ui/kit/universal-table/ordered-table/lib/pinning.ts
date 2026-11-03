@@ -14,7 +14,6 @@ export function getPinningStyle<TData extends Record<string, unknown>>(
 	if (!pinned) return {};
 
 	return {
-		position: "sticky",
 		left: pinned === "left" ? `${column.getStart("left")}px` : undefined,
 		right: pinned === "right" ? `${column.getAfter("right")}px` : undefined,
 	};
