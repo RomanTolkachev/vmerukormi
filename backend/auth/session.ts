@@ -4,9 +4,10 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import type { UserRole } from "@prisma/client";
 import { prisma } from "@backend/infrastructure/database/prisma";
+import { setDatabaseActor } from "@backend/infrastructure/database/context";
 import { CSRF_COOKIE, SESSION_COOKIE, SESSION_TTL_SECONDS } from "./constants";
 
-export type AuthUser = { id: string; username: string; role: UserRole };
+export type AuthUser = { id: string; username: string; email: string; name: string; role: UserRole };
 
 export class AuthError extends Error {
   constructor(readonly status: 401 | 403, message: string) {
@@ -44,17 +45,17 @@ export async function createSession(userId: string) {
   const csrfToken = randomToken();
   const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000);
 
-  await prisma.$transaction([
-    prisma.session.deleteMany({ where: { expiresAt: { lte: new Date() } } }),
-    prisma.session.create({
+  await prisma.$transaction(async transaction => {
+    await transaction.session.deleteMany({ where: { expiresAt: { lte: new Date() } } });
+    await transaction.session.create({
       data: {
         userId,
         tokenHash: tokenHash(sessionToken),
         csrfTokenHash: tokenHash(csrfToken),
         expiresAt,
       },
-    }),
-  ]);
+    });
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, sessionToken, cookieOptions(true, expiresAt));
@@ -67,9 +68,9 @@ export async function getSession() {
 
   const session = await prisma.session.findUnique({
     where: { tokenHash: tokenHash(sessionToken) },
-    include: { user: { select: { id: true, username: true, role: true } } },
+    include: { user: { select: { id: true, username: true, email: true, name: true, role: true, deletedAt: true } } },
   });
-  if (!session || session.expiresAt <= new Date()) return null;
+  if (!session || session.expiresAt <= new Date() || session.user.deletedAt) return null;
   return session;
 }
 
@@ -114,7 +115,12 @@ export async function requireUser(request: Request, options: { csrf?: boolean } 
     }
   }
 
+  setDatabaseActor(session.user);
   return session.user;
+}
+
+export function requireAdmin(user: AuthUser) {
+  if (user.role !== "ADMIN") throw new AuthError(403, "Доступно только администратору");
 }
 
 export async function deleteCurrentSession() {

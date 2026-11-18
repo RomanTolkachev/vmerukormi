@@ -253,6 +253,7 @@ export function RationEditor({
                             <td>
                               <div className={ui("rationProductCell")}>
                                 <b>{item.product.name}</b>
+                                {item.product.deletedAt && <span className={ui("badge")}>Удалён</span>}
                                 <Link className={ui("rationProductLink")} href={`/products/${item.product.id}`} target="_blank" rel="noopener noreferrer">Смотреть ↗</Link>
                               </div>
                               <small>{formatNumber(value.protein)} Б · {formatNumber(value.fat)} Ж · {formatNumber(value.carbs)} У</small>

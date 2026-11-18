@@ -7,9 +7,11 @@ import { prisma } from "@backend/infrastructure/database/prisma";
 import { DEFAULT_MACROS_PER_1000_KCAL, DEFAULT_NUTRIENTS_PER_1000_KCAL } from "@backend/domain/nutrition/standards";
 import type { BreedStandardsValue, SexStandardValue } from "@/entities/standard";
 
-export async function getBreedStandards(breedId: string): Promise<BreedStandardsValue | null> {
-  const userId = (await getCurrentUser())?.id;
-  if (!userId) return null;
+export async function getBreedStandards(breedId: string, requestedUserId?: string): Promise<BreedStandardsValue | null> {
+  const user = await getCurrentUser();
+  if (!user || (requestedUserId && requestedUserId !== user.id && user.role !== "ADMIN")) return null;
+  const userId = requestedUserId ?? user.id;
+  if (!(await prisma.user.findUnique({ where: { id: userId }, select: { id: true } }))) return null;
   const [breed, nutrients, stored] = await Promise.all([
     prisma.breed.findUnique({ where: { id: breedId } }),
     prisma.nutrient.findMany({ where: { ...readableCatalog(userId), isReferenceOnly: false }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
@@ -38,5 +40,5 @@ export async function getBreedStandards(breedId: string): Promise<BreedStandards
       })),
     };
   });
-  return { breed: { id: breed.id, nameRu: breed.nameRu, nameEn: breed.nameEn, species: breed.species }, standards };
+  return { userId, breed: { id: breed.id, nameRu: breed.nameRu, nameEn: breed.nameEn, species: breed.species }, standards };
 }

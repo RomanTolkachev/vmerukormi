@@ -11,6 +11,8 @@ import { MODULES, type ModuleId } from "../../domain/nutrition/modules";
 import { formulaOpenEnd } from "../../domain/nutrition/formula-versions";
 import { DEFAULT_MACROS_PER_1000_KCAL, DEFAULT_NUTRIENTS_PER_1000_KCAL, scalePer1000 } from "../../domain/nutrition/standards";
 import breeds from "./breeds.json";
+import { seedTestUsers } from "./seed-users";
+import { createProductSnapshot } from "../../domain/rations/snapshot";
 import { referenceNutrients } from "../../domain/catalog/nutrient-conventions";
 
 const prisma = new PrismaClient();
@@ -532,10 +534,12 @@ async function seedRations(userId: string, energyByPet: Map<string, number>) {
     });
     for (const item of ration.items) {
       const day = "day" in item ? item.day : 1;
+      const product = await prisma.product.findUniqueOrThrow({ where: { id: item.productId }, include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } } });
+      const snapshot = createProductSnapshot(product, product.measures.find(measure => measure.id === item.measureId) ?? null);
       await prisma.rationItem.upsert({
         where: { id: item.id },
         update: { ...item, rationId: ration.id, day, enabled: true },
-        create: { ...item, rationId: ration.id, day, enabled: true },
+        create: { ...item, rationId: ration.id, day, enabled: true, productSnapshot: snapshot },
       });
     }
   }
@@ -548,11 +552,14 @@ async function main() {
     create: {
       id: "bootstrap-admin",
       username: "admin",
+      email: "admin@vetenergy.ru",
+      name: "Администратор",
       passwordHash: "scrypt$-47FPPl4kPoQj1n3g5r-5w$v-YzaEqk_9OyVxhfAjtkGBvpRE9VDSKoF9bN2cYZMqnfSfoo_Pl6UFHmnXQu1VakiUA9eKrtxBKvBwkJhuW31w",
       role: UserRole.ADMIN,
     },
   });
 
+  await seedTestUsers(prisma);
   await prisma.session.deleteMany({ where: { expiresAt: { lte: new Date() } } });
   await Promise.all(
     MODULES.map((module) =>

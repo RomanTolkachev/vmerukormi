@@ -53,6 +53,9 @@ test("reference migration preserves existing data and converts linked quantities
     const originalProducts = await prisma.product.findMany({ select: { id: true, name: true, userId: true, isShared: true }, orderBy: { id: "asc" } });
     const valuesBefore = await prisma.$queryRaw<{ productId: string; nutrientId: string }[]>`SELECT "productId", "nutrientId" FROM "ProductNutrient"`;
     execute(generateReferenceMigration());
+    for (const migration of readdirSync(root).filter(name => /^\d/.test(name) && name > "20261031090000_reference_nutrients").sort()) {
+      execute(readFileSync(`${root}/${migration}/migration.sql`, "utf8"));
+    }
     assert.deepEqual(await prisma.product.findMany({ select: { id: true, name: true, userId: true, isShared: true }, orderBy: { id: "asc" } }), originalProducts);
     for (const key of valuesBefore) assert.ok(await prisma.productNutrient.findUnique({ where: { productId_nutrientId: key } }));
     const values = await prisma.productNutrient.findMany({ where: { productId: { startsWith: "fixture-" }, nutrient: { isReferenceOnly: false } }, include: { nutrient: true } });

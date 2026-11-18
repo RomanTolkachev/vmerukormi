@@ -1,3 +1,5 @@
+import { createProductSnapshot, applyRationSnapshot } from "@backend/domain/rations/snapshot";
+import { ownerScope } from "@backend/domain/accounts/policy";
 import { z } from "zod";
 import { readableCatalog } from "@backend/domain/catalog/access";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
@@ -24,12 +26,12 @@ export async function POST(
     }
     const [ration, product] = await Promise.all([
       prisma.ration.findFirst({
-        where: { id, userId: user.id },
+        where: { id, ...ownerScope(user) },
         select: { id: true, mode: true },
       }),
       prisma.product.findFirst({
-        where: { id: parsed.data.productId, ...readableCatalog(user.id), archived: false },
-        include: { measures: true },
+        where: { id: parsed.data.productId, ...readableCatalog(user), archived: false },
+        include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } },
       }),
     ]);
     if (!ration) return Response.json({ error: "Рацион не найден" }, { status: 404 });
@@ -46,6 +48,7 @@ export async function POST(
       data: {
         rationId: ration.id,
         productId: product.id,
+        productSnapshot: createProductSnapshot(product, measure ?? null),
         measureId: measure?.id ?? null,
         quantity,
         grams: measure ? measure.grams * quantity : quantity,
@@ -59,7 +62,7 @@ export async function POST(
         },
       },
     });
-    return Response.json(item, { status: 201 });
+    return Response.json(applyRationSnapshot(item), { status: 201 });
   } catch (error) {
     return authErrorResponse(error);
   }

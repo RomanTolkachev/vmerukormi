@@ -41,6 +41,10 @@ enum UserRole {
 }
 
 model User {
+  deletedAt        DateTime?
+  deletedById      String?
+  email            String            @unique
+  name             String
   id               String            @id @default(cuid())
   username         String            @unique
   passwordHash     String
@@ -76,6 +80,8 @@ model Session {
 }
 
 model Module {
+  deletedAt    DateTime?
+  deletedById  String?
   id           String                 @id @default(cuid())
   name         String                 @unique
   species      Species
@@ -85,6 +91,8 @@ model Module {
 }
 
 model ModuleFormulaVersion {
+  deletedAt    DateTime?
+  deletedById  String?
   id           String        @id @default(cuid())
   moduleId     String
   formula      String
@@ -92,7 +100,7 @@ model ModuleFormulaVersion {
   techBegin    DateTime      @map("tech_begin") @db.Timestamp(3)
   techEnd      DateTime      @map("tech_end") @db.Timestamp(3)
   createdAt    DateTime      @default(now())
-  module       Module        @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module       Module        @relation(fields: [moduleId], references: [id], onDelete: Restrict)
   calculations Calculation[]
 
   @@unique([moduleId, techBegin])
@@ -100,6 +108,8 @@ model ModuleFormulaVersion {
 }
 
 model Pet {
+  deletedAt    DateTime?
+  deletedById  String?
   id           String           @id @default(cuid())
   name         String
   species      Species
@@ -112,14 +122,14 @@ model Pet {
   note         String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
-  breed        Breed?           @relation(fields: [breedId], references: [id], onDelete: SetNull)
+  breed        Breed?           @relation(fields: [breedId], references: [id], onDelete: Restrict)
   calculations Calculation[]
   customerId   String?
-  customer     Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customer     Customer?        @relation(fields: [customerId], references: [id], onDelete: Restrict)
   measurements PetMeasurement[]
   rations      Ration[]
   userId       String
-  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([breedId])
   @@index([customerId])
@@ -127,6 +137,8 @@ model Pet {
 }
 
 model Breed {
+  deletedAt         DateTime?
+  deletedById       String?
   id                String          @id
   species           Species
   nameRu            String
@@ -140,6 +152,8 @@ model Breed {
 }
 
 model Calculation {
+  deletedAt        DateTime?
+  deletedById      String?
   id               String                @id @default(cuid())
   petId            String?
   moduleId         String
@@ -156,11 +170,11 @@ model Calculation {
   fat              Float                 @default(0)
   carbs            Float                 @default(0)
   createdAt        DateTime              @default(now())
-  pet              Pet?                  @relation(fields: [petId], references: [id], onDelete: SetNull)
+  pet              Pet?                  @relation(fields: [petId], references: [id], onDelete: Restrict)
   module           Module                @relation(fields: [moduleId], references: [id])
   formulaVersion   ModuleFormulaVersion  @relation(fields: [formulaVersionId], references: [id])
   userId           String
-  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Restrict)
   nutrients        CalculationNutrient[]
   rations          Ration[]
 
@@ -171,10 +185,12 @@ model Calculation {
 }
 
 model CalculationNutrient {
+  deletedAt     DateTime?
+  deletedById   String?
   calculationId String
   nutrientId    String
   targetAmount  Float
-  calculation   Calculation @relation(fields: [calculationId], references: [id], onDelete: Cascade)
+  calculation   Calculation @relation(fields: [calculationId], references: [id], onDelete: Restrict)
   nutrient      Nutrient    @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
 
   @@id([calculationId, nutrientId])
@@ -182,6 +198,8 @@ model CalculationNutrient {
 }
 
 model BreedStandard {
+  deletedAt          DateTime?
+  deletedById        String?
   id                 String                  @id @default(cuid())
   breedId            String
   sex                Sex
@@ -192,9 +210,9 @@ model BreedStandard {
   source             String?
   createdAt          DateTime                @default(now())
   updatedAt          DateTime                @updatedAt
-  breed              Breed                   @relation(fields: [breedId], references: [id], onDelete: Cascade)
+  breed              Breed                   @relation(fields: [breedId], references: [id], onDelete: Restrict)
   userId             String
-  user               User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
   nutrients          BreedStandardNutrient[]
 
   @@unique([userId, breedId, sex])
@@ -202,10 +220,12 @@ model BreedStandard {
 }
 
 model BreedStandardNutrient {
+  deletedAt         DateTime?
+  deletedById       String?
   standardId        String
   nutrientId        String
   amountPer1000Kcal Float
-  standard          BreedStandard @relation(fields: [standardId], references: [id], onDelete: Cascade)
+  standard          BreedStandard @relation(fields: [standardId], references: [id], onDelete: Restrict)
   nutrient          Nutrient      @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
 
   @@id([standardId, nutrientId])
@@ -213,47 +233,55 @@ model BreedStandardNutrient {
 }
 
 model Customer {
-  id        String   @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  note      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  pets      Pet[]
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  id          String    @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  note        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  pets        Pet[]
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([userId, name])
 }
 
 model PetMeasurement {
-  id         String   @id @default(cuid())
-  petId      String
-  measuredAt DateTime @default(now())
-  weight     Float
-  bcs        Int?
-  note       String?
-  pet        Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  id          String    @id @default(cuid())
+  petId       String
+  measuredAt  DateTime  @default(now())
+  weight      Float
+  bcs         Int?
+  note        String?
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Restrict)
 
   @@index([petId, measuredAt])
 }
 
 model ProductGroup {
-  isShared Boolean        @default(false)
-  id       String         @id @default(cuid())
-  name     String
-  parentId String?
-  parent   ProductGroup?  @relation("ProductGroupTree", fields: [parentId], references: [id], onDelete: SetNull)
-  children ProductGroup[] @relation("ProductGroupTree")
-  products Product[]
-  userId   String
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  isShared    Boolean        @default(false)
+  id          String         @id @default(cuid())
+  name        String
+  parentId    String?
+  parent      ProductGroup?  @relation("ProductGroupTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children    ProductGroup[] @relation("ProductGroupTree")
+  products    Product[]
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([userId])
 }
 
 model Nutrient {
+  deletedAt          DateTime?
+  deletedById        String?
   isReferenceOnly    Boolean                 @default(false)
   isShared           Boolean                 @default(false)
   id                 String                  @id @default(cuid())
@@ -265,13 +293,15 @@ model Nutrient {
   calculationTargets CalculationNutrient[]
   standardValues     BreedStandardNutrient[]
   userId             String
-  user               User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@unique([userId, code])
   @@index([userId, category, name])
 }
 
 model Product {
+  deletedAt        DateTime?
+  deletedById      String?
   isShared         Boolean           @default(false)
   id               String            @id @default(cuid())
   name             String
@@ -288,63 +318,73 @@ model Product {
   archived         Boolean           @default(false)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  group            ProductGroup?     @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  group            ProductGroup?     @relation(fields: [groupId], references: [id], onDelete: Restrict)
   nutrients        ProductNutrient[]
   tags             ProductTagLink[]
   measures         ProductMeasure[]
   rationItems      RationItem[]
   userId           String
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@unique([userId, source, sourceExternalId])
   @@index([userId, groupId, name])
 }
 
 model ProductTag {
-  isShared Boolean          @default(false)
-  id       String           @id @default(cuid())
-  name     String
-  slug     String
-  products ProductTagLink[]
-  userId   String
-  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  isShared    Boolean          @default(false)
+  id          String           @id @default(cuid())
+  name        String
+  slug        String
+  products    ProductTagLink[]
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@unique([userId, slug])
   @@index([userId, name])
 }
 
 model ProductTagLink {
-  productId String
-  tagId     String
-  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  tag       ProductTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  productId   String
+  tagId       String
+  product     Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  tag         ProductTag @relation(fields: [tagId], references: [id], onDelete: Restrict)
 
   @@id([productId, tagId])
   @@index([tagId])
 }
 
 model ProductNutrient {
-  productId  String
-  nutrientId String
-  amount     Float?
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  nutrient   Nutrient @relation(fields: [nutrientId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  productId   String
+  nutrientId  String
+  amount      Float?
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  nutrient    Nutrient  @relation(fields: [nutrientId], references: [id], onDelete: Restrict)
 
   @@id([productId, nutrientId])
 }
 
 model ProductMeasure {
+  deletedAt   DateTime?
+  deletedById String?
   id          String       @id @default(cuid())
   productId   String
   name        String
   grams       Float
-  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Restrict)
   rationItems RationItem[]
 
   @@index([productId])
 }
 
 model Ration {
+  deletedAt        DateTime?
+  deletedById      String?
   id               String       @id @default(cuid())
   name             String
   petId            String?
@@ -356,46 +396,53 @@ model Ration {
   sharedToken      String?      @unique
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
-  pet              Pet?         @relation(fields: [petId], references: [id], onDelete: SetNull)
-  calculation      Calculation? @relation(fields: [calculationId], references: [id], onDelete: SetNull)
+  pet              Pet?         @relation(fields: [petId], references: [id], onDelete: Restrict)
+  calculation      Calculation? @relation(fields: [calculationId], references: [id], onDelete: Restrict)
   items            RationItem[]
   userId           String
-  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User         @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([userId, petId, updatedAt])
   @@index([calculationId])
 }
 
 model RationItem {
-  id        String          @id @default(cuid())
-  rationId  String
-  productId String
-  measureId String?
-  quantity  Float           @default(1)
-  grams     Float
-  day       Int             @default(1)
-  enabled   Boolean         @default(true)
-  ration    Ration          @relation(fields: [rationId], references: [id], onDelete: Cascade)
-  product   Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
-  measure   ProductMeasure? @relation(fields: [measureId], references: [id], onDelete: SetNull)
+  deletedAt       DateTime?
+  deletedById     String?
+  productSnapshot Json?
+  id              String          @id @default(cuid())
+  rationId        String
+  productId       String
+  measureId       String?
+  quantity        Float           @default(1)
+  grams           Float
+  day             Int             @default(1)
+  enabled         Boolean         @default(true)
+  ration          Ration          @relation(fields: [rationId], references: [id], onDelete: Restrict)
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  measure         ProductMeasure? @relation(fields: [measureId], references: [id], onDelete: Restrict)
 
   @@index([rationId, day])
   @@index([productId])
 }
 
 model Notification {
-  id        String    @id @default(cuid())
-  title     String
-  body      String
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  id          String    @id @default(cuid())
+  title       String
+  body        String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([userId, createdAt])
 }
 
 model Invoice {
+  deletedAt   DateTime?
+  deletedById String?
   id          String        @id @default(cuid())
   number      String
   description String
@@ -403,18 +450,55 @@ model Invoice {
   status      InvoiceStatus @default(DRAFT)
   createdAt   DateTime      @default(now())
   userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@unique([userId, number])
   @@index([userId, createdAt])
 }
 
 model TablePreference {
-  userId    String
-  tableName String
-  config    Json
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deletedAt   DateTime?
+  deletedById String?
+  userId      String
+  tableName   String
+  config      Json
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@id([userId, tableName])
+}
+
+model AuditEvent {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  actorId    String?
+  actorEmail String?
+  action     String
+  entityType String
+  entityId   String?
+  before     Json?
+  after      Json?
+  requestId  String?
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model CaptchaChallenge {
+  id         String    @id
+  secret     String
+  challenge  Json
+  expiresAt  DateTime
+  consumedAt DateTime?
+
+  @@index([expiresAt])
+}
+
+model AuthRateLimit {
+  key       String   @id
+  attempts  Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
 }

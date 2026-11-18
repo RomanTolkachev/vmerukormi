@@ -1,3 +1,5 @@
+import { applyRationSnapshot } from "@backend/domain/rations/snapshot";
+import { ownerScope } from "@backend/domain/accounts/policy";
 import { z } from "zod";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -22,11 +24,11 @@ export async function GET(request: Request, { params }: Context) {
     const user = await requireUser(request);
     const { id } = await params;
     const ration = await prisma.ration.findFirst({
-      where: { id, userId: user.id },
+      where: { id, ...ownerScope(user) },
       include: { pet: true, items: { include: { product: true, measure: true } } },
     });
     if (!ration) return Response.json({ error: "Рацион не найден" }, { status: 404 });
-    return Response.json(ration);
+    return Response.json({ ...ration, items: ration.items.map(applyRationSnapshot) });
   } catch (error) {
     return authErrorResponse(error);
   }
@@ -41,7 +43,7 @@ export async function PATCH(request: Request, { params }: Context) {
       return Response.json({ error: "Проверьте параметры рациона" }, { status: 400 });
     }
     const existing = await prisma.ration.findFirst({
-      where: { id, userId: user.id },
+      where: { id, ...ownerScope(user) },
       select: { id: true },
     });
     if (!existing) return Response.json({ error: "Рацион не найден" }, { status: 404 });
@@ -49,13 +51,13 @@ export async function PATCH(request: Request, { params }: Context) {
     let calculationPetId: string | null | undefined;
     let calculationEnergy: number | undefined;
     if (parsed.data.calculationId) {
-      const calculation = await prisma.calculation.findFirst({ where: { id: parsed.data.calculationId, userId: user.id }, select: { petId: true, adjustedEnergy: true } });
+      const calculation = await prisma.calculation.findFirst({ where: { id: parsed.data.calculationId, ...ownerScope(user) }, select: { petId: true, adjustedEnergy: true } });
       if (!calculation) return Response.json({ error: "Расчёт не найден" }, { status: 404 });
       calculationPetId = calculation.petId;
       calculationEnergy = calculation.adjustedEnergy;
     } else if (parsed.data.petId) {
       const pet = await prisma.pet.findFirst({
-        where: { id: parsed.data.petId, userId: user.id },
+        where: { id: parsed.data.petId, ...ownerScope(user) },
         select: { id: true, calculations: { orderBy: { createdAt: "desc" }, take: 1, select: { adjustedEnergy: true } } },
       });
       if (!pet) return Response.json({ error: "Питомец не найден" }, { status: 404 });
@@ -91,7 +93,7 @@ export async function DELETE(request: Request, { params }: Context) {
   try {
     const user = await requireUser(request, { csrf: true });
     const { id } = await params;
-    const deleted = await prisma.ration.deleteMany({ where: { id, userId: user.id } });
+    const deleted = await prisma.ration.deleteMany({ where: { id, ...ownerScope(user) } });
     if (!deleted.count) return Response.json({ error: "Рацион не найден" }, { status: 404 });
     return new Response(null, { status: 204 });
   } catch (error) {

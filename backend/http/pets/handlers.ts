@@ -1,3 +1,4 @@
+import { ownerScope } from "@backend/domain/accounts/policy";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -18,7 +19,7 @@ const petSchema = z.object({
 export async function GET(request: Request) {
   try {
     const user = await requireUser(request);
-    return NextResponse.json(await prisma.pet.findMany({ where: { userId: user.id }, include: { breed: true, customer: { select: { id: true, name: true } } }, orderBy: { updatedAt: "desc" } }));
+    return NextResponse.json(await prisma.pet.findMany({ where: { ...ownerScope(user) }, include: { breed: true, customer: { select: { id: true, name: true } } }, orderBy: { updatedAt: "desc" } }));
   } catch (error) {
     return authErrorResponse(error);
   }
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     const parsed = petSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: "Проверьте данные питомца", details: parsed.error.flatten() }, { status: 400 });
     if (parsed.data.customerId) {
-      const customer = await prisma.customer.findFirst({ where: { id: parsed.data.customerId, userId: user.id }, select: { id: true } });
+      const customer = await prisma.customer.findFirst({ where: { id: parsed.data.customerId, ...ownerScope(user) }, select: { id: true } });
       if (!customer) return NextResponse.json({ error: "Клиент не найден" }, { status: 404 });
     }
     return NextResponse.json(await prisma.pet.create({ data: { ...parsed.data, userId: user.id }, include: { breed: true, customer: { select: { id: true, name: true } } } }), { status: 201 });

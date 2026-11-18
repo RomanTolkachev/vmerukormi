@@ -1,3 +1,4 @@
+import { auditEvent } from "@backend/infrastructure/database/prisma";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { exportRationXlsx } from "@backend/application/rations/export-xlsx";
 
@@ -7,9 +8,10 @@ export async function GET(request: Request, { params }: Context) {
   try {
     const user = await requireUser(request);
     const { id } = await params;
-    const exported = await exportRationXlsx(user.id, id);
+    const exported = await exportRationXlsx(user, id);
     if (!exported) return Response.json({ error: "Рацион не найден" }, { status: 404 });
 
+    await auditEvent("EXPORT", "Ration", id);
     return new Response(exported.buffer, {
       headers: {
         "content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

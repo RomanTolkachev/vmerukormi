@@ -1,17 +1,18 @@
 type CatalogUser = { id: string; role: string };
 
-export function readableCatalog(userId: string) {
-  return { OR: [{ userId }, { isShared: true }] };
+export function readableCatalog(user: string | CatalogUser) {
+  const userId = typeof user === "string" ? user : user.id;
+  return typeof user !== "string" && user.role === "ADMIN" ? {} : { OR: [{ userId }, { isShared: true }] };
 }
 
 export function writableCatalog(user: CatalogUser) {
-  return { OR: [{ userId: user.id, isShared: false }, ...(user.role === "ADMIN" ? [{ isShared: true }] : [])] };
+  return user.role === "ADMIN" ? {} : { OR: [{ userId: user.id, isShared: false }] };
 }
 
 export function canEditCatalog(record: { userId: string; isShared: boolean }, user: CatalogUser) {
-  return record.isShared ? user.role === "ADMIN" : record.userId === user.id;
+  return user.role === "ADMIN" || (!record.isShared && record.userId === user.id);
 }
 
-export function catalogReferences(userId: string, isShared: boolean) {
-  return isShared ? { isShared: true } : readableCatalog(userId);
+export function catalogReferences(user: string | CatalogUser, isShared: boolean) {
+  return isShared ? { isShared: true } : readableCatalog(user);
 }

@@ -26,10 +26,15 @@ const groups = [
     { href: "/modules", label: "Формулы", icon: FormulaIcon },
   ] },
   { title: "Рабочее пространство", pages: [
+    { href: "/archive", label: "Удалённые", icon: HistoryIcon },
     { href: "/history", label: "История", icon: HistoryIcon },
     { href: "/notifications", label: "События", icon: NotificationIcon },
     { href: "/invoices", label: "Покупки", icon: PurchaseIcon },
     { href: "/info", label: "Справка", icon: HelpIcon },
+  ] },
+  { title: "Администрирование", admin: true, pages: [
+    { href: "/users", label: "Пользователи", icon: CustomerIcon },
+    { href: "/audit", label: "Журнал действий", icon: HistoryIcon },
   ] },
 ] as const;
 
@@ -37,10 +42,10 @@ function isActive(pathname: string, href: string) {
   return pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 }
 
-export function AppNavigation({ onNavigate }: { onNavigate?: () => void }) {
+export function AppNavigation({ onNavigate, isAdmin = false }: { onNavigate?: () => void; isAdmin?: boolean }) {
   const pathname = usePathname();
   return <nav className={ui("appNavigation")} aria-label="Разделы приложения">
-    {groups.map(group => <div key={group.title} className={ui("navGroup")}>
+    {groups.filter(group => !("admin" in group) || isAdmin).map(group => <div key={group.title} className={ui("navGroup")}>
       <div className={ui("navGroupLabel")}>{group.title}</div>
       {group.pages.map(({ href, label, icon: Icon }) => <Link key={href}
         className={ui("navLink", isActive(pathname, href) && "navLinkActive")}
@@ -58,14 +63,14 @@ export function AppBreadcrumb() {
   return <div className={ui("appBreadcrumb")}><span>{group?.title}</span><span aria-hidden="true">/</span><strong>{page?.label ?? "Рабочий кабинет"}</strong></div>;
 }
 
-export function MobileNavigation() {
+export function MobileNavigation({ isAdmin = false }: { isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   return <div className={ui("mobileNavigation")}>
     <Button type="button" variant="ghost" aria-label="Открыть меню" aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(true)}><MenuIcon size={22} aria-hidden="true" /></Button>
     <Brand caption="" />
     <Modal isOpen={open} onClose={() => setOpen(false)} showCloseButton title="Разделы приложения">
       <h2>Разделы приложения</h2>
-      <AppNavigation onNavigate={() => setOpen(false)} />
+      <AppNavigation isAdmin={isAdmin} onNavigate={() => setOpen(false)} />
     </Modal>
   </div>;
 }

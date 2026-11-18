@@ -21,6 +21,7 @@ export type SexStandardValue = {
 };
 
 export type BreedStandardsValue = {
+  userId: string;
   breed: { id: string; nameRu: string; nameEn: string; species: Species };
   standards: SexStandardValue[];
 };

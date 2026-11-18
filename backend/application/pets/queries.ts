@@ -1,3 +1,4 @@
+import { ownerScope } from "@backend/domain/accounts/policy";
 import "server-only";
 
 import { getCurrentUser } from "@backend/auth/session";
@@ -7,7 +8,7 @@ export async function getPetCard(id: string) {
   const user = await getCurrentUser();
   if (!user) return null;
   return prisma.pet.findFirst({
-    where: { id, userId: user.id },
+    where: { id, ...ownerScope(user) },
     select: {
       id: true,
       name: true,

@@ -36,6 +36,8 @@ services:
     restart: unless-stopped
     env_file:
       - ${ENV_FILE:-.env.production}
+    environment:
+      TRUST_PROXY: "true"
     depends_on:
       migrate:
         condition: service_completed_successfully

@@ -1,3 +1,4 @@
+import { ownerScope } from "@backend/domain/accounts/policy";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { calculateEnergy } from "@backend/domain/nutrition/calculator";
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
   try {
     const user = await requireUser(request);
     const rows = await prisma.calculation.findMany({
-      where: { userId: user.id },
+      where: { ...ownerScope(user) },
       include: { pet: { select: { name: true } }, module: { select: { name: true } }, nutrients: { include: { nutrient: true } } },
       orderBy: { createdAt: "desc" }, take: 50,
     });
@@ -48,13 +49,13 @@ export async function POST(request: Request) {
     const { save, breedId, sex, nutrients: submittedNutrients, adjustedEnergy: submittedEnergy, protein, fat, carbs, ...input } = parsed.data;
     if (submittedNutrients) {
       const nutrientIds = submittedNutrients.map((value) => value.nutrientId);
-      const visibleCount = await prisma.nutrient.count({ where: { id: { in: nutrientIds }, isReferenceOnly: false, ...readableCatalog(user.id) } });
+      const visibleCount = await prisma.nutrient.count({ where: { id: { in: nutrientIds }, isReferenceOnly: false, ...readableCatalog(user) } });
       if (visibleCount !== nutrientIds.length) return NextResponse.json({ error: "Нутриенты недоступны или повторяются" }, { status: 400 });
     }
     let effectiveBreedId = breedId;
     let effectiveSex = sex;
     if (input.petId) {
-      const pet = await prisma.pet.findFirst({ where: { id: input.petId, userId: user.id }, select: { id: true, breedId: true, sex: true } });
+      const pet = await prisma.pet.findFirst({ where: { id: input.petId, ...ownerScope(user) }, select: { id: true, breedId: true, sex: true } });
       if (!pet) return NextResponse.json({ error: "Питомец не найден" }, { status: 404 });
       effectiveBreedId = pet.breedId;
       effectiveSex = pet.sex;

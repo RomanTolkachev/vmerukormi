@@ -50,7 +50,7 @@ export async function PATCH(request: Request, { params }: ProductContext) {
     if (!parsed.success) return Response.json({ error: "Проверьте параметры продукта" }, { status: 400 });
     const existing = await ownedProduct(id, user);
     if (!existing) return Response.json({ error: "Продукт не найден или недоступен для изменения" }, { status: 404 });
-    const references = catalogReferences(user.id, existing.isShared);
+    const references = catalogReferences(user, existing.isShared);
     if (parsed.data.groupId) {
       const group = await prisma.productGroup.findFirst({ where: { id: parsed.data.groupId, ...references }, select: { id: true } });
       if (!group) return Response.json({ error: "Группа не найдена" }, { status: 404 });
@@ -65,7 +65,7 @@ export async function PATCH(request: Request, { params }: ProductContext) {
       const product = await tx.product.update({ where: { id }, data: productData });
       await tx.productTagLink.deleteMany({ where: { productId: id } });
       if (uniqueTagIds.length) {
-        await tx.productTagLink.createMany({ data: uniqueTagIds.map((tagId) => ({ productId: id, tagId })) });
+        for (const tagId of uniqueTagIds) await tx.productTagLink.upsert({ where: { productId_tagId: { productId: id, tagId } }, create: { productId: id, tagId }, update: { deletedAt: null, deletedById: null } });
       }
       return product;
     });
@@ -83,12 +83,12 @@ export async function POST_NUTRIENT(request: Request, { params }: ProductContext
     if (!parsed.success) return Response.json({ error: "Проверьте нутриент и количество" }, { status: 400 });
     const product = await ownedProduct(id, user);
     if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });
-    const nutrient = await prisma.nutrient.findFirst({ where: { id: parsed.data.nutrientId, isReferenceOnly: false, ...catalogReferences(user.id, product.isShared) }, select: { id: true } });
+    const nutrient = await prisma.nutrient.findFirst({ where: { id: parsed.data.nutrientId, isReferenceOnly: false, ...catalogReferences(user, product.isShared) }, select: { id: true } });
     if (!nutrient) return Response.json({ error: "Нутриент не найден" }, { status: 404 });
     await prisma.productNutrient.upsert({
       where: { productId_nutrientId: { productId: id, nutrientId: parsed.data.nutrientId } },
       create: { productId: id, ...parsed.data },
-      update: { amount: parsed.data.amount },
+      update: { amount: parsed.data.amount, deletedAt: null, deletedById: null },
     });
     return Response.json(await nutrientValue(id, parsed.data.nutrientId), { status: 201 });
   } catch (error) {
@@ -105,7 +105,7 @@ export async function PATCH_NUTRIENT(request: Request, { params }: NutrientConte
     const product = await ownedProduct(id, user);
     if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });
     const updated = await prisma.productNutrient.updateMany({
-      where: { productId: id, nutrientId, nutrient: { ...catalogReferences(user.id, product.isShared), isReferenceOnly: false } },
+      where: { productId: id, nutrientId, nutrient: { ...catalogReferences(user, product.isShared), isReferenceOnly: false } },
       data: { amount: amount.data },
     });
     if (!updated.count) return Response.json({ error: "Нутриент не найден в продукте" }, { status: 404 });
@@ -122,7 +122,7 @@ export async function DELETE_NUTRIENT(request: Request, { params }: NutrientCont
     const product = await ownedProduct(id, user);
     if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });
     const deleted = await prisma.productNutrient.deleteMany({
-      where: { productId: id, nutrientId, nutrient: { ...catalogReferences(user.id, product.isShared), isReferenceOnly: false } },
+      where: { productId: id, nutrientId, nutrient: { ...catalogReferences(user, product.isShared), isReferenceOnly: false } },
     });
     if (!deleted.count) return Response.json({ error: "Нутриент не найден в продукте" }, { status: 404 });
     return new Response(null, { status: 204 });
@@ -157,7 +157,7 @@ export async function PATCH_MEASURE(request: Request, { params }: MeasureContext
     const parsed = measureSchema.safeParse(await request.json());
     if (!parsed.success) return Response.json({ error: "Проверьте название и вес меры" }, { status: 400 });
     const existing = await prisma.productMeasure.findFirst({
-      where: { id: measureId, productId: id, product: writableCatalog(user) },
+      where: { id: measureId, productId: id, product: { ...writableCatalog(user), deletedAt: null } },
       select: { id: true },
     });
     if (!existing) return Response.json({ error: "Мера не найдена" }, { status: 404 });
@@ -168,11 +168,6 @@ export async function PATCH_MEASURE(request: Request, { params }: MeasureContext
     if (duplicate) return Response.json({ error: "Такая мера уже добавлена" }, { status: 409 });
     const measure = await prisma.$transaction(async (tx) => {
       const updated = await tx.productMeasure.update({ where: { id: measureId }, data: parsed.data });
-      const rationItems = await tx.rationItem.findMany({ where: { measureId }, select: { id: true, quantity: true } });
-      await Promise.all(rationItems.map((item) => tx.rationItem.update({
-        where: { id: item.id },
-        data: { grams: item.quantity * updated.grams },
-      })));
       return updated;
     });
     return Response.json(measure);
@@ -186,7 +181,7 @@ export async function DELETE_MEASURE(request: Request, { params }: MeasureContex
     const user = await requireUser(request, { csrf: true });
     const { id, measureId } = await params;
     const deleted = await prisma.productMeasure.deleteMany({
-      where: { id: measureId, productId: id, product: writableCatalog(user) },
+      where: { id: measureId, productId: id, product: { ...writableCatalog(user), deletedAt: null } },
     });
     if (!deleted.count) return Response.json({ error: "Мера не найдена" }, { status: 404 });
     return new Response(null, { status: 204 });

@@ -6,6 +6,7 @@ export function updateBreedStandards(value: BreedStandardsValue) {
     method: "PUT",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
+      userId: value.userId,
       standards: value.standards.map((standard) => ({
         ...standard,
         nutrients: standard.nutrients

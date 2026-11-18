@@ -7,10 +7,9 @@ import { readableCatalog, catalogReferences, canEditCatalog } from "@backend/dom
 export async function getProductEditorData(id: string) {
   const user = await getCurrentUser();
   if (!user) return null;
-  const userId = user.id;
 
   const product = await prisma.product.findFirst({
-    where: { id, ...readableCatalog(userId) },
+    where: { id, deletedAt: {}, ...readableCatalog(user) },
     include: {
       group: { select: { id: true, name: true } },
       nutrients: {
@@ -23,7 +22,7 @@ export async function getProductEditorData(id: string) {
     },
   });
   if (!product) return null;
-  const references = catalogReferences(userId, product.isShared);
+  const references = catalogReferences(user, product.isShared);
   const [nutrients, groups, tags] = await Promise.all([
     prisma.nutrient.findMany({
       where: { ...references, isReferenceOnly: false },
@@ -44,7 +43,8 @@ export async function getProductEditorData(id: string) {
     product: {
       id: product.id,
       isShared: product.isShared,
-      canEdit: canEditCatalog(product, user),
+      canEdit: !product.deletedAt && canEditCatalog(product, user),
+      deletedAt: product.deletedAt?.toISOString() ?? null,
       source: product.source,
       sourceExternalId: product.sourceExternalId,
       name: product.name,

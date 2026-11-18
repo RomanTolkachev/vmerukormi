@@ -7,6 +7,6 @@ import { AppEntityCreationProvider } from "@/app/providers/entity-creation-provi
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  return <AppEntityCreationProvider isAdmin={user.role === "ADMIN"}><AppShell username={user.username}>{children}</AppShell></AppEntityCreationProvider>;
+  return <AppEntityCreationProvider isAdmin={user.role === "ADMIN"}><AppShell username={user.name} isAdmin={user.role === "ADMIN"}>{children}</AppShell></AppEntityCreationProvider>;
 }
 

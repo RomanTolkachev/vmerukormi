@@ -12,10 +12,12 @@ test("shared records are readable but not writable by regular users, even the ow
   assert.equal(canEditCatalog({ userId: "bob", isShared: false }, user), false);
 });
 
-test("admin can edit shared catalog, not other users' private records", () => {
+test("admin can edit shared catalog and other users' private records", () => {
   const admin = { id: "admin", role: "ADMIN" };
+  assert.deepEqual(readableCatalog(admin), {});
+  assert.deepEqual(writableCatalog(admin), {});
   assert.equal(canEditCatalog({ userId: "alice", isShared: true }, admin), true);
-  assert.equal(canEditCatalog({ userId: "alice", isShared: false }, admin), false);
+  assert.equal(canEditCatalog({ userId: "alice", isShared: false }, admin), true);
   assert.deepEqual(catalogReferences("admin", true), { isShared: true });
   assert.deepEqual(catalogReferences("alice", false), readableCatalog("alice"));
 });

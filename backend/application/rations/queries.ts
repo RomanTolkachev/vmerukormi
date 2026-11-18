@@ -1,4 +1,6 @@
 import "server-only";
+import { ownerScope } from "@backend/domain/accounts/policy";
+import { applyRationSnapshot } from "@backend/domain/rations/snapshot";
 import { readableCatalog } from "@backend/domain/catalog/access";
 
 import { getCurrentUser } from "@backend/auth/session";
@@ -81,21 +83,22 @@ function calculationOption(calculation: {
 }
 
 export async function getRationsPageData() {
-  const userId = (await getCurrentUser())?.id;
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) return { rations: [] as RationListEntry[], customers: [] as RationCustomerOption[], pets: [] as RationPetOption[], calculations: [] as RationCalculationOption[] };
 
   const [rations, customers, pets, calculations] = await Promise.all([
     prisma.ration.findMany({
-      where: { userId },
+      where: { ...ownerScope(user!) },
       include: {
         pet: { include: { customer: { select: { name: true } } } },
         items: { include: { product: true } },
       },
       orderBy: { updatedAt: "desc" },
     }),
-    prisma.customer.findMany({ where: { userId }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.customer.findMany({ where: { ...ownerScope(user!) }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     prisma.pet.findMany({
-      where: { userId },
+      where: { ...ownerScope(user!) },
       include: {
         customer: { select: { name: true } },
         calculations: {
@@ -107,7 +110,7 @@ export async function getRationsPageData() {
       orderBy: { name: "asc" },
     }),
     prisma.calculation.findMany({
-      where: { userId },
+      where: { ...ownerScope(user!) },
       include: { pet: { select: { name: true } }, module: { select: { name: true } }, nutrients: { include: { nutrient: true } } },
       orderBy: { createdAt: "desc" },
       take: 100,
@@ -119,7 +122,7 @@ export async function getRationsPageData() {
     pets: pets.map(petOption),
     calculations: calculations.map(calculationOption),
     rations: rations.map((ration): RationListEntry => {
-      const enabledItems = ration.items.filter((item) => item.enabled);
+      const enabledItems = ration.items.map(applyRationSnapshot).filter((item) => item.enabled);
       const totalGrams = enabledItems.reduce((sum, item) => sum + item.grams, 0);
       const weeklyCalories = enabledItems.reduce(
         (sum, item) =>
@@ -152,11 +155,12 @@ export async function getRationsPageData() {
 }
 
 export async function getRationEditorData(id: string) {
-  const userId = (await getCurrentUser())?.id;
+  const user = await getCurrentUser();
+  const userId = user?.id;
   if (!userId) return null;
 
   const ration = await prisma.ration.findFirst({
-    where: { id, userId },
+    where: { id, ...ownerScope(user!) },
     include: {
       pet: { include: { customer: { select: { name: true } } } },
       calculation: { include: { pet: { select: { name: true } }, module: { select: { name: true } }, nutrients: { include: { nutrient: true } } } },
@@ -173,16 +177,16 @@ export async function getRationEditorData(id: string) {
 
   const [products, nutrients] = await Promise.all([
     prisma.product.findMany({
-      where: { ...readableCatalog(userId), archived: false },
+      where: { ...readableCatalog(user!), archived: false },
       include: productInclude,
       orderBy: { name: "asc" },
     }),
-    prisma.nutrient.findMany({ where: { ...readableCatalog(userId), isReferenceOnly: false }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
+    prisma.nutrient.findMany({ where: { ...readableCatalog(user!), isReferenceOnly: false }, orderBy: [{ category: "asc" }, { name: "asc" }] }),
   ]);
 
   const value: RationEditorValue = {
     ...serializeRationDetails(ration),
-    items: ration.items.map(
+    items: ration.items.map(applyRationSnapshot).map(
       (item): RationItem => ({
         id: item.id,
         productId: item.productId,

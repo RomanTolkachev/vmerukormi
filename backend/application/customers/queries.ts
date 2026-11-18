@@ -1,17 +1,14 @@
 import "server-only";
+import { ownerScope } from "@backend/domain/accounts/policy";
 
 import { getCurrentUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
 
-async function getUserId() {
-  return (await getCurrentUser())?.id ?? null;
-}
-
 export async function getCustomerHeader(id: string) {
-  const userId = await getUserId();
-  if (!userId) return null;
+  const user = await getCurrentUser();
+  if (!user) return null;
   return prisma.customer.findFirst({
-    where: { id, userId },
+    where: { id, ...ownerScope(user) },
     select: {
       id: true,
       name: true,
@@ -26,10 +23,10 @@ export async function getCustomerHeader(id: string) {
 }
 
 export async function getCustomerPets(customerId: string) {
-  const userId = await getUserId();
-  if (!userId) return [];
+  const user = await getCurrentUser();
+  if (!user) return [];
   return prisma.pet.findMany({
-    where: { customerId, userId },
+    where: { customerId, ...ownerScope(user) },
     include: {
       breed: { select: { nameRu: true } },
       _count: { select: { calculations: true, rations: true } },
@@ -39,10 +36,10 @@ export async function getCustomerPets(customerId: string) {
 }
 
 export async function getCustomerCalculations(customerId: string) {
-  const userId = await getUserId();
-  if (!userId) return [];
+  const user = await getCurrentUser();
+  if (!user) return [];
   return prisma.calculation.findMany({
-    where: { userId, pet: { customerId, userId } },
+    where: { ...ownerScope(user), pet: { customerId, ...ownerScope(user) } },
     include: {
       pet: { select: { id: true, name: true } },
       module: { select: { name: true } },
@@ -52,10 +49,10 @@ export async function getCustomerCalculations(customerId: string) {
 }
 
 export async function getCustomerRations(customerId: string) {
-  const userId = await getUserId();
-  if (!userId) return [];
+  const user = await getCurrentUser();
+  if (!user) return [];
   return prisma.ration.findMany({
-    where: { userId, pet: { customerId, userId } },
+    where: { ...ownerScope(user), pet: { customerId, ...ownerScope(user) } },
     include: {
       pet: { select: { id: true, name: true } },
       _count: { select: { items: true } },

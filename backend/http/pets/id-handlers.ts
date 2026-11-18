@@ -1,3 +1,4 @@
+import { ownerScope } from "@backend/domain/accounts/policy";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -21,7 +22,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params;
     const parsed = updateSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: "Некорректные данные" }, { status: 400 });
-    const pet = await prisma.pet.findFirst({ where: { id, userId: user.id }, select: { species: true } });
+    const pet = await prisma.pet.findFirst({ where: { id, ...ownerScope(user) }, select: { species: true } });
     if (!pet) return NextResponse.json({ error: "Питомец не найден" }, { status: 404 });
     if (parsed.data.species && parsed.data.species !== pet.species && parsed.data.breedId === undefined) {
       parsed.data.breedId = null;
@@ -33,12 +34,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       }
     }
     if (parsed.data.customerId) {
-      const customer = await prisma.customer.findFirst({ where: { id: parsed.data.customerId, userId: user.id }, select: { id: true } });
+      const customer = await prisma.customer.findFirst({ where: { id: parsed.data.customerId, ...ownerScope(user) }, select: { id: true } });
       if (!customer) return NextResponse.json({ error: "Клиент не найден" }, { status: 404 });
     }
-    const result = await prisma.pet.updateMany({ where: { id, userId: user.id }, data: parsed.data });
+    const result = await prisma.pet.updateMany({ where: { id, ...ownerScope(user) }, data: parsed.data });
     if (!result.count) return NextResponse.json({ error: "Питомец не найден" }, { status: 404 });
-    return NextResponse.json(await prisma.pet.findFirst({ where: { id, userId: user.id }, include: { breed: true, customer: { select: { id: true, name: true } } } }));
+    return NextResponse.json(await prisma.pet.findFirst({ where: { id, ...ownerScope(user) }, include: { breed: true, customer: { select: { id: true, name: true } } } }));
   } catch (error) {
     return authErrorResponse(error);
   }
@@ -48,7 +49,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   try {
     const user = await requireUser(request, { csrf: true });
     const { id } = await params;
-    const result = await prisma.pet.deleteMany({ where: { id, userId: user.id } });
+    const result = await prisma.pet.deleteMany({ where: { id, ...ownerScope(user) } });
     if (!result.count) return NextResponse.json({ error: "Питомец не найден" }, { status: 404 });
     return new NextResponse(null, { status: 204 });
   } catch (error) {

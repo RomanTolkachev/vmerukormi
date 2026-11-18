@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWatch } from "react-hook-form";
 import Link from "next/link";
@@ -11,19 +11,24 @@ import { deleteProduct } from "@/features/delete-product";
 import { useEntityCreation, type EntityKind } from "@/features/create-entity";
 import { ui } from "@/shared/ui/styles";
 import { UniversalTable, useTableQuery, type TableBaseQuery } from "@/shared/ui/universal-table";
-import { Button, ButtonLink, Select } from "@/shared/ui/controls";
+import { Button, ButtonLink, Input, Select } from "@/shared/ui/controls";
 import { AddIcon } from "@/shared/ui/icons";
+import { FormDialog } from "@/shared/ui/form-dialog";
+import { requestJson } from "@/shared/api";
+import { RequiredMark } from "@/shared/ui/required-mark";
+
 export type WorkspaceTab = "customers" | "products" | "nutrients" | "rations" | "notifications" | "invoices" | "standards";
 const labels: Record<WorkspaceTab, string> = {
   customers: "Клиенты и их питомцы", products: "Продукты и добавки", nutrients: "Справочник нутриентов", rations: "Рационы",
   notifications: "Уведомления", invoices: "Счета и покупки", standards: "Эталонные значения пород",
 };
 export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceTab; tags?: { id: string; name: string }[]; isAdmin?: boolean }) {
+  const [editingNutrient, setEditingNutrient] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState("");
   const router = useRouter();
   const queryClient = useQueryClient();
   const { open } = useEntityCreation();
-  const canCreate = tab !== "invoices" && tab !== "standards";
+  const canCreate = tab !== "invoices" && tab !== "standards" && (tab !== "nutrients" || isAdmin);
   const cardPath = ["customers", "products", "standards", "rations"].includes(tab) ? tab : null;
   async function remove(id: string, invalidate: () => void) {
     if (!window.confirm("Удалить запись?")) return;
@@ -57,10 +62,11 @@ export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceT
         getRowId={row => String(row.id)}
         cardsView={{ render: (context, row) => <article className={ui("card")}><div className={ui("cardBody")}><h3>{String(row.name ?? row.nameRu ?? row.title ?? row.number)}</h3>{cardPath && <Link href={`/${cardPath}/${row.id}`}>Открыть →</Link>}<p>{String(row.category ?? row.groupName ?? row.body ?? "")}</p></div></article> }}
         actionCell={(context, row) => <div className={ui("tableActions")}>
+          {tab === "nutrients" && isAdmin && <Button onClick={() => setEditingNutrient(row)}>Редактировать</Button>}
           {cardPath && <ButtonLink href={`/${cardPath}/${row.id}`}>Открыть</ButtonLink>}
-          {tab !== "invoices" && tab !== "standards" && <Button className={ui("danger")} disabled={row.canEdit === false || (tab === "nutrients" && row.isShared === true && !isAdmin)} onClick={() => void remove(String(row.id), context.invalidateRows)}>Удалить</Button>}
+          {tab !== "invoices" && tab !== "standards" && (tab !== "nutrients" || isAdmin) && <Button className={ui("danger")} disabled={row.canEdit === false || (tab === "nutrients" && row.isShared === true && !isAdmin)} onClick={() => void remove(String(row.id), context.invalidateRows)}>Удалить</Button>}
         </div>}
-        actionCellWidth={170}
+        actionCellWidth={tab === "nutrients" ? 260 : 170}
         columnSizeData={{ name: 270, nameRu: 240, phone: 195, kind: 110, groupName: 170, tagNames: 220, catalogLabel: 110, calories: 120, protein: 100, fat: 100 }}
         formatCellValue={(column, value) => {
           if (column.endsWith("At") && value) return new Date(String(value)).toLocaleString("ru-RU");
@@ -72,6 +78,7 @@ export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceT
         }}
       />
     </div></section>
+    {editingNutrient && <NutrientDialog value={editingNutrient} onClose={() => setEditingNutrient(null)} onSaved={() => { setEditingNutrient(null); void queryClient.invalidateQueries({ queryKey: ["workspace-nutrients"] }); }} />}
   </div>;
 }
 
@@ -81,4 +88,27 @@ function TagFilter({ tags, draft = false }: { tags: { id: string; name: string }
   return <Select aria-label="Фильтр по тегу" className={ui("tagFilter")} value={draft ? draftValue : query.committed.tagId} onChange={event => draft ? query.setField("tagId", event.target.value) : query.submit({ patch: { tagId: event.target.value }, resetPage: true })}>
     <option value="">Все теги</option>{tags.map(tag => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
   </Select>;
+}
+
+function NutrientDialog({ value, onClose, onSaved }: { value: Record<string, unknown>; onClose: () => void; onSaved: () => void }) {
+  const [pending, setPending] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [error, setError] = useState("");
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setPending(true);
+    try {
+      await requestJson("/api/workspace/nutrients/" + value.id, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(form)) });
+      onSaved();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : "Не удалось сохранить нутриент"); }
+    finally { setPending(false); }
+  }
+  return <FormDialog title="Редактировать нутриент" onClose={onClose} dirty={dirty} busy={pending} discardTitle="Отменить изменения?" discardLabel="Отменить изменения">
+    <form className={ui("loginForm")} onSubmit={submit} onChange={() => setDirty(true)}>
+      {[["name", "Название"], ["code", "Код"], ["category", "Категория"], ["unit", "Единица измерения"]].map(([name, label]) => <label key={name} className={ui("field")}><span>{label}<RequiredMark /></span><Input name={name} required defaultValue={String(value[name] ?? "")} /></label>)}
+      {error && <p role="alert" className={ui("error")}>{error}</p>}
+      <Button type="submit" variant="primary" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить"}</Button>
+    </form>
+  </FormDialog>;
 }

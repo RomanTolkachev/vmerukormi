@@ -186,6 +186,7 @@ export function ProductEditor({
       <div>
         <Link className={ui("backLink")} href="/products">← Все продукты</Link>
         <h1>{product.name}</h1>
+        {product.deletedAt && <p role="status" className={ui("error")}>Продукт удалён. Он сохранён в существующих рационах. Для редактирования восстановите его в разделе «Удалённые».</p>}
         <div className={ui("meta")}>Пищевая ценность указана на {product.baseQuantity} {product.unit}</div>
         {product.isShared && <p className={ui("meta")}>Общий каталог. {product.canEdit ? "Вы можете редактировать эту запись." : "Редактирование доступно администратору."}</p>}
         {product.source === "health-diet" && product.sourceExternalId && <a href={`https://health-diet.ru/base_of_food/sostav/${product.sourceExternalId}.php`} target="_blank" rel="noreferrer">Источник состава: health-diet.ru</a>}

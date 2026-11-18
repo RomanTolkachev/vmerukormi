@@ -1,3 +1,4 @@
+import { ownerScope } from "@backend/domain/accounts/policy";
 import { z } from "zod";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
   try {
     const user = await requireUser(request);
     const rations = await prisma.ration.findMany({
-      where: { userId: user.id },
+      where: { ...ownerScope(user) },
       include: {
         pet: { select: { id: true, name: true } },
         _count: { select: { items: true } },
@@ -42,13 +43,13 @@ export async function POST(request: Request) {
     let targetEnergy = input.targetEnergy ?? 0;
     let petId = input.petId || null;
     if (input.calculationId) {
-      const calculation = await prisma.calculation.findFirst({ where: { id: input.calculationId, userId: user.id }, select: { id: true, petId: true, adjustedEnergy: true } });
+      const calculation = await prisma.calculation.findFirst({ where: { id: input.calculationId, ...ownerScope(user) }, select: { id: true, petId: true, adjustedEnergy: true } });
       if (!calculation) return Response.json({ error: "Расчёт не найден" }, { status: 404 });
       petId = calculation.petId;
       targetEnergy = input.targetEnergy ?? calculation.adjustedEnergy;
     } else if (input.petId) {
       const pet = await prisma.pet.findFirst({
-        where: { id: input.petId, userId: user.id },
+        where: { id: input.petId, ...ownerScope(user) },
         select: {
           id: true,
           calculations: {

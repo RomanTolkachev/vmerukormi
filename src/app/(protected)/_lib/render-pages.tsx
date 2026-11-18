@@ -15,6 +15,6 @@ export async function DashboardPage({ tab, selectedPetId, selectedCustomerId }: 
 
 export async function WorkspacePage({ tab }: { tab: WorkspaceTab }) {
   const user = await getCurrentUser();
-  const tags = user && tab === "products" ? await prisma.productTag.findMany({ where: readableCatalog(user.id), select: { id: true, name: true }, orderBy: { name: "asc" } }) : [];
+  const tags = user && tab === "products" ? await prisma.productTag.findMany({ where: readableCatalog(user), select: { id: true, name: true }, orderBy: { name: "asc" } }) : [];
   return <Workspace tab={tab} tags={tags} isAdmin={user?.role === "ADMIN"} />;
 }

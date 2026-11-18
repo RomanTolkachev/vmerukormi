@@ -5,15 +5,15 @@ import { AppNavigation, AppBreadcrumb, MobileNavigation } from "@/app/ui/app-nav
 import { Brand } from "@/shared/ui/brand";
 import { ui } from "@/shared/ui/styles";
 
-export function AppShell({ children, username }: { children: ReactNode; username: string }) {
+export function AppShell({ children, username, isAdmin = false }: { children: ReactNode; username: string; isAdmin?: boolean }) {
   return <main className={ui("shell")}>
     <a className={ui("skipLink")} href="#main-content">Перейти к содержимому</a>
     <aside className={ui("sidebar")}>
       <Link href="/" className={ui("brandLink")} aria-label="VetEnergy — расчёт рациона"><Brand /></Link>
-      <AppNavigation />
+      <AppNavigation isAdmin={isAdmin} />
     </aside>
     <div className={ui("shellWorkspace")}>
-      <header className={ui("topbar")}><MobileNavigation /><AppBreadcrumb /><AccountMenu username={username} /></header>
+      <header className={ui("topbar")}><MobileNavigation isAdmin={isAdmin} /><AppBreadcrumb /><AccountMenu username={username} /></header>
       <div className={ui("content")} id="main-content" tabIndex={-1}><div className={ui("pageViewport")}>{children}</div></div>
     </div>
   </main>;

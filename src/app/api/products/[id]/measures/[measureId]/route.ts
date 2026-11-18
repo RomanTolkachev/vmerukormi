@@ -1,1 +1,5 @@
-export { PATCH_MEASURE as PATCH, DELETE_MEASURE as DELETE } from "@backend/http/products/handlers";
+import { withRequestAudit } from "@backend/http/request-handler";
+import { PATCH_MEASURE, DELETE_MEASURE } from "@backend/http/products/handlers";
+
+export const PATCH = withRequestAudit(PATCH_MEASURE);
+export const DELETE = withRequestAudit(DELETE_MEASURE);

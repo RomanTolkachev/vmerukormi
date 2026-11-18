@@ -13,6 +13,7 @@ export type ProductMeasureValue = {
 };
 
 export type EditableProduct = {
+  deletedAt?: string | null;
   isShared: boolean;
   canEdit: boolean;
   source: string | null;

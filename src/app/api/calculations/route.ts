@@ -1,1 +1,5 @@
-export { GET, POST } from "@backend/http/calculations/handlers";
+import { withRequestAudit } from "@backend/http/request-handler";
+import { GET as handleGET, POST as handlePOST } from "@backend/http/calculations/handlers";
+
+export const GET = withRequestAudit(handleGET);
+export const POST = withRequestAudit(handlePOST);

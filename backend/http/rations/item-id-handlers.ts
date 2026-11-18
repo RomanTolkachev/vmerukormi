@@ -1,3 +1,5 @@
+import { createProductSnapshot, readProductSnapshot, applyRationSnapshot } from "@backend/domain/rations/snapshot";
+import { ownerScope } from "@backend/domain/accounts/policy";
 import { z } from "zod";
 import { readableCatalog } from "@backend/domain/catalog/access";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
@@ -24,52 +26,36 @@ export async function PATCH(request: Request, { params }: Context) {
       return Response.json({ error: "Проверьте параметры позиции" }, { status: 400 });
     }
     const existing = await prisma.rationItem.findFirst({
-      where: { id: itemId, rationId: id, ration: { userId: user.id } },
+      where: { id: itemId, rationId: id, ration: { ...ownerScope(user), deletedAt: null } },
       include: { ration: { select: { mode: true } } },
     });
     if (!existing) return Response.json({ error: "Позиция не найдена" }, { status: 404 });
 
-    const productId = parsed.data.productId ?? existing.productId;
-    const product = await prisma.product.findFirst({
-      where: { id: productId, ...readableCatalog(user.id), archived: false },
-      include: { measures: true },
-    });
-    if (!product) return Response.json({ error: "Продукт не найден" }, { status: 404 });
-
-    const measureId =
-      parsed.data.measureId !== undefined
-        ? parsed.data.measureId
-        : parsed.data.productId && parsed.data.productId !== existing.productId
-          ? null
-          : existing.measureId;
-    const measure = measureId
-      ? product.measures.find((item) => item.id === measureId)
-      : null;
-    if (measureId && !measure) {
-      return Response.json({ error: "Мера не относится к продукту" }, { status: 400 });
-    }
+    const changedProduct = Boolean(parsed.data.productId && parsed.data.productId !== existing.productId);
+    const saved = readProductSnapshot(existing.productSnapshot);
+    const selected = changedProduct ? await prisma.product.findFirst({
+      where: { id: parsed.data.productId, ...readableCatalog(user), archived: false },
+      include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } },
+    }) : null;
+    if (changedProduct && !selected) return Response.json({ error: "Продукт не найден" }, { status: 404 });
+    const product = selected ?? saved?.product;
+    if (!product) return Response.json({ error: "Не найден сохранённый состав позиции" }, { status: 409 });
+    const measureId = parsed.data.measureId !== undefined ? parsed.data.measureId : changedProduct ? null : existing.measureId;
+    const measure = measureId ? (!changedProduct && saved?.measure?.id === measureId ? saved.measure : product.measures.find(value => value.id === measureId)) : null;
+    if (measureId && !measure) return Response.json({ error: "Мера не относится к сохранённому продукту" }, { status: 400 });
     const quantity = parsed.data.quantity ?? existing.quantity;
     const item = await prisma.rationItem.update({
       where: { id: itemId },
       data: {
-        productId,
-        measureId: measure?.id ?? null,
-        quantity,
-        grams: measure ? measure.grams * quantity : quantity,
-        day:
-          existing.ration.mode === "DAILY"
-            ? 1
-            : parsed.data.day ?? existing.day,
+        productId: product.id, measureId: measure?.id ?? null,
+        productSnapshot: createProductSnapshot(product, measure ?? null),
+        quantity, grams: quantity * (measure?.grams ?? 1),
+        day: existing.ration.mode === "DAILY" ? 1 : parsed.data.day ?? existing.day,
         enabled: parsed.data.enabled,
       },
-      include: {
-        measure: true,
-        product: {
-          include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } },
-        },
-      },
+      include: { measure: true, product: { include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } } } },
     });
-    return Response.json(item);
+    return Response.json(applyRationSnapshot(item));
   } catch (error) {
     return authErrorResponse(error);
   }
@@ -80,7 +66,7 @@ export async function DELETE(request: Request, { params }: Context) {
     const user = await requireUser(request, { csrf: true });
     const { id, itemId } = await params;
     const existing = await prisma.rationItem.findFirst({
-      where: { id: itemId, rationId: id, ration: { userId: user.id } },
+      where: { id: itemId, rationId: id, ration: { ...ownerScope(user), deletedAt: null } },
       select: { id: true },
     });
     if (!existing) return Response.json({ error: "Позиция не найдена" }, { status: 404 });

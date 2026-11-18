@@ -65,6 +65,7 @@ export type RationProductNutrient = {
 };
 
 export type RationProduct = {
+  deletedAt?: string | Date | null;
   id: string;
   name: string;
   baseQuantity: number;

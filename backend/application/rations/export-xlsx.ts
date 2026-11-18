@@ -1,4 +1,6 @@
 import "server-only";
+import { ownerScope, type AccessUser } from "@backend/domain/accounts/policy";
+import { applyRationSnapshot } from "@backend/domain/rations/snapshot";
 
 import { readableCatalog } from "@backend/domain/catalog/access";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -9,9 +11,10 @@ function safeFilePart(value: string) {
     .replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "ration";
 }
 
-export async function exportRationXlsx(userId: string, rationId: string) {
+export async function exportRationXlsx(account: string | AccessUser, rationId: string) {
+  const user = typeof account === "string" ? { id: account, role: "USER" } : account;
   const ration = await prisma.ration.findFirst({
-    where: { id: rationId, userId },
+    where: { id: rationId, ...ownerScope(user) },
     include: {
       pet: { include: { breed: { select: { nameRu: true } }, customer: { select: { name: true } } } },
       items: {
@@ -33,8 +36,8 @@ export async function exportRationXlsx(userId: string, rationId: string) {
     },
   });
   if (!ration) return null;
-  const nutrients = await prisma.nutrient.findMany({ where: { ...readableCatalog(userId), isReferenceOnly: false } });
-  const workbook = buildRationWorkbook(ration, nutrients);
+  const nutrients = await prisma.nutrient.findMany({ where: { ...readableCatalog(user), isReferenceOnly: false } });
+  const workbook = buildRationWorkbook({ ...ration, items: ration.items.map(applyRationSnapshot) }, nutrients);
   return {
     buffer: new Uint8Array(await workbook.xlsx.writeBuffer()),
     fileName: `${safeFilePart(ration.name)}.xlsx`,

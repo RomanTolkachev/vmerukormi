@@ -1,7 +1,12 @@
+import { z } from "zod";
+import { applyRationSnapshot } from "@backend/domain/rations/snapshot";
+import { ownerScope, canManageNutrients } from "@backend/domain/accounts/policy";
 import { prisma } from "@backend/infrastructure/database/prisma";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
 
 import { readableCatalog, writableCatalog, canEditCatalog, catalogReferences } from "@backend/domain/catalog/access";
+
+const nutrientEditSchema = z.object({ code: z.string().trim().min(1).max(80), name: z.string().trim().min(1).max(180), category: z.string().trim().min(1).max(100), unit: z.string().trim().min(1).max(20) });
 
 const columns: Record<string, { name: string; label: string }[]> = {
   customers: [
@@ -108,7 +113,7 @@ export async function listWorkspace(
   const { resource } = await params;
   if (resource === "customers") {
     const rows = await prisma.customer.findMany({
-      where: { userId: user.id },
+      where: { ...ownerScope(user) },
       include: { _count: { select: { pets: true } } },
       orderBy: { updatedAt: "desc" },
     });
@@ -121,7 +126,7 @@ export async function listWorkspace(
   if (resource === "pets") {
     return page(
       await prisma.pet.findMany({
-        where: { userId: user.id },
+        where: { ...ownerScope(user) },
         include: { breed: true, customer: true },
         orderBy: { updatedAt: "desc" },
       }),
@@ -132,7 +137,7 @@ export async function listWorkspace(
   if (resource === "products") {
     const tagId = new URL(request.url).searchParams.get("tagId");
     const rows = await prisma.product.findMany({
-      where: { ...readableCatalog(user.id), ...(tagId ? { tags: { some: { tagId } } } : {}) },
+      where: { ...readableCatalog(user), ...(tagId ? { tags: { some: { tagId, deletedAt: null, tag: { deletedAt: null } } } } : {}) },
       include: { group: true, measures: true, tags: { include: { tag: true } } },
       orderBy: { name: "asc" },
     });
@@ -145,7 +150,7 @@ export async function listWorkspace(
   if (resource === "nutrients")
     return page(
       await prisma.nutrient.findMany({
-        where: { ...readableCatalog(user.id), isReferenceOnly: false },
+        where: { ...readableCatalog(user), isReferenceOnly: false },
         orderBy: [{ category: "asc" }, { name: "asc" }],
       }),
       request,
@@ -153,19 +158,19 @@ export async function listWorkspace(
     );
   if (resource === "rations") {
     const rows = await prisma.ration.findMany({
-      where: { userId: user.id },
+      where: { ...ownerScope(user) },
       include: { pet: true, items: { include: { product: true } } },
       orderBy: { updatedAt: "desc" },
     });
     return page(
-      rows.map((r) => ({ ...r, petName: r.pet?.name ?? "—" })),
+      rows.map((r) => ({ ...r, items: r.items.map(applyRationSnapshot), petName: r.pet?.name ?? "—" })),
       request,
       resource,
     );
   }
   if (resource === "notifications") {
     const rows = await prisma.notification.findMany({
-      where: { userId: user.id },
+      where: { ...ownerScope(user) },
       orderBy: { createdAt: "desc" },
     });
     return page(
@@ -176,13 +181,13 @@ export async function listWorkspace(
   }
   if (resource === "invoices")
     return page(
-      await prisma.invoice.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } }),
+      await prisma.invoice.findMany({ where: { ...ownerScope(user) }, orderBy: { createdAt: "desc" } }),
       request,
       resource,
     );
   if (resource === "groups")
     return Response.json(
-      await prisma.productGroup.findMany({ where: readableCatalog(user.id), orderBy: { name: "asc" } }),
+      await prisma.productGroup.findMany({ where: readableCatalog(user), orderBy: { name: "asc" } }),
     );
   if (resource === "standards") {
     const breeds = await prisma.breed.findMany({
@@ -216,18 +221,19 @@ export async function createWorkspace(
   const user = await requireUser(request, { csrf: true });
   const { resource } = await params;
   const b = await request.json();
-  const isShared = b.isShared === true;
+  const isShared = resource === "nutrients" || b.isShared === true;
+  if (resource === "nutrients" && !canManageNutrients(user)) return Response.json({ error: "Справочник нутриентов изменяет только администратор" }, { status: 403 });
   if (isShared && user.role !== "ADMIN") return Response.json({ error: "Общий каталог изменяет только администратор" }, { status: 403 });
   if (resource === "products" && b.groupId) {
-    const group = await prisma.productGroup.findFirst({ where: { id: b.groupId, ...catalogReferences(user.id, isShared) }, select: { id: true } });
+    const group = await prisma.productGroup.findFirst({ where: { id: b.groupId, ...catalogReferences(user, isShared) }, select: { id: true } });
     if (!group) return Response.json({ error: "Группа не найдена" }, { status: 404 });
   }
   if (resource === "rations" && b.petId) {
-    const pet = await prisma.pet.findFirst({ where: { id: b.petId, userId: user.id }, select: { id: true } });
+    const pet = await prisma.pet.findFirst({ where: { id: b.petId, ...ownerScope(user) }, select: { id: true } });
     if (!pet) return Response.json({ error: "Питомец не найден" }, { status: 404 });
   }
   if (resource === "groups" && b.parentId) {
-    const parent = await prisma.productGroup.findFirst({ where: { id: b.parentId, ...catalogReferences(user.id, isShared) }, select: { id: true } });
+    const parent = await prisma.productGroup.findFirst({ where: { id: b.parentId, ...catalogReferences(user, isShared) }, select: { id: true } });
     if (!parent) return Response.json({ error: "Родительская группа не найдена" }, { status: 404 });
   }
   if (resource === "customers")
@@ -316,9 +322,10 @@ export async function mutateWorkspace(
   const user = await requireUser(request, { csrf: true });
   const { resource, id } = await params;
   const b = request.method === "DELETE" ? {} : await request.json();
+  if (resource === "nutrients" && !canManageNutrients(user)) return Response.json({ error: "Справочник нутриентов изменяет только администратор" }, { status: 403 });
   if (request.method === "DELETE") {
     if (resource === "customers")
-      await prisma.customer.deleteMany({ where: { id, userId: user.id } });
+      await prisma.customer.deleteMany({ where: { id, ...ownerScope(user) } });
     else if (resource === "products")
       {
       const deleted = await prisma.product.deleteMany({ where: { id, ...writableCatalog(user) } });
@@ -330,19 +337,24 @@ export async function mutateWorkspace(
       if (!deleted.count) return Response.json({ error: "Нутриент недоступен для удаления" }, { status: 404 });
     }
     else if (resource === "rations")
-      await prisma.ration.deleteMany({ where: { id, userId: user.id } });
+      await prisma.ration.deleteMany({ where: { id, ...ownerScope(user) } });
     else if (resource === "notifications")
-      await prisma.notification.deleteMany({ where: { id, userId: user.id } });
+      await prisma.notification.deleteMany({ where: { id, ...ownerScope(user) } });
     else return Response.json({ message: "Unknown resource" }, { status: 404 });
     return new Response(null, { status: 204 });
+  }
+  if (resource === "nutrients") {
+    const parsed = nutrientEditSchema.safeParse(b);
+    if (!parsed.success) return Response.json({ error: "Проверьте параметры нутриента" }, { status: 400 });
+    return Response.json(await prisma.nutrient.update({ where: { id }, data: parsed.data }));
   }
   if (resource === "notifications")
     {
       const updated = await prisma.notification.updateMany({
-        where: { id, userId: user.id }, data: { readAt: b.read ? new Date() : null },
+        where: { id, ...ownerScope(user) }, data: { readAt: b.read ? new Date() : null },
       });
       if (!updated.count) return Response.json({ error: "Запись не найдена" }, { status: 404 });
-      return Response.json(await prisma.notification.findFirst({ where: { id, userId: user.id } }));
+      return Response.json(await prisma.notification.findFirst({ where: { id, ...ownerScope(user) } }));
     }
   return Response.json({ message: "Unsupported mutation" }, { status: 400 });
   } catch (error) {

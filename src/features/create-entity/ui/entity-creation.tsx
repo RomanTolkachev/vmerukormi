@@ -17,7 +17,7 @@ export function EntityCreationProvider({ children, isAdmin, renderRationDialog }
   const [dialogs, setDialogs] = useState<(CreationRequest & { id: number })[]>([]);
   const nextId = useRef(0);
   const open = (request: CreationRequest) => setDialogs(current => [...current, { ...request, id: ++nextId.current }]);
-  return <CreationContext.Provider value={{ open, isAdmin, labels: creationLabels }}>
+  return <CreationContext.Provider value={{ open, isAdmin, labels: { ...creationLabels, ...(!isAdmin ? { nutrients: undefined } : {}) } }}>
     {children}
     {dialogs.map(dialog => {
       const close = () => setDialogs(current => current.filter(entry => entry.id !== dialog.id));
@@ -115,7 +115,7 @@ function EntityCreationForm({ request, onClose }: { request: CreationRequest; on
             {preview && <section><h3>Результат расчёта</h3>{(["adjustedEnergy", "protein", "fat", "carbs"] as const).map((key, index) => <label className={ui("field")} key={key}><span>{["Энергия, ккал", "Белок, г", "Жир, г", "Углеводы, г"][index]}</span><Input className={ui("input")} type="number" min={key === "adjustedEnergy" ? 1 : 0} step="any" value={preview[key]} onChange={event => setPreview({ ...preview, [key]: Number(event.target.value) })} /></label>)}{preview.standardNutrients.map(nutrient => <label className={ui("field")} key={nutrient.nutrientId}><span>{nutrient.name}, {nutrient.unit}</span><Input className={ui("input")} type="number" min="0" step="any" value={nutrient.targetAmount ?? ""} onChange={event => setPreview({ ...preview, standardNutrients: preview.standardNutrients.map(item => item.nutrientId === nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) })} /></label>)}</section>}
           </>}
           {entity === "notifications" && <>{field("title", "Заголовок", "text", true)}{field("body", "Текст", "text", true)}</>}
-          {isAdmin && !request.shared && ["products", "groups", "tags", "nutrients"].includes(entity) && <label><Input type="checkbox" checked={shared} onChange={event => { set("isShared", event.target.checked); set("groupId", ""); }} /> Общий каталог для всех пользователей</label>}
+          {isAdmin && !request.shared && ["products", "groups", "tags"].includes(entity) && <label><Input type="checkbox" checked={shared} onChange={event => { set("isShared", event.target.checked); set("groupId", ""); }} /> Общий каталог для всех пользователей</label>}
           {error && <p role="alert" className={ui("error")}>{error}</p>}
           <Button type="submit" className={ui("primary")} disabled={busy}>{busy ? "Сохраняем…" : entity === "calculations" ? (preview ? "Сохранить расчёт" : "Рассчитать") : "Создать"}</Button>
         </div>
