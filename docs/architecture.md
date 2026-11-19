@@ -3,6 +3,11 @@
 Проект использует Feature-Sliced Design. Официальный skill установлен локально:
 `.agents/skills/feature-sliced-design/SKILL.md`.
 
+Источник: [feature-sliced/skills на skills.sh](https://www.skills.sh/feature-sliced/skills/feature-sliced-design),
+[репозиторий](https://github.com/feature-sliced/skills). 20 ноября 2026 года
+проектная копия сверена с ревизией `5e95aaebb84541742686e56352b7569acf4306f1`:
+все файлы совпадают. Повторная установка и дублирование skill не требуются.
+
 ## Слои
 
 - `src/app` — маршрутизация Next.js App Router, layout, оболочка, провайдеры и глобальные стили.

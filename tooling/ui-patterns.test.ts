@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { getModalStackSnapshot, getModalZIndex, pushModalStack, popModalStack, subscribeModalStack } from "../src/shared/ui/kit/modal/modalStack";
 import { createUniversalTableSavedQuery, readUniversalTableSavedQuery, mergeUniversalTableSavedQuery } from "../src/shared/ui/kit/universal-table/table-settings/savedState";
 import { mergeColumnsConfig } from "../src/shared/ui/kit/universal-table/lib/mergeColumnsConfig";
@@ -7,6 +8,18 @@ import { getTableOptions } from "../src/shared/ui/kit/universal-table/table-sett
 import { textButtonTypography } from "../src/shared/ui/kit/buttons/textButtonTypography";
 import { toast } from "sonner";
 import { notify } from "../src/shared/ui/notifications/api/notify";
+
+test("ordered table uses one table and native sticky scrolling without scroll synchronization", () => {
+  const component = readFileSync(new URL("../src/shared/ui/kit/universal-table/ordered-table/OrderedTable.tsx", import.meta.url), "utf8");
+  const stylesheet = readFileSync(new URL("../src/shared/ui/kit/universal-table/ordered-table/OrderedTable.module.css", import.meta.url), "utf8");
+  assert.equal((component.match(/<table\b/g) ?? []).length, 1);
+  assert.equal((component.match(/<thead\b/g) ?? []).length, 1);
+  assert.equal((component.match(/<tbody\b/g) ?? []).length, 1);
+  assert.doesNotMatch(component, /use(?:Layout)?Effect|ResizeObserver|requestAnimationFrame|onScroll|scrollLeft|scrollbarGutter/);
+  assert.match(stylesheet, /\.outer\s*\{[^}]*overflow:\s*auto;/);
+  assert.match(stylesheet, /\.header\s*\{[^}]*position:\s*sticky;[^}]*top:\s*0;/);
+  assert.doesNotMatch(stylesheet, /headerXScroll|bodyXScroll|headerGutter/);
+});
 
 test("shared notifications retain message deduplication and explicit identifiers", context => {
   const success = context.mock.method(toast, "success", () => "test");

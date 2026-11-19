@@ -1,84 +1,33 @@
-/* Тут разделены скролл-контейнеры для осей x и y, чтобы скроллбар по оси y был всегда статично справа.
-Нет другого паттерна, чтобы был вертикальный и горизонтальный скролл, чтобы при этом полоска скролла не заходила не хедер
-и была внутри body (а не справа).
-При этом, фактически thead и tbody живут в раздных table, и по оси x синхронизирутся через event listener на onscroll.
-Ширина колонок и синхронизация ширины колонок в thead и tbody задается через объект таблицы tanstack table. */
-
 .outer {
 	height: 100%;
 	width: 100%;
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	min-height: 0;
-}
-
-.headerWrapper {
-	flex: 0 0 auto;
-	display: flex;
-	flex-direction: row;
-	overflow: hidden;
-	position: sticky;
-	top: 0;
-	z-index: 2;
-	background: var(--universal-table-header-background, var(--table-header-bg));
-	border-bottom: 1.5px solid var(--table-resize-handle);
-	border-radius: 0;
-}
-
-.headerXScroll {
-	flex: 1;
 	min-width: 0;
-	overflow-x: auto;
-	overflow-y: hidden;
-	scrollbar-width: none;
-}
-
-/* Резервирует в header ширину vertical scrollbar body, чтобы колонки thead/tbody
- * совпадали по X (важно для pinned-right колонки). Ширина измеряется в JS как
- * `offsetWidth - clientWidth` body: 0 для overlay-скроллбаров (macOS) — заглушка
- * не рендерится; ширина скроллбара для классических (Windows/Linux).
- * Фон прозрачный (как у header), чтобы зона не выглядела отдельной ячейкой. */
-.headerGutter {
-	flex-shrink: 0;
-	background: transparent;
+	min-height: 0;
+	overflow: auto;
+	scrollbar-gutter: stable;
+	isolation: isolate;
+	background: var(--universal-table-body-background, transparent);
 }
 
 .header {
+	flex: 0 0 auto;
+	display: block;
+	position: sticky;
+	top: 0;
+	z-index: 3;
 	color: var(--table-header-text);
-}
-
-.headerXScroll::-webkit-scrollbar {
-	display: none;
-}
-
-.bodyWrapper {
-	flex: 1;
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	overflow-y: hidden;
-	overflow-x: hidden;
-	background: var(--universal-table-body-background, transparent);
-	min-height: 0;
-}
-
-.bodyXScroll {
-	overflow-x: auto;
-	/* Резервируем вертикальный скроллбар до загрузки шрифта/изменения высоты строк:
-	 * его появление не должно менять ширину резиновой колонки после первого кадра. */
-	overflow-y: scroll;
-	width: 100%;
-	height: 100%;
-	flex: 1;
-	min-height: 0;
+	background: var(--universal-table-header-background, var(--table-header-bg));
+	border-bottom: 1.5px solid var(--table-resize-handle);
 }
 
 .table {
-	border-collapse: collapse;
+	display: flex;
+	flex-direction: column;
+	border-collapse: separate;
+	border-spacing: 0;
 	table-layout: fixed;
 	width: 100%;
-	height: 100%;
+	min-height: 100%;
 	font-size: var(--table-text-xs, var(--typography-body2-font-size));
 	line-height: var(--table-text-xs-line-height, var(--typography-body2-line-height));
 }
@@ -113,7 +62,7 @@
 	font-weight: var(--typography-body2-font-weight);
 	display: flex;
 	flex-direction: column;
-	height: 100%;
+	flex: 1 0 auto;
 }
 
 .table td {
@@ -170,7 +119,7 @@
 }
 
 @media (max-width: 600px) {
-  .cell.pinned { position: relative; box-shadow: none; }
+  .cell.pinned { position: relative; left: auto !important; right: auto !important; box-shadow: none; }
 }
 
 /* hover row → подсвечиваем pinned через overlay-псевдоэлемент с opacity-переходом.

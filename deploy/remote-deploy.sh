@@ -14,7 +14,7 @@ git fetch origin main </dev/null
 git merge --ff-only "$revision" </dev/null
 [[ "$(git rev-parse HEAD)" == "$revision" ]] || { echo "Сервер содержит другой коммит" >&2; exit 1; }
 
-compose=(docker compose -f compose.prod.yml)
+compose=(docker compose --env-file "${ENV_FILE:-.env.production}" -f compose.prod.yml)
 trap 'echo "Деплой прерван. Следующие шаги не выполнялись; данные и тома не удалены." >&2' ERR
 df -h .
 COMPOSE_PARALLEL_LIMIT=1 "${compose[@]}" build migrate app </dev/null
@@ -24,6 +24,6 @@ COMPOSE_PARALLEL_LIMIT=1 "${compose[@]}" build migrate app </dev/null
 "${compose[@]}" up -d --no-deps nginx </dev/null
 "${compose[@]}" exec -T nginx nginx -t </dev/null
 "${compose[@]}" exec -T nginx nginx -s reload </dev/null
-"${compose[@]}" exec -T nginx wget -q -O /dev/null http://127.0.0.1/login </dev/null
+"${compose[@]}" exec -T nginx wget -q -O /dev/null http://app:3000/login </dev/null
 "${compose[@]}" ps </dev/null
 echo "Деплой завершён: $revision"

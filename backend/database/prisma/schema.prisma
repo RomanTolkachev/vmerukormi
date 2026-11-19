@@ -300,31 +300,33 @@ model Nutrient {
 }
 
 model Product {
-  deletedAt        DateTime?
-  deletedById      String?
-  isShared         Boolean           @default(false)
-  id               String            @id @default(cuid())
-  name             String
-  kind             ProductKind       @default(PRODUCT)
-  groupId          String?
-  baseQuantity     Float             @default(100)
-  unit             String            @default("г")
-  calories         Float             @default(0)
-  protein          Float             @default(0)
-  fat              Float             @default(0)
-  carbs            Float             @default(0)
-  source           String?
-  sourceExternalId String?
-  archived         Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  group            ProductGroup?     @relation(fields: [groupId], references: [id], onDelete: Restrict)
-  nutrients        ProductNutrient[]
-  tags             ProductTagLink[]
-  measures         ProductMeasure[]
-  rationItems      RationItem[]
-  userId           String
-  user             User              @relation(fields: [userId], references: [id], onDelete: Restrict)
+  deletedAt          DateTime?
+  deletedById        String?
+  isShared           Boolean           @default(false)
+  id                 String            @id @default(cuid())
+  name               String
+  kind               ProductKind       @default(PRODUCT)
+  groupId            String?
+  baseQuantity       Float             @default(100)
+  unit               String            @default("г")
+  calories           Float             @default(0)
+  protein            Float             @default(0)
+  fat                Float             @default(0)
+  carbs              Float             @default(0)
+  source             String?
+  sourceExternalId   String?
+  recipeInstructions String?
+  recipeNotes        String?
+  archived           Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  group              ProductGroup?     @relation(fields: [groupId], references: [id], onDelete: Restrict)
+  nutrients          ProductNutrient[]
+  tags               ProductTagLink[]
+  measures           ProductMeasure[]
+  rationItems        RationItem[]
+  userId             String
+  user               User              @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@unique([userId, source, sourceExternalId])
   @@index([userId, groupId, name])

@@ -1,0 +1,11 @@
+[Unit]
+Description=Renew VetEnergy HTTPS certificate and reload Nginx
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/var/www/vmerukormi
+ExecStart=/bin/bash /var/www/vmerukormi/deploy/renew-certificates.sh
+TimeoutStartSec=900

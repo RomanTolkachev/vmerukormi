@@ -1,4 +1,6 @@
 COMPOSE := docker compose -f backend/docker-compose.yml
+ENV_FILE ?= .env.production
+PROD_COMPOSE := docker compose --env-file "$(ENV_FILE)" -f compose.prod.yml
 DEPLOY_HOST ?= vmerukormi
 DEPLOY_DIR ?= /var/www/vmerukormi
 
@@ -22,19 +24,19 @@ db-deploy:
 db-setup: db-up db-deploy seed
 
 prod-build:
-	docker compose -f compose.prod.yml build
+	$(PROD_COMPOSE) build
 
 prod-up:
-	docker compose -f compose.prod.yml up -d --build
+	$(PROD_COMPOSE) up -d --build
 
 prod-down:
-	docker compose -f compose.prod.yml down
+	$(PROD_COMPOSE) down
 
 prod-logs:
-	docker compose -f compose.prod.yml logs -f app nginx
+	$(PROD_COMPOSE) logs -f app nginx
 
 prod-migrate:
-	docker compose -f compose.prod.yml run --rm migrate
+	$(PROD_COMPOSE) run --rm migrate
 
 prod-seed:
-	docker compose -f compose.prod.yml run --rm migrate npm run db:seed
+	$(PROD_COMPOSE) run --rm migrate npm run db:seed

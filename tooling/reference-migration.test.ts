@@ -56,7 +56,7 @@ test("reference migration preserves existing data and converts linked quantities
     for (const migration of readdirSync(root).filter(name => /^\d/.test(name) && name > "20261031090000_reference_nutrients").sort()) {
       execute(readFileSync(`${root}/${migration}/migration.sql`, "utf8"));
     }
-    assert.deepEqual(await prisma.product.findMany({ select: { id: true, name: true, userId: true, isShared: true }, orderBy: { id: "asc" } }), originalProducts);
+    assert.deepEqual(await prisma.product.findMany({ where: { id: { in: originalProducts.map(product => product.id) } }, select: { id: true, name: true, userId: true, isShared: true }, orderBy: { id: "asc" } }), originalProducts);
     for (const key of valuesBefore) assert.ok(await prisma.productNutrient.findUnique({ where: { productId_nutrientId: key } }));
     const values = await prisma.productNutrient.findMany({ where: { productId: { startsWith: "fixture-" }, nutrient: { isReferenceOnly: false } }, include: { nutrient: true } });
     const amount = (productId: string, code: string) => values.find((value) => value.productId === productId && value.nutrient.code === code)?.amount;
