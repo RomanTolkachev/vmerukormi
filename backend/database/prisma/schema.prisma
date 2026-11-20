@@ -84,7 +84,9 @@ model Module {
   deletedById  String?
   id           String                 @id @default(cuid())
   name         String                 @unique
-  species      Species
+  species      String
+  speciesCodes String[]
+  animalSpecies AnimalSpecies         @relation(fields: [species], references: [code], onDelete: Restrict)
   archived     Boolean                @default(false)
   versions     ModuleFormulaVersion[]
   calculations Calculation[]
@@ -97,6 +99,9 @@ model ModuleFormulaVersion {
   moduleId     String
   formula      String
   description  String?
+  nameSnapshot String                 @default("")
+  speciesCodes String[]
+  templateKey  String?
   techBegin    DateTime      @map("tech_begin") @db.Timestamp(3)
   techEnd      DateTime      @map("tech_end") @db.Timestamp(3)
   createdAt    DateTime      @default(now())
@@ -107,12 +112,23 @@ model ModuleFormulaVersion {
   @@index([moduleId, techBegin, techEnd])
 }
 
+model AnimalSpecies {
+  code String @id
+  name String @unique
+  deletedAt DateTime?
+  deletedById String?
+  pets Pet[]
+  breeds Breed[]
+  modules Module[]
+}
+
 model Pet {
   deletedAt    DateTime?
   deletedById  String?
   id           String           @id @default(cuid())
   name         String
-  species      Species
+  species      String
+  animalSpecies AnimalSpecies @relation(fields: [species], references: [code], onDelete: Restrict)
   sex          Sex?
   breedId      String?
   actualWeight Float
@@ -140,7 +156,8 @@ model Breed {
   deletedAt         DateTime?
   deletedById       String?
   id                String          @id
-  species           Species
+  species           String
+  animalSpecies     AnimalSpecies @relation(fields: [species], references: [code], onDelete: Restrict)
   nameRu            String
   nameEn            String
   maleIdealWeight   Float
@@ -158,12 +175,18 @@ model Calculation {
   petId            String?
   moduleId         String
   formulaVersionId String
-  actualWeight     Float
-  idealWeight      Float
-  bcs              Int
+  name             String                @default("Расчёт")
+  species          String                @default("CAT")
+  parameters       Json                  @default("{}")
+  formulaSnapshot  Json                  @default("{}")
+  busBegin         DateTime              @default(now()) @map("bus_begin")
+  busEnd           DateTime?             @map("bus_end")
+  actualWeight     Float?
+  idealWeight      Float?
+  bcs              Int?
   energyFactor     Float                 @default(1)
-  lactationWeek    Int                   @default(1)
-  childrenCount    Int                   @default(0)
+  lactationWeek    Int?
+  childrenCount    Int?
   baseEnergy       Int
   adjustedEnergy   Int
   protein          Float                 @default(0)
@@ -317,6 +340,10 @@ model Product {
   sourceExternalId   String?
   recipeInstructions String?
   recipeNotes        String?
+  recipeYieldGrams    Float?
+  recipeIngredients  Json              @default("[]")
+  revision           Int               @default(1)
+  versions           ProductVersion[]
   archived           Boolean           @default(false)
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
@@ -330,6 +357,21 @@ model Product {
 
   @@unique([userId, source, sourceExternalId])
   @@index([userId, groupId, name])
+}
+
+model ProductVersion {
+  id        String   @id @default(cuid())
+  productId String
+  revision  Int
+  busBegin  DateTime @default(now()) @map("bus_begin")
+  busEnd    DateTime? @map("bus_end")
+  actorId   String?
+  action    String
+  snapshot  Json
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([productId, revision])
+  @@index([productId, busBegin])
 }
 
 model ProductTag {
@@ -387,6 +429,8 @@ model ProductMeasure {
 model Ration {
   deletedAt        DateTime?
   deletedById      String?
+  busBegin         DateTime      @default(now()) @map("bus_begin")
+  busEnd           DateTime?     @map("bus_end")
   id               String       @id @default(cuid())
   name             String
   petId            String?

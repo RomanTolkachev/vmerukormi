@@ -1,0 +1,39 @@
+.form { min-width: 0; }
+.fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.section { display: grid; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--line, #dbe5df); }
+.section:first-child { padding-top: 0; }
+.section h2 { margin: 0; font-size: 18px; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.rows { display: grid; gap: 12px; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(110px, 180px) auto; gap: 12px; align-items: end; padding: 12px 0; }
+.row strong { overflow-wrap: anywhere; }
+.row small { display: block; color: var(--muted, #596d61); margin-top: 4px; }
+.hint { color: var(--muted, #596d61); font-size: 13px; margin: 0; }
+.heading, .footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.footer { position: sticky; bottom: 0; padding: 16px 0; background: var(--white, #fff); border-top: 1px solid var(--line, #dbe5df); z-index: 2; }
+.notice { padding: 16px; background: var(--cream, #fcf5e7); border-radius: 8px; }
+.notice p { margin-top: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.page { overflow: auto; min-height: 0; padding-bottom: 24px; }
+.panel { max-width: 1100px; background: var(--white, #fff); padding: 24px; border: 1px solid var(--line, #dbe5df); border-radius: 12px; }
+.readout { display: grid; gap: 16px; overflow-wrap: anywhere; }
+.readout h2 { font-size: 24px; font-weight: 600; }
+.readout h3 { font-size: 16px; font-weight: 600; break-after: avoid; }
+.readout pre { white-space: pre-wrap; font: inherit; }
+.history { display: grid; gap: 16px; }
+.historyList { display: flex; gap: 8px; flex-wrap: wrap; max-height: 180px; overflow: auto; }
+@media (max-width: 767px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .row { grid-template-columns: minmax(0, 1fr) auto; }
+  .row > :first-child { grid-column: 1 / -1; }
+  .panel { padding: 16px; }
+}
+@media print {
+  .printControls { display: none; }
+  .printDocument { position: static; background: white; color: black; padding: 20px; overflow: visible; }
+  :global(body):has(.printDocument) { height: auto; overflow: visible; }
+  :global(body):has(.printDocument) *:has(.printDocument) { height: auto !important; max-height: none !important; overflow: visible !important; display: block !important; position: static !important; }
+  :global(body):has(.printDocument) :global(header), :global(body):has(.printDocument) :global(aside), :global(body):has(.printDocument) :global(nav) { display: none !important; }
+  :global(body):has(.printDocument) * { visibility: hidden; }
+  .printDocument, .printDocument * { visibility: visible !important; }
+}

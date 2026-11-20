@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { CatalogError } from "@backend/domain/catalog/recipe";
 import { Prisma } from "@prisma/client";
 import { rawPrisma } from "@backend/infrastructure/database/prisma";
 import { databaseContext } from "@backend/infrastructure/database/context";
@@ -15,6 +16,7 @@ export function withRequestAudit<Context extends { params: Promise<Record<string
       }), { maxWait: 5000, timeout: 20000 });
     } catch (error) {
       if (error instanceof Response) return error;
+      if (error instanceof CatalogError) return Response.json({ error: error.message }, { status: error.status });
       if (error instanceof SyntaxError) return Response.json({ error: "Некорректное тело запроса" }, { status: 400 });
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2002") return Response.json({ error: "Запись с такими данными уже существует, в том числе среди удалённых" }, { status: 409 });

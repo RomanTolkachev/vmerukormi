@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { saveProduct, setProductDeleted } from "@backend/application/products/versions";
 import { applyRationSnapshot } from "@backend/domain/rations/snapshot";
 import { ownerScope, canManageNutrients } from "@backend/domain/accounts/policy";
 import { prisma } from "@backend/infrastructure/database/prisma";
@@ -134,17 +135,18 @@ export async function listWorkspace(
       resource,
     );
   }
-  if (resource === "products") {
+  if (resource === "products" || resource === "recipes") {
     const tagId = new URL(request.url).searchParams.get("tagId");
     const rows = await prisma.product.findMany({
-      where: { ...readableCatalog(user), ...(tagId ? { tags: { some: { tagId, deletedAt: null, tag: { deletedAt: null } } } } : {}) },
+      where: { ...readableCatalog(user), ...(resource === "recipes" ? { kind: "RECIPE" } : {}), ...(tagId ? { tags: { some: { tagId, deletedAt: null, tag: { deletedAt: null } } } } : {}) },
+      omit: { recipeIngredients: true, recipeInstructions: true, recipeNotes: true },
       include: { group: true, measures: true, tags: { include: { tag: true } } },
       orderBy: { name: "asc" },
     });
     return page(
       rows.map((r) => ({ ...r, groupName: r.group?.name ?? "—", tagNames: r.tags.map(({ tag }) => tag.name).join(", "), catalogLabel: r.isShared ? "Общий" : "Личный", canEdit: canEditCatalog(r, user) })),
       request,
-      resource,
+      "products",
     );
   }
   if (resource === "nutrients")
@@ -221,13 +223,10 @@ export async function createWorkspace(
   const user = await requireUser(request, { csrf: true });
   const { resource } = await params;
   const b = await request.json();
+  if (resource === "products") return Response.json(await saveProduct(b, user), { status: 201 });
   const isShared = resource === "nutrients" || b.isShared === true;
   if (resource === "nutrients" && !canManageNutrients(user)) return Response.json({ error: "Справочник нутриентов изменяет только администратор" }, { status: 403 });
   if (isShared && user.role !== "ADMIN") return Response.json({ error: "Общий каталог изменяет только администратор" }, { status: 403 });
-  if (resource === "products" && b.groupId) {
-    const group = await prisma.productGroup.findFirst({ where: { id: b.groupId, ...catalogReferences(user, isShared) }, select: { id: true } });
-    if (!group) return Response.json({ error: "Группа не найдена" }, { status: 404 });
-  }
   if (resource === "rations" && b.petId) {
     const pet = await prisma.pet.findFirst({ where: { id: b.petId, ...ownerScope(user) }, select: { id: true } });
     if (!pet) return Response.json({ error: "Питомец не найден" }, { status: 404 });
@@ -244,23 +243,6 @@ export async function createWorkspace(
           email: b.email || null,
           phone: b.phone || null,
           note: b.note || null,
-          userId: user.id,
-        },
-      }),
-      { status: 201 },
-    );
-  if (resource === "products")
-    return Response.json(
-      await prisma.product.create({
-        data: {
-          name: b.name,
-          isShared,
-          kind: b.kind,
-          groupId: b.groupId || null,
-          calories: +b.calories || 0,
-          protein: +b.protein || 0,
-          fat: +b.fat || 0,
-          carbs: +b.carbs || 0,
           userId: user.id,
         },
       }),
@@ -328,8 +310,7 @@ export async function mutateWorkspace(
       await prisma.customer.deleteMany({ where: { id, ...ownerScope(user) } });
     else if (resource === "products")
       {
-      const deleted = await prisma.product.deleteMany({ where: { id, ...writableCatalog(user) } });
-      if (!deleted.count) return Response.json({ error: "Продукт недоступен для удаления" }, { status: 404 });
+      await setProductDeleted(id, user, true);
     }
     else if (resource === "nutrients")
       {

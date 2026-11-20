@@ -9,7 +9,7 @@ const rationSchema = z.object({
   petId: z.string().trim().nullable().optional(),
   calculationId: z.string().trim().nullable().optional(),
   mode: z.enum(["DAILY", "WEEKLY"]).default("DAILY"),
-  targetEnergy: z.coerce.number().min(0).max(100000).optional(),
+  targetEnergy: z.coerce.number().min(0).max(2147483647).optional(),
   tolerancePercent: z.coerce.number().min(0).max(100).default(10),
   note: z.string().trim().max(4000).nullable().optional(),
 });

@@ -112,7 +112,11 @@ export const prisma: PrismaClient = new Proxy(rawPrisma, {
             ? await delegate.findMany({ where: plainWhere(modelName, args.where as Arguments) }) as Row[] : [];
           const softDelete = method === "delete" || method === "deleteMany";
           const operation = softDelete ? method === "delete" ? "update" : "updateMany" : method;
-          if (softDelete) args.data = { deletedAt: new Date(), deletedById: context?.actor?.id ?? null };
+          if (softDelete) {
+            const moment = new Date();
+            args.data = { deletedAt: moment, deletedById: context?.actor?.id ?? null, ...(["Calculation", "Ration"].includes(modelName) ? { busEnd: moment } : {}) };
+          }
+          if (["Calculation", "Ration"].includes(modelName) && (args.data as Arguments | undefined)?.deletedAt === null) args.data = { ...args.data as Arguments, busEnd: null };
           const result = await delegate[operation](args);
           const emptyBatch = result && typeof result === "object" && "count" in result && result.count === 0;
           if (context?.actor && !emptyBatch) {

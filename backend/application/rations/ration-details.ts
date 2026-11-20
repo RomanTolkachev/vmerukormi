@@ -23,9 +23,11 @@ export function serializeRationDetails(ration: Prisma.RationGetPayload<{ include
     pet: ration.pet ? { id: ration.pet.id, name: ration.pet.name, customerName: ration.pet.customer?.name ?? null } : null,
     calculation: ration.calculation ? {
       id: ration.calculation.id,
+      name: ration.calculation.name,
+      deletedAt: ration.calculation.deletedAt?.toISOString() ?? null,
       petId: ration.calculation.petId,
       petName: ration.calculation.pet?.name ?? null,
-      moduleName: ration.calculation.module.name,
+      moduleName: (ration.calculation.formulaSnapshot as { name?: string }).name ?? ration.calculation.module.name,
       createdAt: ration.calculation.createdAt.toISOString(),
       adjustedEnergy: ration.calculation.adjustedEnergy,
       protein: ration.calculation.protein,

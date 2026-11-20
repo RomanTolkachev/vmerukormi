@@ -6,7 +6,7 @@ import { authErrorResponse, requireUser } from "@backend/auth/session";
 
 const updateSchema = z.object({
   name: z.string().trim().min(1).max(80).optional(),
-  species: z.enum(["CAT", "DOG"]).optional(),
+  species: z.string().min(1).max(40).optional(),
   sex: z.enum(["MALE", "FEMALE"]).optional().nullable(),
   breedId: z.string().uuid().optional().nullable(),
   customerId: z.string().trim().min(1).max(191).optional().nullable(),
@@ -22,6 +22,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params;
     const parsed = updateSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: "Некорректные данные" }, { status: 400 });
+    if (parsed.data.species && !await prisma.animalSpecies.findFirst({ where: { code: parsed.data.species } })) return NextResponse.json({ error: "Выберите существующий вид животного" }, { status: 400 });
     const pet = await prisma.pet.findFirst({ where: { id, ...ownerScope(user) }, select: { species: true } });
     if (!pet) return NextResponse.json({ error: "Питомец не найден" }, { status: 404 });
     if (parsed.data.species && parsed.data.species !== pet.species && parsed.data.breedId === undefined) {

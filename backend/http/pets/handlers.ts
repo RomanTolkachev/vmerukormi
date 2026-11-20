@@ -6,7 +6,7 @@ import { authErrorResponse, requireUser } from "@backend/auth/session";
 
 const petSchema = z.object({
   name: z.string().trim().min(1).max(80),
-  species: z.enum(["CAT", "DOG"]),
+  species: z.string().min(1).max(40),
   sex: z.enum(["MALE", "FEMALE"]).optional().nullable(),
   breedId: z.string().uuid().optional().nullable(),
   customerId: z.string().cuid().optional().nullable(),
@@ -30,6 +30,8 @@ export async function POST(request: Request) {
     const user = await requireUser(request, { csrf: true });
     const parsed = petSchema.safeParse(await request.json());
     if (!parsed.success) return NextResponse.json({ error: "Проверьте данные питомца", details: parsed.error.flatten() }, { status: 400 });
+    if (!await prisma.animalSpecies.findFirst({ where: { code: parsed.data.species } })) return NextResponse.json({ error: "Выберите существующий вид животного" }, { status: 400 });
+    if (parsed.data.breedId && !await prisma.breed.findFirst({ where: { id: parsed.data.breedId, species: parsed.data.species } })) return NextResponse.json({ error: "Порода не соответствует виду питомца" }, { status: 400 });
     if (parsed.data.customerId) {
       const customer = await prisma.customer.findFirst({ where: { id: parsed.data.customerId, ...ownerScope(user) }, select: { id: true } });
       if (!customer) return NextResponse.json({ error: "Клиент не найден" }, { status: 404 });

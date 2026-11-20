@@ -1,5 +1,6 @@
 export type CalculationHistoryItem = {
   id: string;
+  name: string;
   adjustedEnergy: number;
   baseEnergy: number;
   createdAt: string;

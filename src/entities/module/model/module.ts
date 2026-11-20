@@ -1,31 +1,12 @@
-import type { Species } from "@/entities/breed/@x/module";
-
 export type CalculationModule = {
-  id: string;
-  name: string;
-  species: Species;
-  formula: string;
-  description: string | null;
-  techBegin: string;
-  techEnd: string;
+  id: string; name: string; species: string; speciesCodes: string[];
+  formula: string; description: string | null; versionId: string; templateKey: string | null;
+  techBegin: string; techEnd: string;
 };
-
-export type FormulaVersion = {
-  id: string;
-  moduleId: string;
-  moduleName: string;
-  species: Species;
-  formula: string;
-  description: string | null;
-  techBegin: string;
-  techEnd: string;
-  current: boolean;
+export type FormulaVersion = CalculationModule & {
+  moduleId: string; moduleName: string; current: boolean;
 };
-
 export type FormulaModuleDetails = {
-  id: string;
-  name: string;
-  species: Species;
-  archived: boolean;
-  versions: FormulaVersion[];
+  id: string; name: string; species: string; speciesCodes: string[];
+  archived: boolean; versions: FormulaVersion[];
 };

@@ -9,6 +9,7 @@ const migrationName = "20261120120000_vetdietolog_pilaf_recipe";
 const root = new URL("../backend/database/prisma/migrations/", import.meta.url);
 const migration = readFileSync(new URL(`${migrationName}/migration.sql`, root), "utf8");
 const sections = migration.split("$recipe$");
+const legacyProductOmit = { recipeYieldGrams: true, recipeIngredients: true, revision: true } as const;
 const definition = JSON.parse(sections[1]) as {
   id: string;
   name: string;
@@ -109,6 +110,7 @@ test("recipe migration works on PostgreSQL and preserves user data and recipe ed
     execute(migration);
     const recipe = await database.product.findUniqueOrThrow({
       where: { id: definition.id },
+      omit: legacyProductOmit,
       include: { nutrients: { include: { nutrient: true } }, measures: true },
     });
     assert.equal(recipe.kind, "RECIPE");
@@ -141,22 +143,42 @@ test("recipe migration works on PostgreSQL and preserves user data and recipe ed
     execute(migration);
     assert.equal(await database.product.count(), originalProducts.length + 1);
     assert.deepEqual(await database.product.findUniqueOrThrow({
-      where: { id: definition.id }, include: { nutrients: { include: { nutrient: true } }, measures: true },
+      where: { id: definition.id }, omit: legacyProductOmit, include: { nutrients: { include: { nutrient: true } }, measures: true },
     }), recipe);
 
-    await database.product.update({ where: { id: recipe.id }, data: {
+    await database.product.update({ where: { id: recipe.id }, select: { id: true }, data: {
       calories: 222, archived: true, deletedAt: new Date(),
       recipeInstructions: "Edited instructions", recipeNotes: "Edited notes",
     } });
     await database.productNutrient.updateMany({ where: { productId: recipe.id }, data: { amount: 7, deletedAt: new Date() } });
-    const edited = await database.product.findUniqueOrThrow({ where: { id: recipe.id }, include: { nutrients: true } });
+    const edited = await database.product.findUniqueOrThrow({ where: { id: recipe.id }, omit: legacyProductOmit, include: { nutrients: true } });
     execute(migration);
-    assert.deepEqual(await database.product.findUniqueOrThrow({ where: { id: recipe.id }, include: { nutrients: true } }), edited);
+    assert.deepEqual(await database.product.findUniqueOrThrow({ where: { id: recipe.id }, omit: legacyProductOmit, include: { nutrients: true } }), edited);
 
-    await database.product.update({ where: { id: recipe.id }, data: { id: "recipe-test-same-source" } });
+    await database.product.update({ where: { id: recipe.id }, select: { id: true }, data: { id: "recipe-test-same-source" } });
     execute(migration);
     assert.equal(await database.product.count({ where: { id: recipe.id } }), 0);
     assert.equal(await database.product.count(), originalProducts.length + 1);
+
+    execute(readFileSync(new URL("20261121090000_product_versions_recipes/migration.sql", root), "utf8"));
+    assert.equal(await database.productVersion.count(), await database.product.count());
+    const baseline = await database.productVersion.findFirstOrThrow({ where: { productId: "recipe-test-same-source" } });
+    const snapshot = baseline.snapshot as Record<string, unknown>;
+    assert.equal(baseline.action, "MIGRATION");
+    assert.equal(baseline.busEnd, null);
+    assert.equal(snapshot.calories, 222);
+    assert.equal(snapshot.recipeInstructions, "Edited instructions");
+    assert.ok(snapshot.deletedAt);
+    assert.deepEqual(snapshot.nutrients, []);
+    assert.deepEqual(snapshot.recipeIngredients, []);
+    assert.equal(snapshot.recipeYieldGrams, null);
+    assert.deepEqual(await database.rationItem.findMany({ orderBy: { id: "asc" } }), originalItems);
+    assert.deepEqual(await database.user.findMany({ orderBy: { id: "asc" } }), originalUsers);
+    await assert.rejects(database.productVersion.delete({ where: { id: baseline.id } }), /cannot be deleted/);
+    await assert.rejects(database.productVersion.update({ where: { id: baseline.id }, data: { action: "CHANGED" } }), /Only closing/);
+    await assert.rejects(database.productVersion.create({ data: { productId: baseline.productId, revision: 2, action: "DUPLICATE", snapshot: {} } }), /Unique constraint/);
+    await database.productVersion.update({ where: { id: baseline.id }, data: { busEnd: new Date(baseline.busBegin.getTime() + 1) } });
+    await assert.rejects(database.productVersion.update({ where: { id: baseline.id }, data: { busEnd: null } }), /Only closing/);
   } finally {
     await database.$disconnect();
   }

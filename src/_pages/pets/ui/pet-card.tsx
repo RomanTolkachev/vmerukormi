@@ -8,7 +8,6 @@ import { EntitySelect } from "@/features/create-entity";
 import { updatePetCustomer } from "@/features/update-pet-customer";
 import { Button, ButtonLink, Input, Select, Textarea } from "@/shared/ui/controls";
 import { ui } from "@/shared/ui/styles";
-import { RequiredMark } from "@/shared/ui/required-mark";
 import { updatePetAttributes } from "../api/update-pet-attributes";
 import { changePetWeight, petAttributesDraft, type PetAttributesDraft } from "../model/pet-attributes";
 
@@ -91,7 +90,7 @@ export function PetCard({ initialPet }: { initialPet: Pet }) {
       <form className={ui("cardBody")} onSubmit={saveAttributes}>
         <div className={ui("formGrid")}>
           <label className={ui("field", "full")}><span>Имя питомца</span><Input value={attributes.name} onChange={event => changeAttribute("name", event.target.value)} maxLength={80} required disabled={busy} /></label>
-          <label className={ui("field")}><span>Вид<RequiredMark /></span><Select required value={attributes.species} onChange={event => changeAttribute("species", event.target.value as Pet["species"])} disabled={busy}><option value="CAT">Кошка</option><option value="DOG">Собака</option></Select></label>
+          <EntitySelect entity="species" label="Вид животного" required value={attributes.species} onChange={value => changeAttribute("species", value)} disabled={busy} />
           <label className={ui("field")}><span>Пол</span><Select value={attributes.sex} onChange={event => changeAttribute("sex", event.target.value)} disabled={busy}><option value="">Не указан</option><option value="MALE">Самец</option><option value="FEMALE">Самка</option></Select></label>
           <div className={ui("field", "full")}><EntitySelect entity="breeds" label="Порода" value={attributes.breedId} filters={{ species: attributes.species }} allowCreate={false} disabled={busy}
             selectedOption={pet.breed?.id === attributes.breedId ? { value: pet.breed.id, label: pet.breed.nameRu, data: pet.breed } : null}

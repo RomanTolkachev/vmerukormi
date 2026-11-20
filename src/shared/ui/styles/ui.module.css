@@ -132,7 +132,7 @@
 .rationEditorTop { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 5px 0 18px; }
 .rationEditorTop h1 { margin: 8px 0 0; font-size: clamp(24px, 2.3vw, 30px); font-weight: 600; letter-spacing: -.03em; }
 .rationEditorActions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.rationSummaryGrid { display: grid; grid-template-columns: minmax(210px, 1.5fr) repeat(5, minmax(100px, .7fr)); gap: 10px; margin-bottom: 18px; }
+.rationSummaryGrid { display: grid; grid-template-columns: minmax(210px, 1.5fr) repeat(6, minmax(100px, .7fr)); gap: 10px; margin-bottom: 18px; }
 .rationEnergyCard, .rationMetric { padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: white; }
 .rationMetric { color: inherit; font: inherit; text-align: left; }
 .rationMetricAction { cursor: pointer; transition: border-color .15s, transform .15s; }
@@ -356,7 +356,7 @@
   .productMainCard, .productNutrientColumn { overflow: visible; padding-right: 0; }
   .rationEditorGrid { grid-template-columns: 1fr; overflow: auto; }
   .rationEditorMain { overflow: visible; padding-right: 0; }
-  .rationSummaryGrid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .rationSummaryGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .rationEnergyCard { grid-column: 1 / -1; }
   .nutrientSummaryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

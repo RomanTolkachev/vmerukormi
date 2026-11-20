@@ -21,6 +21,8 @@ export type RationCalculationNutrient = {
 
 export type RationCalculationOption = {
   id: string;
+  name?: string;
+  deletedAt?: string | null;
   petId: string | null;
   petName: string | null;
   moduleName: string;

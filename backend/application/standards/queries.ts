@@ -18,8 +18,9 @@ export async function getBreedStandards(breedId: string, requestedUserId?: strin
     prisma.breedStandard.findMany({ where: { userId, breedId }, include: { nutrients: { where: { nutrient: { isReferenceOnly: false } } } } }),
   ]);
   if (!breed) return null;
-  const macros = DEFAULT_MACROS_PER_1000_KCAL[breed.species];
-  const nutrientDefaults = DEFAULT_NUTRIENTS_PER_1000_KCAL[breed.species];
+  const standardSpecies = breed.species === "CAT" || breed.species === "DOG" ? breed.species : null;
+  const macros = standardSpecies ? DEFAULT_MACROS_PER_1000_KCAL[standardSpecies] : { protein: 0, fat: 0, carbs: 0 };
+  const nutrientDefaults = standardSpecies ? DEFAULT_NUTRIENTS_PER_1000_KCAL[standardSpecies] : {};
   const standards = (["MALE", "FEMALE"] as const).map((sex): SexStandardValue => {
     const current = stored.find((item) => item.sex === sex);
     const values = new Map(current?.nutrients.map((item) => [item.nutrientId, item.amountPer1000Kcal]));
@@ -29,7 +30,7 @@ export async function getBreedStandards(breedId: string, requestedUserId?: strin
       proteinPer1000Kcal: current?.proteinPer1000Kcal ?? macros.protein,
       fatPer1000Kcal: current?.fatPer1000Kcal ?? macros.fat,
       carbsPer1000Kcal: current?.carbsPer1000Kcal ?? macros.carbs,
-      source: current?.source ?? "FEDIAF 2025 · базовый профиль вида",
+      source: current?.source ?? (standardSpecies ? "FEDIAF 2025 · базовый профиль вида" : "Нет базовых норм для вида; заполните вручную"),
       nutrients: uniqueCatalogNutrients(nutrients, new Set(values.keys())).map((nutrient) => ({
         nutrientId: nutrient.id,
         code: nutrient.code,

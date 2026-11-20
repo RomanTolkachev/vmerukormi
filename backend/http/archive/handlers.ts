@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { setProductDeleted } from "@backend/application/products/versions";
 import { authErrorResponse, requireUser, type AuthUser } from "@backend/auth/session";
 import { ownerScope } from "@backend/domain/accounts/policy";
 import { writableCatalog } from "@backend/domain/catalog/access";
@@ -74,7 +75,9 @@ export async function restoreRecord(request: Request) {
     if (descriptor.parent && !(await delegate(descriptor.parent.model).findFirst({ where: { id: record[descriptor.parent.field] } }))) {
       return Response.json({ error: "Сначала восстановите родительскую запись" }, { status: 409 });
     }
-    await delegate(descriptor.model).updateMany({ where, data: { deletedAt: null, deletedById: null } });
+    if (["measures", "composition", "product-tags"].includes(parsed.data.resource)) return Response.json({ error: "Восстановите состав через историю версий в карточке продукта" }, { status: 409 });
+    if (parsed.data.resource === "products") await setProductDeleted(parsed.data.key.id, user, false);
+    else await delegate(descriptor.model).updateMany({ where, data: { deletedAt: null, deletedById: null } });
     return Response.json({ ok: true });
   } catch (error) { return authErrorResponse(error); }
 }

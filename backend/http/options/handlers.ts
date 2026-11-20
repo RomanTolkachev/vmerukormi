@@ -1,7 +1,8 @@
+import { getFormulaTemplate } from "@backend/domain/nutrition/parameters";
 import { ownerScope } from "@backend/domain/accounts/policy";
 import { prisma } from "@backend/infrastructure/database/prisma";
 import { authErrorResponse, requireUser } from "@backend/auth/session";
-import { readableCatalog, catalogReferences } from "@backend/domain/catalog/access";
+import { readableCatalog, catalogReferences, writableCatalog } from "@backend/domain/catalog/access";
 
 export async function getOptions(request: Request, { params }: { params: Promise<{ entity: string }> }) {
   try {
@@ -12,20 +13,26 @@ export async function getOptions(request: Request, { params }: { params: Promise
     const search = query.get("search")?.trim().slice(0, 180) ?? "";
     const text = { contains: search, mode: "insensitive" as const };
     const named = id ? { id } : { name: text };
-    const scope = query.get("shared") === "true" ? catalogReferences(user, true) : readableCatalog(user);
+    let scope = query.get("shared") === "true" ? catalogReferences(user, true) : readableCatalog(user);
+    if (entity === "products" && query.get("ingredients") === "true" && query.get("parentProductId")) {
+      const parent = await prisma.product.findFirst({ where: { id: query.get("parentProductId")!, ...writableCatalog(user) }, select: { userId: true, isShared: true } });
+      if (!parent) return Response.json({ error: "Рецепт недоступен" }, { status: 404 });
+      scope = catalogReferences({ id: parent.userId, role: "USER" }, parent.isShared);
+    }
     const species = query.get("species");
-    const speciesFilter: { species?: "CAT" | "DOG" } = species === "CAT" || species === "DOG" ? { species } : {};
+    const speciesFilter = species ? { species } : {};
     let rows: { id: string; name?: string; nameRu?: string; [key: string]: unknown }[];
     switch (entity) {
+      case "species": rows = (await prisma.animalSpecies.findMany({ where: id ? { code: id } : { name: text }, take: 100, orderBy: { name: "asc" } })).map(value => ({ ...value, id: value.code })); break;
       case "customers": rows = await prisma.customer.findMany({ where: { ...ownerScope(user), ...named }, take: 30, orderBy: { name: "asc" } }); break;
       case "pets": rows = await prisma.pet.findMany({ where: { ...ownerScope(user), ...named, ...speciesFilter, ...(query.has("customerId") ? { customerId: query.get("customerId") || null } : {}) }, include: { breed: true, customer: true }, take: 30, orderBy: { name: "asc" } }); break;
-      case "products": rows = await prisma.product.findMany({ where: { ...scope, ...named, archived: false }, include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } }, take: 30, orderBy: { name: "asc" } }); break;
+      case "products": rows = await prisma.product.findMany({ where: { ...scope, ...named, archived: false, ...(query.get("ingredients") === "true" ? { kind: { in: ["PRODUCT" as const, "SUPPLEMENT" as const] } } : {}) }, omit: { recipeIngredients: true, recipeInstructions: true, recipeNotes: true }, include: { measures: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } }, take: 30, orderBy: { name: "asc" } }); break;
       case "groups": rows = await prisma.productGroup.findMany({ where: { ...scope, ...named }, take: 30, orderBy: { name: "asc" } }); break;
       case "tags": rows = await prisma.productTag.findMany({ where: { ...scope, ...named }, take: 30, orderBy: { name: "asc" } }); break;
       case "nutrients": rows = await prisma.nutrient.findMany({ where: { ...scope, ...named, isReferenceOnly: false }, take: 30, orderBy: { name: "asc" } }); break;
       case "breeds": rows = await prisma.breed.findMany({ where: { ...speciesFilter, ...(id ? { id } : { nameRu: text }) }, take: 30, orderBy: { nameRu: "asc" } }); break;
-      case "modules": rows = await prisma.module.findMany({ where: { ...named, ...speciesFilter, archived: false }, include: { versions: { where: { techBegin: { lte: new Date() }, techEnd: { gt: new Date() } }, take: 1 } }, take: 30, orderBy: { name: "asc" } }); break;
-      case "calculations": rows = (await prisma.calculation.findMany({ where: { ...ownerScope(user), ...(id ? { id } : { OR: [{ module: { name: text } }, { pet: { name: text } }] }), ...(query.get("petId") ? { petId: query.get("petId") } : {}) }, include: { module: true, pet: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } }, take: 30, orderBy: { createdAt: "desc" } })).map(row => ({ ...row, name: `${row.module.name} · ${row.createdAt.toLocaleDateString("ru-RU")}`, moduleName: row.module.name, petName: row.pet?.name ?? null })); break;
+      case "modules": rows = (await prisma.module.findMany({ where: { ...named, ...(species ? { speciesCodes: { has: species } } : {}), archived: false }, include: { versions: { where: { techBegin: { lte: new Date() }, techEnd: { gt: new Date() } }, orderBy: { techBegin: "desc" }, take: 1 } }, take: 30, orderBy: { name: "asc" } })).filter(row => { const version = row.versions[0]; const template = getFormulaTemplate(version?.templateKey); return template && template.moduleId === row.id && template.formula === version?.formula && (!species || template.speciesCodes.includes(species)); }); break;
+      case "calculations": rows = (await prisma.calculation.findMany({ where: { ...ownerScope(user), ...(id ? { id } : { OR: [{ name: text }, { module: { name: text } }, { pet: { name: text } }] }), ...(query.get("petId") ? { petId: query.get("petId") } : {}) }, include: { module: true, pet: true, nutrients: { where: { nutrient: { isReferenceOnly: false } }, include: { nutrient: true } } }, take: 30, orderBy: { createdAt: "desc" } })).map(row => ({ ...row, name: row.name, moduleName: (row.formulaSnapshot as { name?: string }).name ?? row.module.name, petName: row.pet?.name ?? null })); break;
       default: return Response.json({ error: "Справочник не найден" }, { status: 404 });
     }
     return Response.json(rows.map(row => ({ value: row.id, label: row.name ?? row.nameRu ?? row.id, data: row })));

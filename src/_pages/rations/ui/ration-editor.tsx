@@ -128,6 +128,8 @@ export function RationEditor({
   );
   const moistureSummary = nutrientSummary.find(({ nutrient }) => nutrient.code === "MO" && nutrient.unit === "г");
   const moisture = moistureSummary?.amount ?? 0;
+  const fiberSummary = nutrientSummary.find(({ nutrient }) => nutrient.code === "CFi");
+  const fiber = (fiberSummary?.amount ?? 0) / (fiberSummary?.nutrient.unit === "мг" ? 1000 : 1);
 
   const energyPercent = ration.targetEnergy
     ? (totals.calories / ration.targetEnergy) * 100
@@ -225,6 +227,7 @@ export function RationEditor({
         <Button type="button" className={ui("rationMetric", fatComparison === "low" && "rationMetricAction", targetStatusClass(fatComparison))} onClick={() => fatComparison === "low" && openProductPicker({ kind: "macro", code: "fat", name: "Жир", unit: "г" })}><span>Жир</span><strong>{formatNumber(totals.fat)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.fat)} г · ${targetStatusLabel(fatComparison, ration.tolerancePercent)}` : "в сутки"}</small></Button>
         <Button type="button" className={ui("rationMetric", carbsComparison === "low" && "rationMetricAction", targetStatusClass(carbsComparison))} onClick={() => carbsComparison === "low" && openProductPicker({ kind: "macro", code: "carbs", name: "Углеводы", unit: "г" })}><span>Углеводы</span><strong>{formatNumber(totals.carbs)} г</strong><small>{ration.calculation ? `норма ${formatNumber(ration.calculation.carbs)} г · ${targetStatusLabel(carbsComparison, ration.tolerancePercent)}` : "в сутки"}</small></Button>
         <div className={ui("rationMetric")}><span>Влага</span><strong>{formatNumber(moisture)} г</strong><small>{moistureSummary?.complete ? "в сутки" : "в сутки · неполные данные"}</small></div>
+        <div className={ui("rationMetric")}><span>Сырая клетчатка</span><strong>{formatNumber(fiber)} г</strong><small>{fiberSummary?.complete ? "в сутки" : "в сутки · неполные данные"}</small></div>
       </section>
 
       <div className={ui("rationEditorGrid")}>

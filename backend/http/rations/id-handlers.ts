@@ -11,7 +11,7 @@ const updateSchema = z
     petId: z.string().trim().nullable().optional(),
     calculationId: z.string().trim().nullable().optional(),
     mode: z.enum(["DAILY", "WEEKLY"]).optional(),
-    targetEnergy: z.coerce.number().min(0).max(100000).optional(),
+    targetEnergy: z.coerce.number().min(0).max(2147483647).optional(),
     tolerancePercent: z.coerce.number().min(0).max(100).optional(),
     note: z.string().trim().max(4000).nullable().optional(),
   })
@@ -44,14 +44,14 @@ export async function PATCH(request: Request, { params }: Context) {
     }
     const existing = await prisma.ration.findFirst({
       where: { id, ...ownerScope(user) },
-      select: { id: true },
+      select: { id: true, calculationId: true },
     });
     if (!existing) return Response.json({ error: "Рацион не найден" }, { status: 404 });
 
     let calculationPetId: string | null | undefined;
     let calculationEnergy: number | undefined;
     if (parsed.data.calculationId) {
-      const calculation = await prisma.calculation.findFirst({ where: { id: parsed.data.calculationId, ...ownerScope(user) }, select: { petId: true, adjustedEnergy: true } });
+      const calculation = await prisma.calculation.findFirst({ where: { id: parsed.data.calculationId, ...ownerScope(user), deletedAt: parsed.data.calculationId === existing.calculationId ? undefined : null }, select: { petId: true, adjustedEnergy: true } });
       if (!calculation) return Response.json({ error: "Расчёт не найден" }, { status: 404 });
       calculationPetId = calculation.petId;
       calculationEnergy = calculation.adjustedEnergy;

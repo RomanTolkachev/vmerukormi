@@ -6,5 +6,5 @@ export default async function ModulePage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   const data = await getFormulaModuleDetails(id);
   if (!data) notFound();
-  return <FormulaModulePage module={data.module} canEdit={data.user?.role === "ADMIN"} />;
+  return <FormulaModulePage module={data.module} />;
 }

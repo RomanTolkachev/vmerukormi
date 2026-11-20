@@ -1,4 +1,4 @@
-export type Species = "CAT" | "DOG";
+export type Species = string;
 
 export type Breed = {
   id: string;

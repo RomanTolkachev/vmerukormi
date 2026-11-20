@@ -8,7 +8,7 @@ import { Button } from "@/shared/ui/controls";
 import { Modal } from "@/shared/ui/modal";
 import {
   CalculatorIcon, RationIcon, PetIcon, CustomerIcon, ProductIcon, NutrientIcon,
-  StandardIcon, FormulaIcon, HistoryIcon, NotificationIcon, PurchaseIcon, HelpIcon, MenuIcon,
+  StandardIcon, FormulaIcon, HistoryIcon, NotificationIcon, HelpIcon, MenuIcon,
 } from "@/shared/ui/icons";
 import { ui } from "@/shared/ui/styles";
 
@@ -21,6 +21,7 @@ const groups = [
   ] },
   { title: "Справочники", pages: [
     { href: "/products", label: "Продукты", icon: ProductIcon },
+    { href: "/recipes", label: "Рецепты", icon: RationIcon },
     { href: "/nutrients", label: "Нутриенты", icon: NutrientIcon },
     { href: "/standards", label: "Эталоны", icon: StandardIcon },
     { href: "/modules", label: "Формулы", icon: FormulaIcon },
@@ -29,7 +30,6 @@ const groups = [
     { href: "/archive", label: "Удалённые", icon: HistoryIcon },
     { href: "/history", label: "История", icon: HistoryIcon },
     { href: "/notifications", label: "События", icon: NotificationIcon },
-    { href: "/invoices", label: "Покупки", icon: PurchaseIcon },
     { href: "/info", label: "Справка", icon: HelpIcon },
   ] },
   { title: "Администрирование", admin: true, pages: [

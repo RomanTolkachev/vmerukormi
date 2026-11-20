@@ -65,7 +65,7 @@ class Parser {
       if (identifier === "max" && args.length) return Math.max(...args);
       throw new Error(`Неизвестная функция ${identifier}`);
     }
-    if (!(identifier in this.variables)) throw new Error(`Неизвестная переменная ${identifier}`);
+    if (!Object.hasOwn(this.variables, identifier)) throw new Error(`Неизвестная переменная ${identifier}`);
     return this.variables[identifier];
   }
 
@@ -95,4 +95,8 @@ class Parser {
 export function evaluateExpression(source: string, variables: Variables) {
   if (!source.trim() || source.length > 500) throw new Error("Некорректная формула");
   return new Parser(source, variables).parse();
+}
+
+export function expressionVariables(source: string) {
+  return [...new Set([...source.matchAll(/[A-Za-z_][A-Za-z0-9_]*/g)].map(match => match[0]).filter(name => !["exp", "min", "max"].includes(name)))];
 }

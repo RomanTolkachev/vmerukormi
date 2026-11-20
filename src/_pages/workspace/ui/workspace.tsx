@@ -17,10 +17,11 @@ import { FormDialog } from "@/shared/ui/form-dialog";
 import { requestJson } from "@/shared/api";
 import { RequiredMark } from "@/shared/ui/required-mark";
 
-export type WorkspaceTab = "customers" | "products" | "nutrients" | "rations" | "notifications" | "invoices" | "standards";
+export type WorkspaceTab = "customers" | "products" | "recipes" | "nutrients" | "rations" | "notifications" | "invoices" | "standards";
 const labels: Record<WorkspaceTab, string> = {
   customers: "Клиенты и их питомцы", products: "Продукты и добавки", nutrients: "Справочник нутриентов", rations: "Рационы",
   notifications: "Уведомления", invoices: "Счета и покупки", standards: "Эталонные значения пород",
+  recipes: "Рецепты",
 };
 export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceTab; tags?: { id: string; name: string }[]; isAdmin?: boolean }) {
   const [editingNutrient, setEditingNutrient] = useState<Record<string, unknown> | null>(null);
@@ -29,19 +30,20 @@ export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceT
   const queryClient = useQueryClient();
   const { open } = useEntityCreation();
   const canCreate = tab !== "invoices" && tab !== "standards" && (tab !== "nutrients" || isAdmin);
-  const cardPath = ["customers", "products", "standards", "rations"].includes(tab) ? tab : null;
+  const catalog = tab === "products" || tab === "recipes";
+  const cardPath = tab === "recipes" ? "products" : ["customers", "products", "standards", "rations"].includes(tab) ? tab : null;
   async function remove(id: string, invalidate: () => void) {
     if (!window.confirm("Удалить запись?")) return;
     try {
       if (tab === "customers") await deleteCustomer(id);
-      else if (tab === "products") await deleteProduct(id);
+      else if (catalog) await deleteProduct(id);
       else await deleteWorkspaceRow(tab, id);
       invalidate();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Не удалось удалить запись"); }
   }
   return <div className={ui("pageLayout", "workspacePage")}>
     <section className={ui("hero")}><div><h1>{labels[tab]}</h1><p>{tab === "products" ? "Общий и личный каталог для составления рационов" : "Поиск, фильтры и персональные настройки отображения"}</p></div>
-      {canCreate && <Button type="button" variant="primary" onClick={() => open({ entity: tab as EntityKind, onCreated: choice => { void queryClient.invalidateQueries({ queryKey: [`workspace-${tab}`] }); if (tab === "products") router.push(`/products/${choice.value}`); } })}><AddIcon size={18} aria-hidden="true" />{tab === "products" ? "Создать продукт" : "Создать"}</Button>}
+      {canCreate && <Button type="button" variant="primary" onClick={() => open({ entity: catalog ? "products" : tab as EntityKind, initial: tab === "recipes" ? { kind: "RECIPE" } : undefined, onCreated: choice => { void queryClient.invalidateQueries({ queryKey: [`workspace-${tab}`] }); if (catalog) router.push(`/products/${choice.value}`); } })}><AddIcon size={18} aria-hidden="true" />{tab === "recipes" ? "Создать рецепт" : tab === "products" ? "Создать продукт" : "Создать"}</Button>}
     </section>
     <section className={ui("card")}><div className={ui("cardBody", "tableBody")}>
       {message && <p role="alert" className={ui("error")}>{message}</p>}
@@ -51,10 +53,10 @@ export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceT
         queryFn={query => getWorkspaceRows(tab, query)}
         sortable={["name", "nameRu", "createdAt", "updatedAt", "calories", "protein", "fat"]}
         toolbar={{
-          inlineSlot: tab === "products" ? () => <TagFilter tags={tags} /> : undefined,
-          search: { enabled: true, placeholder: tab === "products" ? "Название, группа или тег" : "Поиск" },
+          inlineSlot: catalog ? () => <TagFilter tags={tags} /> : undefined,
+          search: { enabled: true, placeholder: catalog ? "Название, группа или тег" : "Поиск" },
           settingsButton: { enabled: true },
-          filtersButton: tab === "products" ? {
+          filtersButton: catalog ? {
             render: () => <div className={ui("field")}><span>Тег продукта</span><TagFilter tags={tags} draft /></div>,
             applied: query => query.tagId ? [{ key: "tagId", label: `Тег: ${tags.find(tag => tag.id === query.tagId)?.name ?? "не найден"}`, fields: ["tagId"] }] : [],
           } : undefined,
@@ -73,6 +75,7 @@ export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceT
           if (typeof value === "number") return <span className={ui("numericCell")}>{value.toLocaleString("ru-RU", { maximumFractionDigits: 6 })}</span>;
           if (value === "PRODUCT") return "Продукт";
           if (value === "SUPPLEMENT") return "Добавка";
+          if (value === "RECIPE") return "Рецепт";
           if (value === "Общий" || value === "Личный") return <span className={ui("catalogBadge", value === "Личный" && "catalogBadgePersonal")}>{value}</span>;
           return <span className={ui(column === "name" || column === "nameRu" ? "registryName" : column === "tagNames" ? "registryTags" : undefined)}>{String(value ?? "—")}</span>;
         }}

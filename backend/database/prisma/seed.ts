@@ -437,6 +437,7 @@ async function seedClientsAndPets(userId: string) {
       update: {
         petId: pet.id,
         moduleId: pet.moduleId,
+        name: `Расчёт ${pet.name}`, species: pet.species,
         formulaVersionId: `${pet.moduleId}-initial`,
         actualWeight: pet.actualWeight,
         idealWeight: pet.idealWeight,
@@ -452,6 +453,7 @@ async function seedClientsAndPets(userId: string) {
         id: calculationId,
         petId: pet.id,
         moduleId: pet.moduleId,
+        name: `Расчёт ${pet.name}`, species: pet.species,
         formulaVersionId: `${pet.moduleId}-initial`,
         actualWeight: pet.actualWeight,
         idealWeight: pet.idealWeight,
@@ -559,14 +561,15 @@ async function main() {
     },
   });
 
+  await prisma.animalSpecies.createMany({ data: [{ code: "CAT", name: "Кошка" }, { code: "DOG", name: "Собака" }], skipDuplicates: true });
   await seedTestUsers(prisma);
   await prisma.session.deleteMany({ where: { expiresAt: { lte: new Date() } } });
   await Promise.all(
     MODULES.map((module) =>
       prisma.module.upsert({
         where: { id: module.id },
-        update: { name: module.name, species: module.species as Species, archived: false },
-        create: { id: module.id, name: module.name, species: module.species as Species },
+        update: { name: module.name, species: module.species as Species, speciesCodes: [module.species], archived: false },
+        create: { id: module.id, name: module.name, species: module.species as Species, speciesCodes: [module.species] },
       }),
     ),
   );
@@ -579,6 +582,9 @@ async function main() {
           id: `${module.id}-initial`,
           moduleId: module.id,
           formula: module.formula,
+          nameSnapshot: module.name,
+          speciesCodes: [module.species],
+          templateKey: `${module.id}:v1`,
           description: module.description,
           techBegin: new Date("2000-01-01T00:00:00.000Z"),
           techEnd: formulaOpenEnd(),

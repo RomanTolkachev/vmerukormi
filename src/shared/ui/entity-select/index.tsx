@@ -25,6 +25,6 @@ export function EntitySelect({ entity, label, value, onChange, filters = {}, dis
     <AsyncSelect<EntityChoice> label={label} value={value} selectedOption={selectedOption ?? (created?.value === value ? created : lookup.data?.[0] ?? null)}
       onChange={choose} disabled={disabled} required={required} queryKey={["entity-options", entity, filterKey]} wrapOptions
       loadOptions={({ search, signal }) => requestJson<EntityChoice[]>(`/api/options/${entity}?${new URLSearchParams({ ...filters, search })}`, { signal })} />
-    {allowCreate && Boolean(labels[entity]) && (!shared || isAdmin) && (entity !== "modules" || isAdmin) && <Button type="button" className={ui("secondary")} disabled={disabled} onClick={() => open({ entity: entity as CreationRequest["entity"], shared, initial: { ...(filters.species ? { species: filters.species } : {}), ...initial }, onCreated: option => choose(option.value, option) })}>{labels[entity]}</Button>}
+    {allowCreate && Boolean(labels[entity]) && (!shared || isAdmin) && (entity !== "species" || isAdmin) && <Button type="button" className={ui("secondary")} disabled={disabled} onClick={() => open({ entity: entity as CreationRequest["entity"], shared, initial: { ...(filters.species ? { species: filters.species } : {}), ...initial }, onCreated: option => choose(option.value, option) })}>{labels[entity]}</Button>}
   </div>;
 }

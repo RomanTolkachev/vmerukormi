@@ -84,9 +84,9 @@ test("local authentication, role permissions, soft deletion, snapshots and audit
       await user.json("/api/workspace/nutrients/" + nutrientId, "PATCH", { name: "Forbidden" }, 403);
       await user.json("/api/workspace/nutrients/" + nutrientId, "DELETE", undefined, 403);
       await user.json("/api/archive", "POST", { resource: "nutrients", key: { id: nutrientId } }, 403);
-      const product = await user.json<{ id: string }>("/api/workspace/products", "POST", { name: "QA food " + suffix, kind: "PRODUCT", calories: 100, protein: 10, fat: 2, carbs: 5 }, 201);
+      const product = await user.json<{ id: string }>("/api/workspace/products", "POST", { name: "QA food " + suffix, kind: "PRODUCT", calories: 100, protein: 10, fat: 2, carbs: 5, nutrients: [{ nutrientId, amount: 0.004 }] }, 201);
       productId = product.id;
-      await user.json("/api/products/" + productId + "/nutrients", "POST", { nutrientId, amount: 0.004 }, 201);
+      await user.json("/api/products/" + productId + "/nutrients", "POST", { nutrientId, amount: 0.004 }, 409);
       await stranger.json("/api/workspace/products/" + productId, "DELETE", undefined, 404);
     });
     await context.test("source edits and soft deletion never change saved ration composition or Excel", async () => {
@@ -97,8 +97,9 @@ test("local authentication, role permissions, soft deletion, snapshots and audit
       await stranger.json("/api/rations/" + rationId + "/export", "GET", undefined, 404);
       const item = await user.json<{ id: string }>("/api/rations/" + rationId + "/items", "POST", { productId, quantity: 200 }, 201);
       itemId = item.id;
-      await admin.json("/api/products/" + productId, "PATCH", { name: "Changed", kind: "PRODUCT", groupId: null, baseQuantity: 100, unit: "г", calories: 999, protein: 99, fat: 20, carbs: 50, archived: false, tagIds: [] });
-      await user.json("/api/products/" + productId + "/nutrients/" + nutrientId, "PATCH", { amount: 999 });
+      const current = await admin.json<{ revision: number }>("/api/products/" + productId);
+      await admin.json("/api/products/" + productId, "PATCH", { name: "Changed", kind: "PRODUCT", groupId: null, baseQuantity: 100, unit: "г", calories: 999, protein: 99, fat: 20, carbs: 50, archived: false, tagIds: [], nutrients: [{ nutrientId, amount: 999 }], expectedRevision: current.revision });
+      await user.json("/api/products/" + productId + "/nutrients/" + nutrientId, "PATCH", { amount: 999 }, 409);
       await user.json("/api/workspace/products/" + productId, "DELETE", undefined, 204);
       const options = await user.json<{ value: string }[]>("/api/options/products?id=" + productId);
       assert.equal(options.length, 0);
@@ -108,7 +109,7 @@ test("local authentication, role permissions, soft deletion, snapshots and audit
       assert.ok(saved.items[0].product.deletedAt);
       const card = await user.request("/products/" + productId);
       assert.equal(card.status, 200);
-      assert.match(await card.text(), /Продукт удалён/);
+      assert.match(await card.text(), /Запись удалена/);
       await user.json("/api/rations/" + rationId + "/items/" + itemId, "PATCH", { quantity: 300 });
       const response = await admin.request("/api/rations/" + rationId + "/export");
       assert.equal(response.status, 200);

@@ -1,0 +1,12 @@
+.layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 18px; min-height: 0; overflow: hidden; }
+.panel { min-width: 0; min-height: 0; overflow: auto; background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.panel h2 { font-size: 18px; font-weight: 600; margin: 0 0 20px; }
+.panel h3 { font-size: 16px; font-weight: 600; margin: 20px 0 0; }
+.fields { display: grid; gap: 16px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.coefficients { display: grid; gap: 16px; padding-block: 20px; border-block: 1px solid var(--line); }
+.coefficients h3, .coefficients p { margin: 0; }
+.panel code { overflow-wrap: anywhere; }
+.panel code, .panel code + span { display: block; margin-block: 6px; }
+.compact { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; overflow: visible; }
+.compact .panel { border: 0; padding: 0; overflow: visible; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; overflow: auto; align-items: start; } .panel { padding: 16px; overflow: visible; } }
