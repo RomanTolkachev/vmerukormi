@@ -9,4 +9,4 @@
 .panel code, .panel code + span { display: block; margin-block: 6px; }
 .compact { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; overflow: visible; }
 .compact .panel { border: 0; padding: 0; overflow: visible; }
-@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; overflow: auto; align-items: start; } .panel { padding: 16px; overflow: visible; } }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: max-content; overflow: auto; align-items: start; } .panel { padding: 16px; overflow: visible; } }

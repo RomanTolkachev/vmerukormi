@@ -18,7 +18,7 @@
     "test:reference-migration": "node --import tsx --test tooling/reference-migration.test.ts tooling/bootstrap-reference-migration.test.ts",
     "test:recipe-migration": "node --import tsx --test tooling/recipe-migration.test.ts",
     "test:recipes": "node --import tsx --test backend/domain/catalog/recipe.test.ts tooling/recipes.integration.test.ts",
-    "test:formulas": "node --import tsx --test backend/domain/nutrition/parameters.test.ts tooling/formulas.integration.test.ts",
+    "test:formulas": "node --import tsx --test backend/domain/nutrition/parameters.test.ts src/features/calculate-energy/model/*.test.ts tooling/formulas.integration.test.ts",
     "test:formulas:migration": "node --import tsx --test tooling/formula-migration.test.ts",
     "db:generate": "prisma generate --schema backend/database/prisma/schema.prisma",
     "db:migrate": "prisma migrate dev --schema backend/database/prisma/schema.prisma",

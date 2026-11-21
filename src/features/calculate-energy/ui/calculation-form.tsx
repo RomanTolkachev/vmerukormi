@@ -8,11 +8,13 @@ import { requestJson } from "@/shared/api";
 import type { EntityChoice } from "@/shared/api/entity-choice";
 import { EntitySelect } from "@/shared/ui/entity-select";
 import { Button, Input, Select } from "@/shared/ui/controls";
+import { InputField } from "@/shared/ui/input-field";
 import { FormDialog } from "@/shared/ui/form-dialog";
 import { RequiredMark } from "@/shared/ui/required-mark";
 import { notify } from "@/shared/ui/notifications";
 import { ui } from "@/shared/ui/styles";
 import styles from "./calculation-form.module.css";
+import { parameterHelp, coefficientHint, energyFactorHelp } from "../model/formula-help";
 
 type Formula = { id: string; name: string; speciesCodes: string[]; versions: { id: string; formula: string; templateKey: string | null }[] };
 type Result = EnergyResult & { variables: Record<string, number>; coefficients: Record<string, number>; formulaVersionId: string; formulaExpression: string };
@@ -109,12 +111,15 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
         {template && <>
           <div className={ui("formGrid")}>{template.fields.filter(key => !template.automatic.includes(key)).map(key => {
             const parameter = calculationParameters.find(item => item.key === key)!;
-            return <label className={ui("field")} key={key}><span>{parameterLabel(template, key)}{required.has(key) && <RequiredMark />}</span><Input type="number" step={"integer" in parameter ? 1 : "any"} min={parameter.min} required={required.has(key)} placeholder="Не задано" value={parameters[key] ?? ""} onChange={event => { changed(); setParameters(current => ({ ...current, [key]: event.target.value })); }} /><small className={ui("fieldHint")}>{key === "AW" ? "AW — текущая масса питомца" : key === "IW" ? (template.growing ? "IW — ожидаемая масса во взрослом возрасте" : "IW — идеальная масса питомца") : "Нужен для автоматического коэффициента; ручное значение можно задать ниже"}</small></label>;
+            return <InputField key={`${template.key}-${key}`} label={parameterLabel(template, key)} hint={parameterHelp(template, key).hint} type="number" step={"integer" in parameter ? 1 : "any"} min={parameter.min} required={required.has(key)} placeholder="Не задано" value={parameters[key] ?? ""} onChange={event => { changed(); setParameters(current => ({ ...current, [key]: event.target.value })); }} />;
           })}</div>
           <section className={styles.coefficients}><h3>Коэффициенты формулы{coefficientsChanged ? " · изменены" : ""}</h3><p className={ui("meta")}>Изменения действуют только в этом расчёте. Структура формулы фиксирована.</p>
-            <div className={ui("formGrid")}>{template.coefficients.map(item => <label className={ui("field")} key={item.key}><span>{item.label}</span><Input type="number" step="any" required value={coefficients[item.key] ?? item.value} onChange={event => { changed(); setCoefficients(current => ({ ...current, [item.key]: event.target.value })); }} /><small className={ui("fieldHint")}>{item.key} · стандартное значение: {item.value}{coefficients[item.key] !== undefined && Number(coefficients[item.key]) !== item.value ? " · изменено" : ""}</small></label>)}
-            {template.automatic.map(key => <label className={ui("field")} key={key}><span>{parameterLabel(template, key)}</span><Input type="number" step="any" min="0" placeholder={automatic[key] === undefined ? "Автоматически" : `Автоматически: ${automatic[key]}`} value={parameters[key] ?? ""} onChange={event => { changed(); setParameters(current => ({ ...current, [key]: event.target.value })); }} /><small className={ui("fieldHint")}>Пусто — автоматически; 0 — ручной ноль</small></label>)}</div>
-            <label className={ui("field")}><span>Индивидуальная потребность, доля ОЭ</span><Input type="number" min={Number.MIN_VALUE} step="any" value={factor} onChange={event => { setFactor(event.target.value); changed(); }} /><small className={ui("fieldHint")}>Пусто или 1 — без поправки. 1,2 — 120% рассчитанной энергии.</small></label>
+            <div className={ui("formGrid")}>{template.coefficients.map(item => <InputField key={`${template.key}-${item.key}`} label={item.label} hint={coefficientHint(template, item.key)} note={<>{item.key} · стандартное значение: {item.value.toLocaleString("ru-RU")}{coefficients[item.key] !== undefined && Number(coefficients[item.key]) !== item.value ? " · изменено" : ""}</>} type="number" step="any" required value={coefficients[item.key] ?? item.value} onChange={event => { changed(); setCoefficients(current => ({ ...current, [item.key]: event.target.value })); }} />)}
+            {template.automatic.map(key => {
+              const help = parameterHelp(template, key);
+              return <InputField key={`${template.key}-${key}`} label={parameterLabel(template, key)} hint={help.hint} note="Пусто — автоматически; введённое значение заменяет автоматику, в том числе 0." details={help.rules ? { title: "Как рассчитывается", content: <ul>{help.rules.map(rule => <li key={rule}>{rule}</li>)}</ul> } : undefined} type="number" step="any" min="0" placeholder={automatic[key] === undefined ? "Автоматически" : `Автоматически: ${automatic[key]}`} value={parameters[key] ?? ""} onChange={event => { changed(); setParameters(current => ({ ...current, [key]: event.target.value })); }} />;
+            })}</div>
+            <InputField label="Индивидуальная потребность, доля ОЭ" {...energyFactorHelp} type="number" min={Number.MIN_VALUE} step="any" value={factor} onChange={event => { setFactor(event.target.value); changed(); }} />
             <Button type="button" disabled={busy || !coefficientsChanged} onClick={resetCoefficients}>Сбросить коэффициенты</Button>
           </section>
           <div className={ui("formulaBox")}><strong>Формула</strong><code>{displayFormula(template, coefficients)}</code><span>× {factor || "1"} — индивидуальная поправка</span>{result && <code>{Object.entries(result.variables).map(([key, value]) => `${key} = ${value}`).join("; ")}</code>}</div>
@@ -125,10 +130,10 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
     </form>
     <section className={styles.panel}><h2>Суточная норма</h2>{!result ? <p>Выберите формулу, заполните необходимые параметры и выполните расчёт.</p> : <fieldset disabled={busy} className={styles.fields}>
       <p className={ui("meta")}>{result.standardSource}</p>
-      <label className={ui("field")}><span>Калорийность, ккал/сут</span><Input type="number" min="1" max="2147483647" step="1" value={result.adjustedEnergy} onChange={event => { setResult({ ...result, adjustedEnergy: Number(event.target.value) }); onDirtyChange?.(true); }} /></label>
-      <div className={ui("formGrid")}>{(["protein", "fat", "carbs"] as const).map((key, index) => <label className={ui("field")} key={key}><span>{["Белок, г", "Жир, г", "Углеводы, г"][index]}</span><Input type="number" min="0" step="any" value={result[key]} onChange={event => { const next = { ...result, [key]: Number(event.target.value) }; setResult({ ...next, adjustedEnergy: macroEnergy(next.protein, next.fat, next.carbs) }); onDirtyChange?.(true); }} /></label>)}</div>
-      <p className={ui("fieldHint")}>Изменение БЖУ пересчитывает энергию. Ручное изменение калорийности не меняет БЖУ. Нутриенты корректируются отдельно.</p>
-      <h3>Нутриенты</h3>{result.standardNutrients.map(nutrient => <label className={ui("field")} key={nutrient.nutrientId}><span>{nutrient.name}, {nutrient.unit}/сут</span><Input type="number" min="0" step="any" placeholder="Не задано" value={nutrient.targetAmount ?? ""} onChange={event => { setResult({ ...result, standardNutrients: result.standardNutrients.map(item => item.nutrientId === nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) }); onDirtyChange?.(true); }} /></label>)}
+      <InputField label="Калорийность, ккал/сут" hint="Целевая энергия на сутки с учётом индивидуальной поправки. Ручное изменение не пересчитывает БЖУ и нутриенты." type="number" min="1" max="2147483647" step="1" value={result.adjustedEnergy} onChange={event => { setResult({ ...result, adjustedEnergy: Number(event.target.value) }); onDirtyChange?.(true); }} />
+      <div className={ui("formGrid")}>{(["protein", "fat", "carbs"] as const).map((key, index) => <InputField key={key} label={["Белок, г", "Жир, г", "Углеводы, г"][index]} hint={`Целевое количество ${["белка", "жира", "углеводов"][index]} в граммах на сутки. Изменение пересчитывает калорийность, но не остальные нутриенты.`} type="number" min="0" step="any" value={result[key]} onChange={event => { const next = { ...result, [key]: Number(event.target.value) }; setResult({ ...next, adjustedEnergy: macroEnergy(next.protein, next.fat, next.carbs) }); onDirtyChange?.(true); }} />)}</div>
+      <h3>Нутриенты</h3><p className={ui("fieldHint")}>Пусто — не задано; 0 — явно заданный ноль. Изменение нутриентов не пересчитывает калорийность и БЖУ.</p>
+      {result.standardNutrients.map(nutrient => <InputField key={nutrient.nutrientId} label={`${nutrient.name}, ${nutrient.unit}/сут`} hint="Целевое количество этого нутриента на сутки, не на 100 г продукта." type="number" min="0" step="any" placeholder="Не задано" value={nutrient.targetAmount ?? ""} onChange={event => { setResult({ ...result, standardNutrients: result.standardNutrients.map(item => item.nutrientId === nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) }); onDirtyChange?.(true); }} />)}
     </fieldset>}</section>
   </div>;
 }

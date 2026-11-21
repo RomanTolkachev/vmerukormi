@@ -1,0 +1,8 @@
+.field { min-width: 0; }
+.details { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.details summary { width: fit-content; max-width: 100%; min-height: 32px; padding-block: 7px; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.details summary:hover { color: var(--accent-hover); }
+.content { padding-top: 4px; overflow-wrap: anywhere; }
+.content ul { padding-left: 18px; margin: 0; }
+.content li + li { margin-top: 6px; }
+@media (pointer: coarse) { .details summary { min-height: 44px; padding-block: 13px; } }

@@ -9,6 +9,11 @@ import { textButtonTypography } from "../src/shared/ui/kit/buttons/textButtonTyp
 import { toast } from "sonner";
 import { notify } from "../src/shared/ui/notifications/api/notify";
 
+test("mobile calculation panels grow with helper text instead of overlapping", () => {
+  const stylesheet = readFileSync(new URL("../src/features/calculate-energy/ui/calculation-form.module.css", import.meta.url), "utf8");
+  assert.match(stylesheet, /@media\s*\(max-width:\s*900px\)\s*\{\s*\.layout\s*\{[^}]*grid-auto-rows:\s*max-content;/);
+});
+
 test("ordered table uses one table and native sticky scrolling without scroll synchronization", () => {
   const component = readFileSync(new URL("../src/shared/ui/kit/universal-table/ordered-table/OrderedTable.tsx", import.meta.url), "utf8");
   const stylesheet = readFileSync(new URL("../src/shared/ui/kit/universal-table/ordered-table/OrderedTable.module.css", import.meta.url), "utf8");
