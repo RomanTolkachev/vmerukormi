@@ -9,6 +9,31 @@ import { textButtonTypography } from "../src/shared/ui/kit/buttons/textButtonTyp
 import { toast } from "sonner";
 import { notify } from "../src/shared/ui/notifications/api/notify";
 
+test("recipe forms hide classification controls without deleting stored metadata", () => {
+  const form = readFileSync(new URL("../src/features/edit-product/ui/product-form.tsx", import.meta.url), "utf8");
+  const creation = readFileSync(new URL("../src/features/edit-product/ui/product-creation-dialog.tsx", import.meta.url), "utf8");
+  assert.match(form, /const recipe = draft\.kind === "RECIPE"/);
+  assert.match(form, /className=\{recipe \? undefined : styles\.grid\}/);
+  assert.match(form, /\{!recipe && <>\s*<label[\s\S]*?<Select value=\{draft\.kind\}[\s\S]*?<EntitySelect entity="groups"[^\n]*\/>\s*<\/>\}/);
+  assert.match(form, /\{!recipe && <section[^>]*><h2>Теги и доступность<\/h2>/);
+  assert.doesNotMatch(form, /Продукты и добавки, без вложенных рецептов|Ингредиентов нет\. Можно заполнить|По умолчанию — сумма ингредиентов/);
+  assert.match(form, /useState<ProductDraft>\(initial\)/);
+  assert.match(form, /JSON\.stringify\(\{ \.\.\.draft, expectedRevision:/);
+  assert.match(creation, /kind: initial\.kind === "RECIPE" && !initial\.ingredientOnly \? "RECIPE"/);
+});
+
+test("product editor aligns its header and form within a focus-safe scrolling column", () => {
+  const editor = readFileSync(new URL("../src/features/edit-product/ui/product-editor.tsx", import.meta.url), "utf8");
+  const stylesheet = readFileSync(new URL("../src/features/edit-product/ui/product-form.module.css", import.meta.url), "utf8");
+  assert.match(editor, /<div className=\{styles\.editorContent\}>\s*<header[\s\S]*<\/header>\s*<div className=\{styles\.panel\}>/);
+  assert.match(stylesheet, /\.editorContent\s*\{[^}]*max-width:\s*1100px;/);
+  assert.match(stylesheet, /\.page\s*\{[^}]*overflow:\s*auto;[^}]*padding:\s*8px 8px 0;[^}]*scroll-padding:\s*8px;/);
+  assert.match(stylesheet, /\.editorContent\s*\{[^}]*padding-bottom:\s*24px;/);
+  assert.match(stylesheet, /\.editorContent\s*>\s*\.editorHeader\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/);
+  assert.match(stylesheet, /\.editorHeader h1\s*\{[^}]*overflow-wrap:\s*anywhere;/);
+  assert.match(stylesheet, /\.footer\s*\{[^}]*position:\s*sticky;[^}]*bottom:\s*0;/);
+});
+
 test("mobile calculation panels grow with helper text instead of overlapping", () => {
   const stylesheet = readFileSync(new URL("../src/features/calculate-energy/ui/calculation-form.module.css", import.meta.url), "utf8");
   assert.match(stylesheet, /@media\s*\(max-width:\s*900px\)\s*\{\s*\.layout\s*\{[^}]*grid-auto-rows:\s*max-content;/);

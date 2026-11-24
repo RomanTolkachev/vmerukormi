@@ -83,28 +83,29 @@ export function ProductForm({ initial, onSaved, onDirtyChange, onBusyChange, ing
   return <form className={styles.form} onSubmit={submit}>
     <fieldset disabled={busy || !initial.canEdit} className={styles.fields}>
       <section className={styles.section}>
-        <div className={styles.grid}>
+        <div className={recipe ? undefined : styles.grid}>
           <label className={ui("field")}><span>Название<RequiredMark /></span><Input required maxLength={180} value={draft.name} onChange={event => change({ name: event.target.value })} /></label>
-          <label className={ui("field")}><span>Тип<RequiredMark /></span><Select value={draft.kind} onChange={event => setKind(event.target.value as ProductKind)}><option value="PRODUCT">Продукт</option><option value="SUPPLEMENT">Добавка</option>{!ingredientOnly && <option value="RECIPE">Рецепт</option>}</Select></label>
-          <EntitySelect entity="groups" label="Группа" value={draft.groupId ?? ""} filters={{ shared: String(initial.isShared) }} selectedOption={draft.groupId ? undefined : null} onChange={value => change({ groupId: value || null })} />
+          {!recipe && <>
+            <label className={ui("field")}><span>Тип<RequiredMark /></span><Select value={draft.kind} onChange={event => setKind(event.target.value as ProductKind)}><option value="PRODUCT">Продукт</option><option value="SUPPLEMENT">Добавка</option>{!ingredientOnly && <option value="RECIPE">Рецепт</option>}</Select></label>
+            <EntitySelect entity="groups" label="Группа" value={draft.groupId ?? ""} filters={{ shared: String(initial.isShared) }} selectedOption={draft.groupId ? undefined : null} onChange={value => change({ groupId: value || null })} />
+          </>}
           {!recipe && <>{numberField("baseQuantity", "Базовое количество")}<label className={ui("field")}><span>Единица базового количества</span><Input required value={draft.unit} onChange={event => change({ unit: event.target.value })} /></label></>}
         </div>
         <p className={styles.hint}>{initial.isShared ? "Общий каталог: запись видна всем пользователям." : "Личный каталог: запись доступна вам и администратору."}</p>
       </section>
       {recipe && <section className={styles.section}>
-        <h2>Ингредиенты</h2><p className={styles.hint}>Продукты и добавки, без вложенных рецептов. Количество указывается в граммах.</p>
+        <h2>Ингредиенты</h2>
         {draft.recipeIngredients.length ? <div className={styles.rows}>{draft.recipeIngredients.map((ingredient, index) => <div className={styles.row} key={ingredient.productId}>
           <div><strong>{ingredient.snapshot.name}</strong><small>Сохранённый состав · версия {ingredient.snapshot.revision}</small></div>
           <label className={ui("field")}><span>Количество, г</span><Input aria-label={`Количество ${ingredient.snapshot.name}, г`} type="number" min="0.000001" step="any" required value={ingredient.grams} onChange={event => change({ recipeIngredients: draft.recipeIngredients.map((value, position) => position === index ? { ...value, grams: Number(event.target.value) } : value) }, true)} /></label>
           <Button type="button" variant="danger" onClick={() => change({ recipeIngredients: draft.recipeIngredients.filter((_, position) => position !== index) }, true)}>Убрать</Button>
-        </div>)}</div> : <p className={styles.hint}>Ингредиентов нет. Можно заполнить пищевую ценность вручную.</p>}
+        </div>)}</div> : null}
         <div className={styles.grid}>
           <EntitySelect entity="products" label="Продукт или добавка" value={ingredientId} filters={{ shared: String(initial.isShared), ingredients: "true", parentProductId: initial.id }} initial={{ ingredientOnly: true }} onChange={setIngredientId} />
           <label className={ui("field")}><span>Добавляемое количество, г</span><Input type="number" min="0.000001" step="any" value={ingredientGrams} onChange={event => setIngredientGrams(Number(event.target.value))} /></label>
         </div>
         <Button type="button" loading={operation === "preview"} onClick={() => void addIngredient()} disabled={!ingredientId}>Добавить ингредиент</Button>
         <label className={ui("field")}><span>Масса готового блюда, г{draft.recipeIngredients.length > 0 && <RequiredMark />}</span><Input type="number" min="0.000001" step="any" required={draft.recipeIngredients.length > 0} value={draft.recipeYieldGrams ?? ""} onChange={event => change({ recipeYieldGrams: event.target.value ? Number(event.target.value) : null }, true)} /></label>
-        <p className={styles.hint}>По умолчанию — сумма ингредиентов. Уточните массу после приготовления: от неё зависит состав на 100 г.</p>
         {needsCalculation && <div role="status" className={styles.notice}><p>Состав изменён. Пересчитайте его перед сохранением; можно отменить изменения всей формы.</p><Button type="button" loading={operation === "preview"} onClick={() => void recompute()}>Пересчитать состав</Button></div>}
       </section>}
       <section className={styles.section}>
@@ -125,7 +126,7 @@ export function ProductForm({ initial, onSaved, onDirtyChange, onBusyChange, ing
         {draft.measures.map((measure, index) => <div className={styles.row} key={measure.id || `new-${index}`}><label className={ui("field")}><span>Название меры</span><Input required value={measure.name} onChange={event => change({ measures: draft.measures.map((value, position) => position === index ? { ...value, name: event.target.value } : value) })} /></label><label className={ui("field")}><span>1 мера, г</span><Input required type="number" min="0.000001" step="any" value={measure.grams} onChange={event => change({ measures: draft.measures.map((value, position) => position === index ? { ...value, grams: Number(event.target.value) } : value) })} /></label><Button type="button" variant="danger" onClick={() => change({ measures: draft.measures.filter((_, position) => position !== index) })}>Убрать</Button></div>)}
         <Button type="button" onClick={() => change({ measures: [...draft.measures, { id: "", name: "", grams: 1 }] })}>Добавить меру</Button>
       </section>
-      <section className={styles.section}><h2>Теги и доступность</h2><div className={styles.tags}>{draft.tagIds.map(id => <Button type="button" key={id} onClick={() => change({ tagIds: draft.tagIds.filter(value => value !== id) })}>Убрать: {tagNames[id] ?? "тег"}</Button>)}</div><EntitySelect entity="tags" label="Добавить тег" value="" filters={{ shared: String(initial.isShared) }} onChange={(value, option) => { if (value && !draft.tagIds.includes(value)) { change({ tagIds: [...draft.tagIds, value] }); setTagNames(current => ({ ...current, [value]: option?.label ?? "Тег" })); } }} /><label><Input type="checkbox" checked={draft.archived} onChange={event => change({ archived: event.target.checked })} /> Архивный продукт</label></section>
+      {!recipe && <section className={styles.section}><h2>Теги и доступность</h2><div className={styles.tags}>{draft.tagIds.map(id => <Button type="button" key={id} onClick={() => change({ tagIds: draft.tagIds.filter(value => value !== id) })}>Убрать: {tagNames[id] ?? "тег"}</Button>)}</div><EntitySelect entity="tags" label="Добавить тег" value="" filters={{ shared: String(initial.isShared) }} onChange={(value, option) => { if (value && !draft.tagIds.includes(value)) { change({ tagIds: [...draft.tagIds, value] }); setTagNames(current => ({ ...current, [value]: option?.label ?? "Тег" })); } }} /><label><Input type="checkbox" checked={draft.archived} onChange={event => change({ archived: event.target.checked })} /> Архивный продукт</label></section>}
     </fieldset>
     {error && <p role="alert" className={ui("error")}>{error}</p>}
     {initial.canEdit && <div className={styles.footer}><span className={styles.hint}>{dirty ? "Есть несохранённые изменения" : "Изменения сохраняются одной версией"}</span><div className={ui("actions")}><Button type="button" disabled={busy} onClick={() => { if (!dirty || window.confirm("Отменить несохранённые изменения?")) { setDraft(initial); setNeedsCalculation(false); setError(""); onDirtyChange?.(false); } }}>Отменить изменения</Button><Button type="submit" variant="primary" loading={operation === "save"} disabled={busy || needsCalculation}>{operation === "save" ? "Сохраняем…" : "Сохранить"}</Button></div></div>}
