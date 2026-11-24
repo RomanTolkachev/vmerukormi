@@ -28,7 +28,7 @@ export function CalculationEntry(props: Props) {
 }
 export function CalculationDialog({ initial = {}, onClose, onSaved }: { initial?: Record<string, unknown>; onClose: () => void; onSaved: (record: Saved) => void }) {
   const [dirty, setDirty] = useState(false), [busy, setBusy] = useState(false);
-  return <FormDialog title="Создать расчёт" onClose={onClose} dirty={dirty} busy={busy}><CalculationEntry initialPetId={String(initial.petId ?? "") || undefined} customerId={String(initial.customerId ?? "") || undefined} compact onDirtyChange={setDirty} onBusyChange={setBusy} onSaved={record => { onSaved(record); onClose(); }} /></FormDialog>;
+  return <FormDialog title="Создать расчёт" onClose={onClose} dirty={dirty} busy={busy} contained><CalculationEntry initialPetId={String(initial.petId ?? "") || undefined} customerId={String(initial.customerId ?? "") || undefined} compact onDirtyChange={setDirty} onBusyChange={setBusy} onSaved={record => { onSaved(record); onClose(); }} /></FormDialog>;
 }
 function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChange, onBusyChange }: Props & { initialPet?: Pet }) {
   const [name, setName] = useState("");
@@ -41,10 +41,14 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
   const [coefficients, setCoefficients] = useState<CoefficientDraft>({});
   const [factor, setFactor] = useState("1");
   const [result, setResult] = useState<Result | null>(null);
+  const [nutrientSearch, setNutrientSearch] = useState("");
+  const resultScroller = useRef<HTMLDivElement>(null);
   const [error, setError] = useState("");
   const [operation, setOperation] = useState<"calculate" | "save" | null>(null);
   const busy = operation !== null;
   const submitting = useRef(false);
+  const nutrientQuery = nutrientSearch.trim().toLocaleLowerCase("ru-RU").replaceAll("ё", "е");
+  const visibleNutrients = result?.standardNutrients.filter(nutrient => `${nutrient.name} ${nutrient.code}`.toLocaleLowerCase("ru-RU").replaceAll("ё", "е").includes(nutrientQuery)) ?? [];
   const queryClient = useQueryClient();
   const version = formula?.versions[0];
   const template = getFormulaTemplate(version?.templateKey);
@@ -92,13 +96,14 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
       if (save) {
         void queryClient.invalidateQueries({ predicate: query => ["calculations", "entity-options", "entity-option"].includes(String(query.queryKey[0])) });
         notify.success("Расчёт сохранён"); onDirtyChange?.(false); setResult(null); onSaved?.(response);
-      } else setResult(response);
+      } else { setResult(response); setNutrientSearch(""); }
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Не удалось выполнить расчёт"); }
     finally { submitting.current = false; setOperation(null); onBusyChange?.(false); }
   }
   function submit(event: FormEvent) { event.preventDefault(); event.stopPropagation(); void run(false); }
   return <div className={`${styles.layout} ${compact ? styles.compact : ""}`}>
-    <form onSubmit={submit} className={styles.panel}>
+    <form onSubmit={submit} className={`${styles.panel} ${styles.formPanel}`}>
+      <div className={styles.formContent}>
       <h2>Параметры расчёта</h2>
       <fieldset disabled={busy} className={styles.fields}>
         <label className={ui("field")}><span>Название расчёта<RequiredMark /></span><Input maxLength={160} value={name} onChange={event => { setName(event.target.value); setError(""); onDirtyChange?.(true); }} placeholder="Название для сохранения" /></label>
@@ -126,15 +131,27 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
           <div className={ui("formulaBox")}><strong>Формула</strong><code>{displayFormula(template, coefficients)}</code><span>× {factor || "1"} — индивидуальная поправка</span>{result && <code>{Object.entries(result.variables).map(([key, value]) => `${key} = ${value}`).join("; ")}</code>}</div>
         </>}
         {error && <p role="alert" className={ui("error")}>{error}</p>}
-        <div className={ui("actions")}><Button type="submit" variant="primary" loading={operation === "calculate"} disabled={busy || !template}>{operation === "calculate" ? "Рассчитываем…" : "Рассчитать"}</Button><Button type="button" loading={operation === "save"} disabled={busy || !result} onClick={() => void run(true)}>{operation === "save" ? "Сохраняем…" : "Сохранить расчёт"}</Button><Button type="button" disabled={busy || !result} onClick={() => setResult(null)}>Сбросить результат</Button></div>
       </fieldset>
+      </div>
+      <div className={styles.formActions}><Button type="submit" variant="primary" loading={operation === "calculate"} disabled={busy || !template}>{operation === "calculate" ? "Рассчитываем…" : "Рассчитать"}</Button><Button type="button" loading={operation === "save"} disabled={busy || !result} onClick={() => void run(true)}>{operation === "save" ? "Сохраняем…" : "Сохранить расчёт"}</Button><Button type="button" disabled={busy || !result} onClick={() => setResult(null)}>Сбросить результат</Button></div>
     </form>
-    <section className={styles.panel}><h2>Суточная норма</h2>{!result ? <p>Выберите формулу, заполните необходимые параметры и выполните расчёт.</p> : <fieldset disabled={busy} className={styles.fields}>
+    <section className={`${styles.panel} ${styles.resultPanel}`}>
+      <div className={styles.resultHeader}>
+        <h2>Суточная норма</h2>
+        {result && <label className={ui("field")}><span>Поиск по нутриентам</span><Input type="search" placeholder="Название или код нутриента" value={nutrientSearch} onChange={event => { setNutrientSearch(event.target.value); resultScroller.current?.scrollTo({ top: 0 }); }} /></label>}
+      </div>
+      <div ref={resultScroller} className={styles.resultContent}>
+      {!result ? <p>Выберите формулу, заполните необходимые параметры и выполните расчёт.</p> : <fieldset disabled={busy} className={styles.fields}>
+      {!nutrientQuery && <>
       <p className={ui("meta")}>{result.standardSource}</p>
       <InputField label="Калорийность, ккал/сут" hint="Целевая энергия на сутки с учётом индивидуальной поправки. Ручное изменение не пересчитывает БЖУ и нутриенты." type="number" min="1" max="2147483647" step="1" value={result.adjustedEnergy} onChange={event => { setResult({ ...result, adjustedEnergy: Number(event.target.value) }); onDirtyChange?.(true); }} />
       <div className={ui("formGrid")}>{(["protein", "fat", "carbs"] as const).map((key, index) => <InputField key={key} label={["Белок, г", "Жир, г", "Углеводы, г"][index]} hint={`Целевое количество ${["белка", "жира", "углеводов"][index]} в граммах на сутки. Изменение пересчитывает калорийность, но не остальные нутриенты.`} type="number" min="0" step="any" value={result[key]} onChange={event => { const next = { ...result, [key]: Number(event.target.value) }; setResult({ ...next, adjustedEnergy: macroEnergy(next.protein, next.fat, next.carbs) }); onDirtyChange?.(true); }} />)}</div>
+      </>}
       <h3>Нутриенты</h3><p className={ui("fieldHint")}>Пусто — не задано; 0 — явно заданный ноль. Изменение нутриентов не пересчитывает калорийность и БЖУ.</p>
-      {result.standardNutrients.map(nutrient => <InputField key={nutrient.nutrientId} label={`${nutrient.name}, ${nutrient.unit}/сут`} hint="Целевое количество этого нутриента на сутки, не на 100 г продукта." type="number" min="0" step="any" placeholder="Не задано" value={nutrient.targetAmount ?? ""} onChange={event => { setResult({ ...result, standardNutrients: result.standardNutrients.map(item => item.nutrientId === nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) }); onDirtyChange?.(true); }} />)}
-    </fieldset>}</section>
+      <p role="status" className={ui("meta")}>{visibleNutrients.length ? `Показано ${visibleNutrients.length} из ${result.standardNutrients.length}` : nutrientQuery ? "Нутриенты не найдены. Измените запрос." : "Нутриенты пока не заданы."}</p>
+      {visibleNutrients.map(nutrient => <InputField key={nutrient.nutrientId} label={`${nutrient.name}, ${nutrient.unit}/сут`} hint="Целевое количество этого нутриента на сутки, не на 100 г продукта." type="number" min="0" step="any" placeholder="Не задано" value={nutrient.targetAmount ?? ""} onChange={event => { setResult({ ...result, standardNutrients: result.standardNutrients.map(item => item.nutrientId === nutrient.nutrientId ? { ...item, targetAmount: event.target.value === "" ? null : Number(event.target.value) } : item) }); onDirtyChange?.(true); }} />)}
+    </fieldset>}
+      </div>
+    </section>
   </div>;
 }

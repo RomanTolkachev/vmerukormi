@@ -1,3 +1,18 @@
+.contained[role="dialog"] {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: hidden;
+}
+
+.contained > :not(.containedBody) { flex-shrink: 0; }
+.containedBody { flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+
+@media (max-width: 767px) {
+  .contained[role="dialog"] { height: 100dvh; max-height: 100dvh; }
+}
+
 .progress {
   position: sticky;
   top: 0;

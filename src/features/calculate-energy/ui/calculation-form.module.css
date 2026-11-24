@@ -1,5 +1,11 @@
-.layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 18px; min-height: 0; overflow: hidden; }
+.layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 18px; height: 100%; min-height: 0; overflow: hidden; }
 .panel { min-width: 0; min-height: 0; overflow: auto; background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.panel.formPanel { display: grid; grid-template-rows: minmax(0, 1fr) auto; padding: 0; overflow: hidden; }
+.formContent { min-width: 0; min-height: 0; overflow: auto; padding: 20px; scroll-padding: 8px; }
+.formActions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 16px 20px; border-top: 1px solid var(--line); }
+.panel.resultPanel { display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0; overflow: hidden; }
+.resultHeader { padding: 20px; border-bottom: 1px solid var(--line); }
+.resultContent { min-width: 0; min-height: 0; overflow: auto; padding: 20px; scroll-padding: 8px; }
 .panel h2 { font-size: 18px; font-weight: 600; margin: 0 0 20px; }
 .panel h3 { font-size: 16px; font-weight: 600; margin: 20px 0 0; }
 .fields { display: grid; gap: 16px; border: 0; padding: 0; margin: 0; min-width: 0; }
@@ -7,6 +13,12 @@
 .coefficients h3, .coefficients p { margin: 0; }
 .panel code { overflow-wrap: anywhere; }
 .panel code, .panel code + span { display: block; margin-block: 6px; }
-.compact { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; overflow: visible; }
-.compact .panel { border: 0; padding: 0; overflow: visible; }
-@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: max-content; overflow: auto; align-items: start; } .panel { padding: 16px; overflow: visible; } }
+.compact { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: 100%; overflow: auto; }
+.compact .panel { border: 0; border-radius: 0; }
+.compact .formContent, .compact .resultHeader, .compact .resultContent { padding: 8px; }
+.compact .formActions { padding: 16px 8px 8px; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-rows: 100%; overflow: auto; }
+  .panel, .formContent, .resultHeader, .resultContent { padding: 16px; }
+  .formActions { padding: 16px; }
+}

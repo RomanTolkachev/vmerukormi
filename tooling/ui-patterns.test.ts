@@ -26,7 +26,8 @@ test("product editor aligns its header and form within a focus-safe scrolling co
   const editor = readFileSync(new URL("../src/features/edit-product/ui/product-editor.tsx", import.meta.url), "utf8");
   const stylesheet = readFileSync(new URL("../src/features/edit-product/ui/product-form.module.css", import.meta.url), "utf8");
   assert.match(editor, /<div className=\{styles\.editorContent\}>\s*<header[\s\S]*<\/header>\s*<div className=\{styles\.panel\}>/);
-  assert.match(stylesheet, /\.editorContent\s*\{[^}]*max-width:\s*1100px;/);
+  assert.match(stylesheet, /\.editorContent\s*\{[^}]*width:\s*100%;/);
+  assert.doesNotMatch(stylesheet, /\.editorContent\s*\{[^}]*max-width:/);
   assert.match(stylesheet, /\.page\s*\{[^}]*overflow:\s*auto;[^}]*padding:\s*8px 8px 0;[^}]*scroll-padding:\s*8px;/);
   assert.match(stylesheet, /\.editorContent\s*\{[^}]*padding-bottom:\s*24px;/);
   assert.match(stylesheet, /\.editorContent\s*>\s*\.editorHeader\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/);
@@ -34,9 +35,23 @@ test("product editor aligns its header and form within a focus-safe scrolling co
   assert.match(stylesheet, /\.footer\s*\{[^}]*position:\s*sticky;[^}]*bottom:\s*0;/);
 });
 
-test("mobile calculation panels grow with helper text instead of overlapping", () => {
+test("calculation panels scroll their fields while actions remain outside the scroller", () => {
+  const form = readFileSync(new URL("../src/features/calculate-energy/ui/calculation-form.tsx", import.meta.url), "utf8");
   const stylesheet = readFileSync(new URL("../src/features/calculate-energy/ui/calculation-form.module.css", import.meta.url), "utf8");
-  assert.match(stylesheet, /@media\s*\(max-width:\s*900px\)\s*\{\s*\.layout\s*\{[^}]*grid-auto-rows:\s*max-content;/);
+  assert.match(form, /<\/fieldset>\s*<\/div>\s*<div className=\{styles\.formActions\}>/);
+  assert.match(stylesheet, /\.panel\.formPanel\s*\{[^}]*grid-template-rows:\s*minmax\(0, 1fr\) auto;/);
+  assert.match(stylesheet, /\.formContent\s*\{[^}]*overflow:\s*auto;/);
+  assert.match(stylesheet, /@media\s*\(max-width:\s*900px\)\s*\{\s*\.layout\s*\{[^}]*grid-auto-rows:\s*100%;/);
+});
+
+test("calculation nutrient search stays above scrolling results without filtering saved data", () => {
+  const form = readFileSync(new URL("../src/features/calculate-energy/ui/calculation-form.tsx", import.meta.url), "utf8");
+  const stylesheet = readFileSync(new URL("../src/features/calculate-energy/ui/calculation-form.module.css", import.meta.url), "utf8");
+  assert.match(form, /className=\{styles\.resultHeader\}[\s\S]*<span>Поиск по нутриентам<\/span>[\s\S]*<\/div>\s*<div ref=\{resultScroller\} className=\{styles\.resultContent\}>/);
+  assert.match(form, /visibleNutrients\.map/);
+  assert.match(form, /nutrients: result\.standardNutrients\.filter/);
+  assert.match(stylesheet, /\.panel\.resultPanel\s*\{[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\);[^}]*overflow:\s*hidden;/);
+  assert.match(stylesheet, /\.resultContent\s*\{[^}]*overflow:\s*auto;/);
 });
 
 test("workspace loading leaves navigation outside the blocked region", () => {
