@@ -1,0 +1,8 @@
+.progress {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}

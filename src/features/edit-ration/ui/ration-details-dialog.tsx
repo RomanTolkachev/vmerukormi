@@ -68,7 +68,7 @@ export function RationDetailsDialog({ ration, initial, onSaved, onClose }: {
       </div>
       {ration?.mode === "WEEKLY" && values.mode === "DAILY" && <p className={ui("fieldHint")}>Все позиции будут перенесены на первый день. Продукты и их количества сохранятся.</p>}
       {error && <p className={ui("error")} role="alert">{error}</p>}
-      <div className={ui("actions")}><Button type="submit" variant="primary" disabled={busy || Boolean(ration && !dirty)}>{busy ? "Сохраняем…" : ration ? "Сохранить параметры" : "Создать рацион"}</Button></div>
+      <div className={ui("actions")}><Button type="submit" variant="primary" loading={busy} disabled={Boolean(ration && !dirty)}>{busy ? "Сохраняем…" : ration ? "Сохранить параметры" : "Создать рацион"}</Button></div>
     </form>
   </FormDialog>;
 }

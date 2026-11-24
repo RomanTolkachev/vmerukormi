@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNavigationRouter as useRouter } from "@/shared/lib/navigation";
 import { useEntityCreation } from "@/features/create-entity";
 import { LocalRegistry } from "@/shared/ui/local-registry";
 import { ui } from "@/shared/ui/styles";

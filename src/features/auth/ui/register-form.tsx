@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigationPending, useNavigationRouter as useRouter } from "@/shared/lib/navigation";
 import { requestJson } from "@/shared/api";
 import { Button, ButtonLink, Input } from "@/shared/ui/controls";
 import { RequiredMark } from "@/shared/ui/required-mark";
@@ -10,12 +10,14 @@ import { ui } from "@/shared/ui/styles";
 
 export function RegisterForm() {
   const router = useRouter();
+  const navigating = useNavigationPending();
   const [captcha, setCaptcha] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending || navigating) return;
     const form = new FormData(event.currentTarget);
     if (form.get("password") !== form.get("confirmation")) { setError("Пароли не совпадают"); return; }
     setPending(true);
@@ -39,7 +41,7 @@ export function RegisterForm() {
     <label className={ui("field")}><span>Повторите пароль<RequiredMark /></span><Input name="confirmation" type="password" autoComplete="new-password" required minLength={6} maxLength={200} /></label>
     <Captcha key={attempt} onChange={setCaptcha} />
     {error && <p className={ui("error")} role="alert">{error}</p>}
-    <Button type="submit" variant="primary" disabled={pending || !captcha}>{pending ? "Создаём аккаунт…" : "Зарегистрироваться"}</Button>
+    <Button type="submit" variant="primary" loading={pending || navigating} disabled={!captcha}>{pending || navigating ? "Создаём аккаунт…" : "Зарегистрироваться"}</Button>
     <ButtonLink href="/login">Уже есть аккаунт — войти</ButtonLink>
   </form>;
 }

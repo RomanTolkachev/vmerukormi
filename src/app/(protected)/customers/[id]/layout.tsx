@@ -1,6 +1,6 @@
 import { ui } from "@/shared/ui/styles";
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
 import { notFound } from "next/navigation";
 import { getCustomerHeader } from "@backend/application/customers/queries";
 import { CustomerTabs } from "@/entities/customer";

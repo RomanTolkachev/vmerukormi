@@ -42,7 +42,8 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
   const [factor, setFactor] = useState("1");
   const [result, setResult] = useState<Result | null>(null);
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [operation, setOperation] = useState<"calculate" | "save" | null>(null);
+  const busy = operation !== null;
   const submitting = useRef(false);
   const queryClient = useQueryClient();
   const version = formula?.versions[0];
@@ -83,7 +84,7 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
     setError("");
     if (!version || !formula || !template) { setError("Выберите формулу"); return; }
     if (save && (!result || !name.trim())) { setError(result ? "Введите название расчёта" : "Сначала выполните расчёт"); return; }
-    submitting.current = true; setBusy(true); onBusyChange?.(true);
+    submitting.current = true; setOperation(save ? "save" : "calculate"); onBusyChange?.(true);
     try {
       const payload = { name, moduleId: formula.id, expectedVersionId: version.id, species, petId: petId || null, breedId: breedId || null, sex: sex || null, parameters: cleanParameters(activeParameters, template), coefficients, energyFactor: factor.trim() ? Number(factor) : 1, save,
         ...(save && result ? { adjustedEnergy: result.adjustedEnergy, protein: result.protein, fat: result.fat, carbs: result.carbs, nutrients: result.standardNutrients.filter(item => item.targetAmount !== null).map(item => ({ nutrientId: item.nutrientId, targetAmount: item.targetAmount })) } : {}) };
@@ -93,7 +94,7 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
         notify.success("Расчёт сохранён"); onDirtyChange?.(false); setResult(null); onSaved?.(response);
       } else setResult(response);
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Не удалось выполнить расчёт"); }
-    finally { submitting.current = false; setBusy(false); onBusyChange?.(false); }
+    finally { submitting.current = false; setOperation(null); onBusyChange?.(false); }
   }
   function submit(event: FormEvent) { event.preventDefault(); event.stopPropagation(); void run(false); }
   return <div className={`${styles.layout} ${compact ? styles.compact : ""}`}>
@@ -125,7 +126,7 @@ function CalculationForm({ initialPet, customerId, compact, onSaved, onDirtyChan
           <div className={ui("formulaBox")}><strong>Формула</strong><code>{displayFormula(template, coefficients)}</code><span>× {factor || "1"} — индивидуальная поправка</span>{result && <code>{Object.entries(result.variables).map(([key, value]) => `${key} = ${value}`).join("; ")}</code>}</div>
         </>}
         {error && <p role="alert" className={ui("error")}>{error}</p>}
-        <div className={ui("actions")}><Button type="submit" variant="primary" disabled={busy || !template}>{busy ? "Подождите…" : "Рассчитать"}</Button><Button type="button" disabled={busy || !result} onClick={() => void run(true)}>Сохранить расчёт</Button><Button type="button" disabled={busy || !result} onClick={() => setResult(null)}>Сбросить результат</Button></div>
+        <div className={ui("actions")}><Button type="submit" variant="primary" loading={operation === "calculate"} disabled={busy || !template}>{operation === "calculate" ? "Рассчитываем…" : "Рассчитать"}</Button><Button type="button" loading={operation === "save"} disabled={busy || !result} onClick={() => void run(true)}>{operation === "save" ? "Сохраняем…" : "Сохранить расчёт"}</Button><Button type="button" disabled={busy || !result} onClick={() => setResult(null)}>Сбросить результат</Button></div>
       </fieldset>
     </form>
     <section className={styles.panel}><h2>Суточная норма</h2>{!result ? <p>Выберите формулу, заполните необходимые параметры и выполните расчёт.</p> : <fieldset disabled={busy} className={styles.fields}>

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
 import { usePathname } from "next/navigation";
 import { ui } from "@/shared/ui/styles";
 

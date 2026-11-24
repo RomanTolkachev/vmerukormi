@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { AccountMenu } from "@/features/auth";
-import Link from "next/link";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
 import { AppNavigation, AppBreadcrumb, MobileNavigation } from "@/app/ui/app-navigation";
 import { Brand } from "@/shared/ui/brand";
 import { ui } from "@/shared/ui/styles";
+import { WorkspaceContent } from "./workspace-content";
 
 export function AppShell({ children, username, isAdmin = false }: { children: ReactNode; username: string; isAdmin?: boolean }) {
   return <main className={ui("shell")}>
@@ -14,7 +15,7 @@ export function AppShell({ children, username, isAdmin = false }: { children: Re
     </aside>
     <div className={ui("shellWorkspace")}>
       <header className={ui("topbar")}><MobileNavigation isAdmin={isAdmin} /><AppBreadcrumb /><AccountMenu username={username} /></header>
-      <div className={ui("content")} id="main-content" tabIndex={-1}><div className={ui("pageViewport")}>{children}</div></div>
+      <WorkspaceContent>{children}</WorkspaceContent>
     </div>
   </main>;
 }

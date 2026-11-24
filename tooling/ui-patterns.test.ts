@@ -14,6 +14,35 @@ test("mobile calculation panels grow with helper text instead of overlapping", (
   assert.match(stylesheet, /@media\s*\(max-width:\s*900px\)\s*\{\s*\.layout\s*\{[^}]*grid-auto-rows:\s*max-content;/);
 });
 
+test("workspace loading leaves navigation outside the blocked region", () => {
+  const shell = readFileSync(new URL("../src/app/ui/app-shell.tsx", import.meta.url), "utf8");
+  const workspace = readFileSync(new URL("../src/app/ui/workspace-content.tsx", import.meta.url), "utf8");
+  const navigation = readFileSync(new URL("../src/shared/lib/navigation/index.tsx", import.meta.url), "utf8");
+  assert.match(shell, /<aside[\s\S]*<\/aside>[\s\S]*<WorkspaceContent>\{children\}<\/WorkspaceContent>/);
+  assert.match(workspace, /busy=\{pending\}/);
+  assert.match(navigation, /startTransition\(\(\) => router\.push\(\.\.\.args\)\)/);
+  assert.doesNotMatch(navigation, /addEventListener|setTimeout/);
+});
+
+test("table refresh keeps its mounted rows and blocks stale actions", () => {
+  const table = readFileSync(new URL("../src/shared/ui/kit/universal-table/UniversalTable.tsx", import.meta.url), "utf8");
+  const loading = readFileSync(new URL("../src/shared/ui/loading/index.tsx", import.meta.url), "utf8");
+  const stylesheet = readFileSync(new URL("../src/shared/ui/loading/loading.module.css", import.meta.url), "utf8");
+  assert.match(table, /rowsQuery\.isFetching \|\| refreshing/);
+  assert.match(table, /<BusyRegion[^>]*busy=\{updating\}/);
+  assert.match(table, /<Button onClick=\{\(\) => \{ void rowsQuery\.refetch/);
+  assert.match(loading, /inert=\{busy \|\| undefined\} aria-busy=\{busy\}>\{children\}/);
+  assert.match(stylesheet, /prefers-reduced-motion: reduce/);
+});
+
+test("shared buttons and dialogs expose loading without removing form drafts", () => {
+  const buttons = readFileSync(new URL("../src/shared/ui/controls/index.tsx", import.meta.url), "utf8");
+  const dialog = readFileSync(new URL("../src/shared/ui/form-dialog/index.tsx", import.meta.url), "utf8");
+  assert.match(buttons, /disabled=\{disabled \|\| loading\} aria-busy=\{loading \|\| undefined\}/);
+  assert.match(dialog, /<LoadingStatus label=/);
+  assert.match(dialog, /inert=\{busy \|\| undefined\} aria-busy=\{busy\}>\{children\}/);
+});
+
 test("ordered table uses one table and native sticky scrolling without scroll synchronization", () => {
   const component = readFileSync(new URL("../src/shared/ui/kit/universal-table/ordered-table/OrderedTable.tsx", import.meta.url), "utf8");
   const stylesheet = readFileSync(new URL("../src/shared/ui/kit/universal-table/ordered-table/OrderedTable.module.css", import.meta.url), "utf8");

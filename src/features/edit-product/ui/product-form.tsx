@@ -17,7 +17,8 @@ export function ProductForm({ initial, onSaved, onDirtyChange, onBusyChange, ing
   initial: EditableProduct; onSaved: (product: EditableProduct) => void; onDirtyChange?: (dirty: boolean) => void; onBusyChange?: (busy: boolean) => void; ingredientOnly?: boolean;
 }) {
   const [draft, setDraft] = useState<ProductDraft>(initial);
-  const [busy, setBusy] = useState(false);
+  const [operation, setOperation] = useState<"save" | "preview" | null>(null);
+  const busy = operation !== null;
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [needsCalculation, setNeedsCalculation] = useState(false);
@@ -32,20 +33,21 @@ export function ProductForm({ initial, onSaved, onDirtyChange, onBusyChange, ing
     onDirtyChange?.(true);
     if (composition) setNeedsCalculation(true);
   }
-  function pending(value: boolean) { setBusy(value); onBusyChange?.(value); }
+  function pending(value: boolean, action: "save" | "preview" = "save") { setOperation(value ? action : null); onBusyChange?.(value); }
   function setKind(kind: ProductKind) {
     if (draft.kind === "RECIPE" && kind !== "RECIPE" && !window.confirm("Ингредиенты и приготовление будут убраны, КБЖУ и нутриенты обнулены. История сохранится после нажатия «Сохранить». Продолжить?")) return;
     try { setDraft(changeProductKind(draft, kind)); setNeedsCalculation(false); onDirtyChange?.(true); }
     catch (caught) { setError(caught instanceof Error ? caught.message : "Не удалось сменить тип"); }
   }
   async function recompute(candidate = draft) {
+    if (busy) return false;
     let manual = true;
     try {
       const calculated = calculateRecipe(draft.recipeIngredients, draft.recipeYieldGrams);
       manual = (["calories", "protein", "fat", "carbs"] as const).some(key => Math.abs(draft[key] - calculated[key]) > 0.000001) || draft.nutrients.some(value => value.amount !== calculated.nutrients.find(item => item.nutrientId === value.nutrientId)?.amount);
     } catch { manual = true; }
     if (manual && !window.confirm("Пересчитать все КБЖУ и нутриенты? Ручные корректировки будут сброшены. Без ингредиентов значения станут нулевыми.")) return false;
-    pending(true); setError("");
+    pending(true, "preview"); setError("");
     try {
       const preview = await requestJson<Preview>("/api/products/recipe-preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: initial.id || undefined, isShared: initial.isShared, recipeIngredients: candidate.recipeIngredients.map(({ productId, grams }) => ({ productId, grams })), recipeYieldGrams: candidate.recipeYieldGrams }) });
       const extra = draft.nutrients.filter(value => !preview.nutrients.some(item => recipeNutrientKey(item.nutrient) === recipeNutrientKey(value.nutrient))).map(value => ({ ...value, amount: 0 }));
@@ -100,13 +102,13 @@ export function ProductForm({ initial, onSaved, onDirtyChange, onBusyChange, ing
           <EntitySelect entity="products" label="Продукт или добавка" value={ingredientId} filters={{ shared: String(initial.isShared), ingredients: "true", parentProductId: initial.id }} initial={{ ingredientOnly: true }} onChange={setIngredientId} />
           <label className={ui("field")}><span>Добавляемое количество, г</span><Input type="number" min="0.000001" step="any" value={ingredientGrams} onChange={event => setIngredientGrams(Number(event.target.value))} /></label>
         </div>
-        <Button type="button" onClick={() => void addIngredient()} disabled={!ingredientId}>Добавить ингредиент</Button>
+        <Button type="button" loading={operation === "preview"} onClick={() => void addIngredient()} disabled={!ingredientId}>Добавить ингредиент</Button>
         <label className={ui("field")}><span>Масса готового блюда, г{draft.recipeIngredients.length > 0 && <RequiredMark />}</span><Input type="number" min="0.000001" step="any" required={draft.recipeIngredients.length > 0} value={draft.recipeYieldGrams ?? ""} onChange={event => change({ recipeYieldGrams: event.target.value ? Number(event.target.value) : null }, true)} /></label>
         <p className={styles.hint}>По умолчанию — сумма ингредиентов. Уточните массу после приготовления: от неё зависит состав на 100 г.</p>
-        {needsCalculation && <div role="status" className={styles.notice}><p>Состав изменён. Пересчитайте его перед сохранением; можно отменить изменения всей формы.</p><Button type="button" onClick={() => void recompute()}>Пересчитать состав</Button></div>}
+        {needsCalculation && <div role="status" className={styles.notice}><p>Состав изменён. Пересчитайте его перед сохранением; можно отменить изменения всей формы.</p><Button type="button" loading={operation === "preview"} onClick={() => void recompute()}>Пересчитать состав</Button></div>}
       </section>}
       <section className={styles.section}>
-        <div className={styles.heading}><h2>Пищевая ценность на {draft.baseQuantity} {draft.unit}</h2>{recipe && <Button type="button" onClick={() => void recompute()}>Сбросить</Button>}</div>
+        <div className={styles.heading}><h2>Пищевая ценность на {draft.baseQuantity} {draft.unit}</h2>{recipe && <Button type="button" loading={operation === "preview"} onClick={() => void recompute()}>Сбросить</Button>}</div>
         <p className={styles.hint}>{recipe ? "Рассчитанные значения можно корректировать вручную. «Сбросить» берёт актуальный состав ингредиентов; без них значения обнуляются." : "Введите значения с упаковки или из проверенного справочника."}</p>
         <div className={styles.grid}>{numberField("calories", "Калорийность, ккал")}{numberField("protein", "Белки, г")}{numberField("fat", "Жиры, г")}{numberField("carbs", "Углеводы, г")}</div>
         <label className={ui("field")}><span>Поиск по нутриентам</span><Input type="search" placeholder="Название или код нутриента" value={search} onChange={event => setSearch(event.target.value)} /></label>
@@ -126,6 +128,6 @@ export function ProductForm({ initial, onSaved, onDirtyChange, onBusyChange, ing
       <section className={styles.section}><h2>Теги и доступность</h2><div className={styles.tags}>{draft.tagIds.map(id => <Button type="button" key={id} onClick={() => change({ tagIds: draft.tagIds.filter(value => value !== id) })}>Убрать: {tagNames[id] ?? "тег"}</Button>)}</div><EntitySelect entity="tags" label="Добавить тег" value="" filters={{ shared: String(initial.isShared) }} onChange={(value, option) => { if (value && !draft.tagIds.includes(value)) { change({ tagIds: [...draft.tagIds, value] }); setTagNames(current => ({ ...current, [value]: option?.label ?? "Тег" })); } }} /><label><Input type="checkbox" checked={draft.archived} onChange={event => change({ archived: event.target.checked })} /> Архивный продукт</label></section>
     </fieldset>
     {error && <p role="alert" className={ui("error")}>{error}</p>}
-    {initial.canEdit && <div className={styles.footer}><span className={styles.hint}>{dirty ? "Есть несохранённые изменения" : "Изменения сохраняются одной версией"}</span><div className={ui("actions")}><Button type="button" disabled={busy} onClick={() => { if (!dirty || window.confirm("Отменить несохранённые изменения?")) { setDraft(initial); setNeedsCalculation(false); setError(""); onDirtyChange?.(false); } }}>Отменить изменения</Button><Button type="submit" variant="primary" disabled={busy || needsCalculation}>{busy ? "Сохраняем…" : "Сохранить"}</Button></div></div>}
+    {initial.canEdit && <div className={styles.footer}><span className={styles.hint}>{dirty ? "Есть несохранённые изменения" : "Изменения сохраняются одной версией"}</span><div className={ui("actions")}><Button type="button" disabled={busy} onClick={() => { if (!dirty || window.confirm("Отменить несохранённые изменения?")) { setDraft(initial); setNeedsCalculation(false); setError(""); onDirtyChange?.(false); } }}>Отменить изменения</Button><Button type="submit" variant="primary" loading={operation === "save"} disabled={busy || needsCalculation}>{operation === "save" ? "Сохраняем…" : "Сохранить"}</Button></div></div>}
   </form>;
 }

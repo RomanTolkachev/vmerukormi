@@ -74,7 +74,7 @@ export type UniversalTableActionContext<
 	data: TResponse | undefined;
 	/** Текущее отображение, включая ещё не сохранённые изменения настроек. */
 	tableState: UniversalTableState;
-	invalidateRows: () => void;
+	invalidateRows: () => Promise<void>;
 };
 
 export type UniversalTableDocumentActionContext<
@@ -418,6 +418,7 @@ export type UniversalTableProps<
 	 *   select: response => normalizeResponse(response),
 	 * }}
 	 */
+	refreshing?: boolean;
 	queryOptions?: Omit<
 		UseQueryOptions<TQueryFnData, Error, TResponse>,
 		"queryKey" | "queryFn"

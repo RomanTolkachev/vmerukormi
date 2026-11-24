@@ -7,7 +7,7 @@ import { ui } from "../styles";
 
 export function LocalRegistry<Row extends Record<string, unknown>>({ rows, columns, tableName, createButton, ...props }: {
   rows: Row[]; columns: UniversalTableColumnMeta[]; tableName: string; createButton?: ReactNode;
-} & Pick<UniversalTableProps<Row>, "actionCell" | "actionCellWidth" | "columnSizeData" | "formatCellValue" | "customColumns">) {
+} & Pick<UniversalTableProps<Row>, "actionCell" | "actionCellWidth" | "columnSizeData" | "formatCellValue" | "customColumns" | "refreshing">) {
   const client = useQueryClient();
   useEffect(() => { void client.invalidateQueries({ queryKey: [tableName] }); }, [client, rows, tableName]);
   return <UniversalTable<Row> {...props} formatCellValue={props.formatCellValue ?? ((_column, value) => typeof value === "number" ? <span className={ui("numericCell")}>{value.toLocaleString("ru-RU", { maximumSignificantDigits: 8 })}</span> : String(value ?? "—"))} tableName={tableName} getRowId={row => String(row.id)}

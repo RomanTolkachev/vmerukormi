@@ -6,6 +6,7 @@ import { AsyncSelect } from "../kit/inputs/AsyncSelect";
 import { ui } from "../styles";
 import type { ChoiceKind, CreationRequest, EntityChoice } from "@/shared/api/entity-choice";
 import { Button } from "@/shared/ui/controls";
+import { LoadingStatus } from "../loading";
 export const CreationContext = createContext<{ open: (request: CreationRequest) => void; isAdmin: boolean; labels: Partial<Record<ChoiceKind, string>> } | null>(null);
 export function useEntityCreation() {
  const context = useContext(CreationContext);
@@ -25,6 +26,8 @@ export function EntitySelect({ entity, label, value, onChange, filters = {}, dis
     <AsyncSelect<EntityChoice> label={label} value={value} selectedOption={selectedOption ?? (created?.value === value ? created : lookup.data?.[0] ?? null)}
       onChange={choose} disabled={disabled} required={required} queryKey={["entity-options", entity, filterKey]} wrapOptions
       loadOptions={({ search, signal }) => requestJson<EntityChoice[]>(`/api/options/${entity}?${new URLSearchParams({ ...filters, search })}`, { signal })} />
+    {lookup.isFetching && !lookup.data && <LoadingStatus label="Загружаем выбранное значение…" />}
+    {lookup.isError && <div role="alert">Не удалось загрузить выбранное значение. <Button type="button" loading={lookup.isFetching} onClick={() => void lookup.refetch()}>Повторить</Button></div>}
     {allowCreate && Boolean(labels[entity]) && (!shared || isAdmin) && (entity !== "species" || isAdmin) && <Button type="button" className={ui("secondary")} disabled={disabled} onClick={() => open({ entity: entity as CreationRequest["entity"], shared, initial: { ...(filters.species ? { species: filters.species } : {}), ...initial }, onCreated: option => choose(option.value, option) })}>{labels[entity]}</Button>}
   </div>;
 }

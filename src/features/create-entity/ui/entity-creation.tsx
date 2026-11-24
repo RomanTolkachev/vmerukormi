@@ -88,7 +88,7 @@ function EntityCreationForm({ request, onClose }: { request: CreationRequest; on
           {entity === "notifications" && <>{field("title", "Заголовок", "text", true)}{field("body", "Текст", "text", true)}</>}
           {isAdmin && !request.shared && ["products", "groups", "tags"].includes(entity) && <label><Input type="checkbox" checked={shared} onChange={event => { set("isShared", event.target.checked); set("groupId", ""); }} /> Общий каталог для всех пользователей</label>}
           {error && <p role="alert" className={ui("error")}>{error}</p>}
-          <Button type="submit" className={ui("primary")} disabled={busy}>{busy ? "Сохраняем…" : "Создать"}</Button>
+          <Button type="submit" className={ui("primary")} loading={busy}>{busy ? "Сохраняем…" : "Создать"}</Button>
         </div>
       </fieldset>
     </form>

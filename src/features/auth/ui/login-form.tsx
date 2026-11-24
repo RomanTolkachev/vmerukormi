@@ -1,18 +1,20 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigationPending, useNavigationRouter as useRouter } from "@/shared/lib/navigation";
 import { apiFetch } from "@/shared/api";
 import { ui } from "@/shared/ui/styles";
 import { Button, ButtonLink, Input } from "@/shared/ui/controls";
 
 export function LoginForm() {
   const router = useRouter();
+  const navigating = useNavigationPending();
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending || navigating) return;
     setError("");
     setPending(true);
     const form = new FormData(event.currentTarget);
@@ -49,7 +51,7 @@ export function LoginForm() {
       <label htmlFor="password">Пароль</label>
       <Input className={ui("input")} id="password" name="password" type="password" autoComplete="current-password" required />
     </div>
-    <Button className={ui("primary", "loginButton")} type="submit" disabled={pending}>{pending ? "Вход…" : "Войти"}</Button>
+    <Button className={ui("primary", "loginButton")} type="submit" loading={pending || navigating}>{pending || navigating ? "Вход…" : "Войти"}</Button>
     <ButtonLink href="/register">Создать аккаунт</ButtonLink>
     {error && <div className={ui("error")} role="alert">{error}</div>}
   </form>;

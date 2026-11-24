@@ -93,7 +93,7 @@ export const Modal = ({
 				onClose();
 			}
 			if (e.key === "Tab") {
-				const controls = [...(modalContentRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], [tabindex="0"]') ?? [])].filter(element => element.getClientRects().length > 0);
+				const controls = [...(modalContentRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], [tabindex="0"]') ?? [])].filter(element => element.getClientRects().length > 0 && !element.closest("[inert]"));
 				const first = controls[0];
 				const last = controls[controls.length - 1];
 				if (!first) { e.preventDefault(); return; }

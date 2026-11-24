@@ -19,14 +19,15 @@ export function UsersPage() {
   const [pendingId, setPendingId] = useState<string | null>(null);
   const client = useQueryClient();
   const tableName = deleted ? "users-deleted" : "users-active";
-  async function removeOrRestore(user: UserRow, invalidate: () => void) {
+  async function removeOrRestore(user: UserRow, invalidate: () => Promise<void>) {
+    if (pendingId) return;
     if (!user.deletedAt && !window.confirm("Удалить пользователя? Его сессии завершатся, данные останутся доступны для восстановления.")) return;
     setPendingId(user.id);
     try {
       const response = await apiFetch("/api/users/" + user.id, { method: user.deletedAt ? "PATCH" : "DELETE", headers: { "Content-Type": "application/json" }, ...(user.deletedAt ? { body: JSON.stringify({ restore: true }) } : {}) });
       if (!response.ok) throw new Error((await response.json()).error);
       notify.success(user.deletedAt ? "Пользователь восстановлен" : "Пользователь удалён");
-      invalidate();
+      await invalidate();
     } catch (error) { notify.error(error instanceof Error ? error.message : "Не удалось выполнить действие"); }
     finally { setPendingId(null); }
   }
@@ -41,8 +42,8 @@ export function UsersPage() {
         formatCellValue={(column, value) => column === "createdAt" ? new Date(String(value)).toLocaleString("ru-RU") : column === "role" ? value === "ADMIN" ? "Администратор" : "Пользователь" : String(value ?? "—")}
         actionCellWidth={240}
         actionCell={(context, row) => <div className={ui("tableActions")}>
-          {!deleted && <Button onClick={() => setEditing(row)}>Редактировать</Button>}
-          <Button variant={deleted ? "secondary" : "danger"} disabled={pendingId === row.id} onClick={() => void removeOrRestore(row, context.invalidateRows)}>{deleted ? "Восстановить" : "Удалить"}</Button>
+          {!deleted && <Button disabled={pendingId === row.id} onClick={() => setEditing(row)}>Редактировать</Button>}
+          <Button variant={deleted ? "secondary" : "danger"} loading={pendingId === row.id} disabled={Boolean(pendingId)} onClick={() => void removeOrRestore(row, context.invalidateRows)}>{deleted ? "Восстановить" : "Удалить"}</Button>
         </div>} />
     </div></section>
     {editing && <UserDialog user={editing === "new" ? null : editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); void client.invalidateQueries({ queryKey: [tableName] }); }} />}
@@ -55,6 +56,7 @@ function UserDialog({ user, onClose, onSaved }: { user: UserRow | null; onClose:
   const [error, setError] = useState("");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) return;
     const form = new FormData(event.currentTarget);
     setPending(true);
     setError("");
@@ -75,7 +77,7 @@ function UserDialog({ user, onClose, onSaved }: { user: UserRow | null; onClose:
       <label className={ui("field")}><span>Роль<RequiredMark /></span><Select name="role" defaultValue={user?.role ?? "USER"} required><option value="USER">Пользователь</option><option value="ADMIN">Администратор</option></Select></label>
       <label className={ui("field")}><span>{user ? "Новый пароль" : "Пароль"}{!user && <RequiredMark />}</span><Input name="password" type="password" autoComplete="new-password" required={!user} minLength={6} maxLength={200} /><small>{user ? "Оставьте пустым, чтобы сохранить текущий пароль." : "Не менее 6 символов. Письмо отправлено не будет."}</small></label>
       {error && <p className={ui("error")} role="alert">{error}</p>}
-      <Button type="submit" variant="primary" disabled={pending}>{pending ? "Сохраняем…" : "Сохранить"}</Button>
+      <Button type="submit" variant="primary" loading={pending}>{pending ? "Сохраняем…" : "Сохранить"}</Button>
     </form>
   </FormDialog>;
 }

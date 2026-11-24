@@ -7,6 +7,8 @@ import { TableDocumentActions } from "@/shared/ui/kit/universal-table/ui/TableDo
 import { resolveTableSort } from "@/shared/ui/kit/universal-table/lib/sort";
 import { DEFAULT_PER_PAGE, normalizeTablePerPage } from "@/shared/ui/kit/universal-table/lib/perPage";
 import { Preloader } from "@/shared/ui/kit/preloader/Preloader";
+import { BusyRegion } from "@/shared/ui/loading";
+import { Button } from "@/shared/ui/controls";
 import { Typography } from "@/shared/ui/kit/typography/Typography";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { readUniversalTableSavedQuery } from "@/shared/ui/kit/universal-table/table-settings/savedState";
@@ -251,6 +253,7 @@ function UniversalTableContent<
 	queryScopeKey,
 	queryFn,
 	queryOptions,
+	refreshing = false,
 	mapRows,
 	toolbar,
 	excelSlot,
@@ -438,15 +441,14 @@ function UniversalTableContent<
 
 	const isLoading = (rowsQuery.isPending && rowsQuery.data == null) || isOptionsPending;
 	const loadError = rowsQuery.error ?? optionsError;
+	const updating = !isLoading && (rowsQuery.isFetching || refreshing);
 	const columnsReady = !!columnsConfig && (columnsConfig.order ?? []).length > 0;
 
 	const renderTableBody = (): ReactNode => {
 		if (isLoading) return <Preloader />;
-		if (loadError) {
+		if (loadError && !rowsQuery.data) {
 			return (
-				<Typography variant="body3" component="p" color="danger">
-					{loadError instanceof Error ? loadError.message : "Ошибка загрузки"}
-				</Typography>
+				<Typography variant="body3" component="p" color="danger">Данные не загружены.</Typography>
 			);
 		}
 		if (rowsQuery.data == null || !columnsReady) return null;
@@ -512,11 +514,12 @@ function UniversalTableContent<
 				bottomSlot={bottomSlotNode}
 				extraButtons={<>
 					{extraButtonsNode}
-					<TableDocumentActions ctx={actionContext} selectionEnabled={isSelectionEnabled} disabled={isLoading}
+					<TableDocumentActions ctx={actionContext} selectionEnabled={isSelectionEnabled} disabled={isLoading || updating}
 						excelSlot={excelSlot} printSlot={printSlot} wordSlot={wordSlot} />
 				</>}
 			/>
-			<div className={styles.tableArea} style={tableAreaStyle}>
+			{loadError && <div role="alert">{loadError instanceof Error ? loadError.message : "Ошибка загрузки"} <Button onClick={() => { void rowsQuery.refetch(); void queryClient.invalidateQueries(TableOptionsQueries.get({ tableName })); }}>Повторить</Button></div>}
+			<BusyRegion className={styles.tableArea} style={tableAreaStyle} busy={updating} label="Обновляем таблицу…">
 				{renderTableBody()}
 				{!isLoading && !loadError && rowsQuery.data && columnsReady && <TableFooter
 					pageIndex={pageIndex}
@@ -526,7 +529,7 @@ function UniversalTableContent<
 					onPerPageChange={handlePerPageChange}
 					counter={isSelectionEnabled ? <TableSelectedCount render={rowSelection?.selectedCount?.render} /> : undefined}
 				/>}
-			</div>
+			</BusyRegion>
 		</div>
 	);
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Pet } from "@/entities/pet";
@@ -101,7 +101,7 @@ export function PetCard({ initialPet }: { initialPet: Pet }) {
           <label className={ui("field", "full")}><span>Заметка</span><Textarea rows={3} maxLength={500} value={attributes.note} onChange={event => changeAttribute("note", event.target.value)} disabled={busy} /></label>
         </div>
         <div className={ui("actions")}>
-          <Button type="submit" variant="primary" disabled={busy || !attributesDirty}>{attributesPending ? "Сохраняем…" : "Сохранить данные"}</Button>
+          <Button type="submit" variant="primary" loading={attributesPending} disabled={busy || !attributesDirty}>{attributesPending ? "Сохраняем…" : "Сохранить данные"}</Button>
           {attributesDirty && <Button type="button" disabled={busy} onClick={() => { setAttributes(petAttributesDraft(pet)); setAttributesMessage(""); setAttributesError(""); }}>Отменить изменения данных</Button>}
         </div>
         {attributesMessage && <p className={ui("formMessage")} role="status">{attributesMessage}</p>}
@@ -115,7 +115,7 @@ export function PetCard({ initialPet }: { initialPet: Pet }) {
         <p className={ui("fieldHint")}>Выберите клиента или создайте нового. Чтобы отвязать хозяина, очистите поле и сохраните изменения.</p>
         {pet.customer && <Link className={ui("tablePrimaryLink")} href={`/customers/${pet.customer.id}`}>Карточка клиента: {pet.customer.name}</Link>}
         <div className={ui("actions")}>
-          <Button type="submit" variant="primary" disabled={busy || !dirty}>{pending ? "Сохраняем…" : "Сохранить хозяина"}</Button>
+          <Button type="submit" variant="primary" loading={pending} disabled={busy || !dirty}>{pending ? "Сохраняем…" : "Сохранить хозяина"}</Button>
           {dirty && <Button type="button" disabled={busy} onClick={() => { setCustomerId(pet.customerId ?? ""); setMessage(""); setError(""); }}>Отменить изменения</Button>}
         </div>
         {message && <p className={ui("formMessage")} role="status">{message}</p>}

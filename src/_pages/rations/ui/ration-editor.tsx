@@ -5,9 +5,9 @@ import { RequiredMark } from "@/shared/ui/required-mark";
 import { EntitySelect } from "@/features/create-entity";
 import { ui } from "@/shared/ui/styles";
 
-import Link from "next/link";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
 import { useMemo, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigationRouter as useRouter } from "@/shared/lib/navigation";
 import {
   addRationItem,
   deleteRation,
@@ -20,7 +20,10 @@ import type {
   RationProduct,
 } from "@/entities/ration";
 import { summarizeNutrients, targetStatus, targetStatusClass, targetStatusLabel } from "@/entities/ration";
-import { AnchorButton, Button, Input, Select } from "@/shared/ui/controls";
+import { Button, Input, Select } from "@/shared/ui/controls";
+import { DownloadButton } from "@/shared/ui/download-button";
+import { LoadingSpinner } from "@/shared/ui/loading";
+import { usePendingActions } from "@/shared/lib/pending-actions";
 import { FormDialog } from "@/shared/ui/form-dialog";
 import { Modal } from "@/shared/ui/modal";
 import { RationDetailsDialog } from "@/features/edit-ration";
@@ -80,6 +83,8 @@ export function RationEditor({
   const [itemPending, setItemPending] = useState(false);
   const [itemError, setItemError] = useState("");
   const [itemDirty, setItemDirty] = useState(false);
+  const rowActions = usePendingActions();
+  const deletion = usePendingActions();
   const availableProducts = useMemo(() => [...products]
     .sort((first, second) => productFocus ? scoreProduct(second, productFocus) - scoreProduct(first, productFocus) || first.name.localeCompare(second.name, "ru") : first.name.localeCompare(second.name, "ru")), [productFocus, products]);
   const selectedProduct = products.find((product) => product.id === productId);
@@ -162,39 +167,48 @@ export function RationEditor({
   }
 
   async function patchItem(itemId: string, patch: Partial<{ measureId: string | null; quantity: number; day: number; enabled: boolean }>) {
-    setError("");
-    try {
-      const updated = await updateRationItem(ration.id, itemId, patch);
-      setRation((current) => ({
-        ...current,
-        items: current.items.map((item) => (item.id === itemId ? updated : item)),
-      }));
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Не удалось изменить продукт");
-    }
+    const item = ration.items.find(value => value.id === itemId);
+    if (!item || Object.entries(patch).every(([key, value]) => item[key as keyof RationItem] === value)) return;
+    await rowActions.run(itemId, async () => {
+      setError("");
+      try {
+        const updated = await updateRationItem(ration.id, itemId, patch);
+        setRation((current) => ({
+          ...current,
+          items: current.items.map((item) => (item.id === itemId ? updated : item)),
+        }));
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : "Не удалось изменить продукт");
+      }
+    });
   }
 
   async function removeItem(itemId: string) {
-    setError("");
-    try {
-      await deleteRationItem(ration.id, itemId);
-      setRation((current) => ({
-        ...current,
-        items: current.items.filter((item) => item.id !== itemId),
-      }));
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Не удалось удалить продукт");
-    }
+    await rowActions.run(itemId, async () => {
+      setError("");
+      try {
+        await deleteRationItem(ration.id, itemId);
+        setRation((current) => ({
+          ...current,
+          items: current.items.filter((item) => item.id !== itemId),
+        }));
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : "Не удалось удалить продукт");
+      }
+    });
   }
 
   async function removeRation() {
+    if (deletion.pending || rowActions.pending || itemPending) return;
     if (!window.confirm(`Удалить рацион «${ration.name}»?`)) return;
-    try {
-      await deleteRation(ration.id);
-      router.push("/rations");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Не удалось удалить рацион");
-    }
+    await deletion.run("ration", async () => {
+      try {
+        await deleteRation(ration.id);
+        router.push("/rations");
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : "Не удалось удалить рацион");
+      }
+    });
   }
 
   return (
@@ -209,9 +223,9 @@ export function RationEditor({
           </div>
         </div>
         <div className={ui("rationEditorActions")}>
-          <Button type="button" onClick={() => setDetailsDialogOpen(true)}>Параметры рациона</Button>
-          <AnchorButton href={`/api/rations/${ration.id}/export`}>Выгрузить в Excel</AnchorButton>
-          <Button className={ui("danger")} type="button" onClick={() => void removeRation()}>Удалить рацион</Button>
+          <Button type="button" disabled={deletion.pending || rowActions.pending} onClick={() => setDetailsDialogOpen(true)}>Параметры рациона</Button>
+          <DownloadButton href={`/api/rations/${ration.id}/export`} filename={`ration-${ration.id}.xlsx`} disabled={deletion.pending || rowActions.pending || itemPending}>Выгрузить в Excel</DownloadButton>
+          <Button className={ui("danger")} type="button" loading={deletion.pending} disabled={rowActions.pending || itemPending} onClick={() => void removeRation()}>{deletion.pending ? "Удаляем рацион…" : "Удалить рацион"}</Button>
         </div>
       </div>
 
@@ -236,7 +250,7 @@ export function RationEditor({
             <div><h2>Состав рациона</h2><div className={ui("meta")}>Количество пересчитывается сразу после изменения</div></div>
             <div className={ui("rationCompositionActions")}>
               <Button type="button" className={ui("secondary")} onClick={() => setNutrientsDialogOpen(true)}>Нутриенты</Button>
-              <Button type="button" className={ui("primary")} onClick={() => openProductPicker()}>Добавить продукт</Button>
+              <Button type="button" className={ui("primary")} disabled={deletion.pending} onClick={() => openProductPicker()}>Добавить продукт</Button>
             </div>
           </div>
           <section className={ui("card")} aria-label="Продукты рациона">
@@ -250,23 +264,24 @@ export function RationEditor({
                     <tbody>
                       {ration.items.map((item) => {
                         const value = itemValues(item);
+                        const pending = rowActions.isPending(item.id) || deletion.pending;
                         return (
-                          <tr key={item.id} className={ui(!item.enabled && "rationItemDisabled")}>
-                            <td><Input aria-label={`Включить ${item.product.name}`} type="checkbox" checked={item.enabled} onChange={(event) => void patchItem(item.id, { enabled: event.target.checked })} /></td>
+                          <tr key={item.id} aria-busy={pending} className={ui(!item.enabled && "rationItemDisabled")}>
+                            <td><Input disabled={pending} aria-label={`Включить ${item.product.name}`} type="checkbox" checked={item.enabled} onChange={(event) => void patchItem(item.id, { enabled: event.target.checked })} /></td>
                             <td>
                               <div className={ui("rationProductCell")}>
                                 <b>{item.product.name}</b>
                                 {item.product.deletedAt && <span className={ui("badge")}>Удалён</span>}
                                 <Link className={ui("rationProductLink")} href={`/products/${item.product.id}`} target="_blank" rel="noopener noreferrer">Смотреть ↗</Link>
                               </div>
-                              <small>{formatNumber(value.protein)} Б · {formatNumber(value.fat)} Ж · {formatNumber(value.carbs)} У</small>
+                              {pending ? <small role="status"><LoadingSpinner /> Обновляем строку…</small> : <small>{formatNumber(value.protein)} Б · {formatNumber(value.fat)} Ж · {formatNumber(value.carbs)} У</small>}
                             </td>
-                            {ration.mode === "WEEKLY" && <td><Select className={ui("input", "compactInput")} aria-label={`День для ${item.product.name}`} value={item.day} onChange={(event) => void patchItem(item.id, { day: Number(event.target.value) })}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</Select></td>}
-                            <td><Select className={ui("input", "compactInput")} aria-label={`Мера для ${item.product.name}`} value={item.measureId ?? ""} onChange={(event) => void patchItem(item.id, { measureId: event.target.value || null })}><option value="">Граммы</option>{item.product.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name}</option>)}</Select></td>
-                            <td><Input className={ui("input", "compactInput", "quantityInput")} aria-label={`Количество ${item.product.name}`} type="number" min="0.000001" step="any" defaultValue={item.quantity} onBlur={(event) => void patchItem(item.id, { quantity: Number(event.target.value) })} /></td>
+                            {ration.mode === "WEEKLY" && <td><Select disabled={pending} className={ui("input", "compactInput")} aria-label={`День для ${item.product.name}`} value={item.day} onChange={(event) => void patchItem(item.id, { day: Number(event.target.value) })}>{days.map((label, index) => <option value={index + 1} key={label}>{label}</option>)}</Select></td>}
+                            <td><Select disabled={pending} className={ui("input", "compactInput")} aria-label={`Мера для ${item.product.name}`} value={item.measureId ?? ""} onChange={(event) => void patchItem(item.id, { measureId: event.target.value || null })}><option value="">Граммы</option>{item.product.measures.map((measure) => <option value={measure.id} key={measure.id}>{measure.name}</option>)}</Select></td>
+                            <td><Input disabled={pending} className={ui("input", "compactInput", "quantityInput")} aria-label={`Количество ${item.product.name}`} type="number" min="0.000001" step="any" defaultValue={item.quantity} onBlur={(event) => void patchItem(item.id, { quantity: Number(event.target.value) })} /></td>
                             <td>{formatNumber(item.grams)} г</td>
                             <td><b>{formatNumber(value.calories, 0)}</b> ккал</td>
-                            <td><Button className={ui("danger")} type="button" onClick={() => void removeItem(item.id)}>Удалить</Button></td>
+                            <td><Button disabled={pending} className={ui("danger")} type="button" onClick={() => void removeItem(item.id)}>Удалить</Button></td>
                           </tr>
                         );
                       })}

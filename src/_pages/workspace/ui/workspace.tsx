@@ -3,8 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWatch } from "react-hook-form";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
+import { useNavigationRouter as useRouter } from "@/shared/lib/navigation";
 import { deleteWorkspaceRow, getWorkspaceRows } from "@/features/workspace";
 import { deleteCustomer } from "@/features/delete-customer";
 import { deleteProduct } from "@/features/delete-product";
@@ -16,6 +16,7 @@ import { AddIcon } from "@/shared/ui/icons";
 import { FormDialog } from "@/shared/ui/form-dialog";
 import { requestJson } from "@/shared/api";
 import { RequiredMark } from "@/shared/ui/required-mark";
+import { usePendingActions } from "@/shared/lib/pending-actions";
 
 export type WorkspaceTab = "customers" | "products" | "recipes" | "nutrients" | "rations" | "notifications" | "invoices" | "standards";
 const labels: Record<WorkspaceTab, string> = {
@@ -26,20 +27,24 @@ const labels: Record<WorkspaceTab, string> = {
 export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceTab; tags?: { id: string; name: string }[]; isAdmin?: boolean }) {
   const [editingNutrient, setEditingNutrient] = useState<Record<string, unknown> | null>(null);
   const [message, setMessage] = useState("");
+  const removal = usePendingActions();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { open } = useEntityCreation();
   const canCreate = tab !== "invoices" && tab !== "standards" && (tab !== "nutrients" || isAdmin);
   const catalog = tab === "products" || tab === "recipes";
   const cardPath = tab === "recipes" ? "products" : ["customers", "products", "standards", "rations"].includes(tab) ? tab : null;
-  async function remove(id: string, invalidate: () => void) {
+  async function remove(id: string, invalidate: () => Promise<void>) {
+    if (removal.isPending(id)) return;
     if (!window.confirm("Удалить запись?")) return;
-    try {
-      if (tab === "customers") await deleteCustomer(id);
-      else if (catalog) await deleteProduct(id);
-      else await deleteWorkspaceRow(tab, id);
-      invalidate();
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Не удалось удалить запись"); }
+    await removal.run(id, async () => {
+      try {
+        if (tab === "customers") await deleteCustomer(id);
+        else if (catalog) await deleteProduct(id);
+        else await deleteWorkspaceRow(tab, id);
+        await invalidate();
+      } catch (error) { setMessage(error instanceof Error ? error.message : "Не удалось удалить запись"); }
+    });
   }
   return <div className={ui("pageLayout", "workspacePage")}>
     <section className={ui("hero")}><div><h1>{labels[tab]}</h1><p>{tab === "products" ? "Общий и личный каталог для составления рационов" : "Поиск, фильтры и персональные настройки отображения"}</p></div>
@@ -66,7 +71,7 @@ export function Workspace({ tab, tags = [], isAdmin = false }: { tab: WorkspaceT
         actionCell={(context, row) => <div className={ui("tableActions")}>
           {tab === "nutrients" && isAdmin && <Button onClick={() => setEditingNutrient(row)}>Редактировать</Button>}
           {cardPath && <ButtonLink href={`/${cardPath}/${row.id}`}>Открыть</ButtonLink>}
-          {tab !== "invoices" && tab !== "standards" && (tab !== "nutrients" || isAdmin) && <Button className={ui("danger")} disabled={row.canEdit === false || (tab === "nutrients" && row.isShared === true && !isAdmin)} onClick={() => void remove(String(row.id), context.invalidateRows)}>Удалить</Button>}
+          {tab !== "invoices" && tab !== "standards" && (tab !== "nutrients" || isAdmin) && <Button className={ui("danger")} loading={removal.isPending(String(row.id))} disabled={row.canEdit === false || (tab === "nutrients" && row.isShared === true && !isAdmin)} onClick={() => void remove(String(row.id), context.invalidateRows)}>{removal.isPending(String(row.id)) ? "Удаляем…" : "Удалить"}</Button>}
         </div>}
         actionCellWidth={tab === "nutrients" ? 260 : 170}
         columnSizeData={{ name: 270, nameRu: 240, phone: 195, kind: 110, groupName: 170, tagNames: 220, catalogLabel: 110, calories: 120, protein: 100, fat: 100 }}

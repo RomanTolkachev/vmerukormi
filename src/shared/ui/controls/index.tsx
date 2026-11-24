@@ -1,12 +1,13 @@
 import type { ComponentPropsWithRef } from "react";
-import Link from "next/link";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
+import { LoadingSpinner } from "../loading";
 import { ui } from "../styles";
 import { buttonMotionClassName } from "../button-motion";
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost";
 
-export function Button({ variant, className, ...props }: ComponentPropsWithRef<"button"> & { variant?: ButtonVariant }) {
-  return <button className={[buttonMotionClassName, ui("button", variant ?? (!className ? "secondary" : undefined)), className].filter(Boolean).join(" ")} {...props} />;
+export function Button({ variant, className, loading = false, disabled, children, ...props }: ComponentPropsWithRef<"button"> & { variant?: ButtonVariant; loading?: boolean }) {
+  return <button className={[buttonMotionClassName, ui("button", variant ?? (!className ? "secondary" : undefined)), className].filter(Boolean).join(" ")} {...props} disabled={disabled || loading} aria-busy={loading || undefined}>{loading && <LoadingSpinner />}{children}</button>;
 }
 
 export function ButtonLink({ variant = "secondary", className, ...props }: ComponentPropsWithRef<typeof Link> & { variant?: ButtonVariant }) {

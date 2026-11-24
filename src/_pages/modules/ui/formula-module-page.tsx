@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { NavigationLink as Link } from "@/shared/lib/navigation";
 import type { FormulaModuleDetails } from "@/entities/module";
 import { LocalRegistry } from "@/shared/ui/local-registry";
 import { ui } from "@/shared/ui/styles";

@@ -4,6 +4,8 @@ import { useState, type ReactNode } from "react";
 import { Modal } from "../kit/modal";
 import { ui } from "../styles";
 import { Button } from "@/shared/ui/controls";
+import { LoadingStatus } from "../loading";
+import styles from "./form-dialog.module.css";
 
 export function FormDialog({ title, children, onClose, dirty = false, busy = false, discardTitle = "Отменить создание?", discardLabel = "Отменить создание" }: { title: string; children: ReactNode; onClose: () => void; dirty?: boolean; busy?: boolean; discardTitle?: string; discardLabel?: string }) {
   const [confirming, setConfirming] = useState(false);
@@ -11,7 +13,8 @@ export function FormDialog({ title, children, onClose, dirty = false, busy = fal
   return <>
     <Modal isOpen onClose={close} preventClose={busy} showCloseButton title={title}>
       <h2 className={ui("formDialogHeading")}>{title}</h2>
-      {children}
+      {busy && <div className={styles.progress}><LoadingStatus label="Выполняем действие…" /></div>}
+      <div inert={busy || undefined} aria-busy={busy}>{children}</div>
       <div className={ui("actions")}><Button type="button" className={ui("secondary")} disabled={busy} onClick={close}>Отмена</Button></div>
     </Modal>
     <Modal isOpen={confirming} title={discardTitle} onClose={() => setConfirming(false)}>
