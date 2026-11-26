@@ -1,0 +1,40 @@
+.page {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  padding: 8px;
+  scroll-padding: 8px;
+}
+
+.header {
+  display: grid;
+  min-width: 0;
+  gap: 16px;
+  padding-bottom: 18px;
+}
+
+.identity {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.titleRow > button {
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+.owner {
+  min-width: 0;
+  width: min(100%, 480px);
+}
+
+.content {
+  min-height: 0;
+}
+
+@media (max-width: 780px), (max-height: 600px) {
+  .page {
+    grid-template-rows: auto minmax(320px, 1fr) auto;
+    overflow: auto;
+  }
+}

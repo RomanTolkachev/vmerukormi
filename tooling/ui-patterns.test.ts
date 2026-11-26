@@ -9,6 +9,19 @@ import { textButtonTypography } from "../src/shared/ui/kit/buttons/textButtonTyp
 import { toast } from "sonner";
 import { notify } from "../src/shared/ui/notifications/api/notify";
 
+test("standard editor keeps the optional owner selector inside its auto-sized header", () => {
+  const editor = readFileSync(new URL("../src/features/edit-standard/ui/breed-standard-editor.tsx", import.meta.url), "utf8");
+  const stylesheet = readFileSync(new URL("../src/features/edit-standard/ui/breed-standard-editor.module.css", import.meta.url), "utf8");
+  const sharedStyles = readFileSync(new URL("../src/shared/ui/styles/ui.module.css", import.meta.url), "utf8");
+  assert.match(editor, /<header className=\{styles\.header\}>[\s\S]*?<h1>[\s\S]*?Сохранить эталоны[\s\S]*?owners\.length > 0[\s\S]*?Эталоны пользователя[\s\S]*?<\/header>\s*<div className=\{`\$\{ui\("standardEditorGrid"\)\} \$\{styles\.content\}`\}>/);
+  assert.match(stylesheet, /\.page\s*\{[^}]*grid-template-rows:\s*auto minmax\(0, 1fr\) auto;/);
+  assert.match(stylesheet, /\.header\s*\{[^}]*gap:\s*16px;[^}]*padding-bottom:\s*18px;/);
+  assert.match(stylesheet, /\.identity\s*\{[^}]*min-width:\s*0;[^}]*overflow-wrap:\s*anywhere;/);
+  assert.match(stylesheet, /\.titleRow > button\s*\{[^}]*flex-shrink:\s*0;/);
+  assert.match(stylesheet, /@media \(max-width: 780px\), \(max-height: 600px\)[\s\S]*?\.page\s*\{[^}]*grid-template-rows:\s*auto minmax\(320px, 1fr\) auto;[^}]*overflow:\s*auto;/);
+  assert.doesNotMatch(sharedStyles, /\.standardEditorPage\b/);
+});
+
 test("recipe forms hide classification controls without deleting stored metadata", () => {
   const form = readFileSync(new URL("../src/features/edit-product/ui/product-form.tsx", import.meta.url), "utf8");
   const creation = readFileSync(new URL("../src/features/edit-product/ui/product-creation-dialog.tsx", import.meta.url), "utf8");
